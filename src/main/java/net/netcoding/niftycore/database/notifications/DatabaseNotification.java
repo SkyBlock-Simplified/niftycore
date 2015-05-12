@@ -28,7 +28,7 @@ public class DatabaseNotification extends MinecraftLogger {
 	private final String table;
 
 	DatabaseNotification(SQLFactory sql, String table, DatabaseListener listener, long delay, boolean overwrite) throws SQLException {
-		super(NiftyCore.getNiftyLogger());
+		super(NiftyCore.getLogger());
 		if (listener == null) throw new IllegalArgumentException("DatabaseListener cannot be null!");
 		this.sql = sql;
 		this.table = table;
