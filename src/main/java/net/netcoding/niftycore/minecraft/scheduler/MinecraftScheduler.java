@@ -9,17 +9,18 @@ import net.netcoding.niftycore.util.StringUtil;
 public class MinecraftScheduler {
 
 	private static final Object SCHEDULER_OBJ;
-	static final Reflection SCHEDULER;
 	private static final Reflection BUNGEE_TASK = new Reflection("ScheduledTask", "net.md_5.bungee.api.scheduler");
 	private static final Reflection BUKKIT_TASK = new Reflection("BukkitTask", "org.bukkit.scheduler");
-	private static final Reflection NIFTY_BUNGEE = new Reflection("NiftyBungee", "net.netcoding.niftybungee");
-	private static final Reflection NIFTY_BUKKIT = new Reflection("NiftyBukkit", "net.netcoding.niftybukkit");
+	static final Reflection SCHEDULER = new Reflection(StringUtil.format("{0}Scheduler", (NiftyCore.isBungee() ? "Task" : "Bukkit")), (NiftyCore.isBungee() ? BUNGEE_TASK.getPackagePath() : BUKKIT_TASK.getPackagePath()));
 
 	static {
 		try {
 			Reflection server = new Reflection((NiftyCore.isBungee() ? "ProxyServer" : "Bukkit"), (NiftyCore.isBungee() ? "net.md_5.bungee.api" : "org.bukkit"));
 			SCHEDULER_OBJ = server.invokeMethod("getScheduler", null);
-			SCHEDULER = new Reflection(SCHEDULER_OBJ.getClass().getSimpleName(), SCHEDULER_OBJ.getClass().getPackage().toString());
+			System.out.println(SCHEDULER_OBJ);
+			System.out.println(SCHEDULER_OBJ.getClass());
+			System.out.println(SCHEDULER_OBJ.getClass().getClass());
+			//SCHEDULER = new Reflection(SCHEDULER_OBJ.getClass().getSimpleName(), SCHEDULER_OBJ.getClass().getPackage().toString());
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -56,11 +57,11 @@ public class MinecraftScheduler {
 	public final static ScheduledTask<?> runAsync(Runnable task) {
 		try {
 			if (NiftyCore.isBungee()) {
-				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NIFTY_BUNGEE.invokeMethod("getPlugin", null);
+				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NiftyCore.getPlugin();
 				return runAsync(owner, task);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NIFTY_BUKKIT.invokeMethod("getPlugin", null);
+			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
 			return runAsync(owner, task);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -78,7 +79,7 @@ public class MinecraftScheduler {
 				}, delay);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NIFTY_BUKKIT.invokeMethod("getPlugin", null);
+			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
 			return runAsync(owner, task, delay);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -96,7 +97,7 @@ public class MinecraftScheduler {
 				}, delay, period);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NIFTY_BUKKIT.invokeMethod("getPlugin", null);
+			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
 			return runAsync(owner, task, delay, period);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -120,7 +121,7 @@ public class MinecraftScheduler {
 
 	public final static <T extends org.bukkit.plugin.java.JavaPlugin> ScheduledTask<T> runAsync(T owner, Runnable task, long delay) {
 		try {
-			Object taskObj = SCHEDULER.invokeMethod("runTaskAsynchronously", SCHEDULER_OBJ, owner, task, delay);
+			Object taskObj = SCHEDULER.invokeMethod("runTaskLaterAsynchronously", SCHEDULER_OBJ, owner, task, delay);
 			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
 			return new ScheduledTask<T>(owner, taskId, false);
 		} catch (Exception ex) {
@@ -167,11 +168,11 @@ public class MinecraftScheduler {
 	public final static ScheduledTask<?> schedule(Runnable task) {
 		try {
 			if (NiftyCore.isBungee()) {
-				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NIFTY_BUNGEE.invokeMethod("getPlugin", null);
+				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NiftyCore.getPlugin();
 				return schedule(owner, task, 0, TimeUnit.MILLISECONDS);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NIFTY_BUKKIT.invokeMethod("getPlugin", null);
+			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
 			return schedule(owner, task);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -191,11 +192,11 @@ public class MinecraftScheduler {
 	public final static ScheduledTask<?> schedule(Runnable task, long delay) {
 		try {
 			if (NiftyCore.isBungee()) {
-				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NIFTY_BUNGEE.invokeMethod("getPlugin", null);
+				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NiftyCore.getPlugin();
 				return schedule(owner, task, delay, TimeUnit.MILLISECONDS);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NIFTY_BUKKIT.invokeMethod("getPlugin", null);
+			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
 			return schedule(owner, task, delay);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -215,11 +216,11 @@ public class MinecraftScheduler {
 	public final static ScheduledTask<?> schedule(Runnable task, long delay, long period) {
 		try {
 			if (NiftyCore.isBungee()) {
-				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NIFTY_BUNGEE.invokeMethod("getPlugin", null);
+				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NiftyCore.getPlugin();
 				return schedule(owner, task, delay, period, TimeUnit.MILLISECONDS);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NIFTY_BUKKIT.invokeMethod("getPlugin", null);
+			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
 			return schedule(owner, task, delay, period);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
