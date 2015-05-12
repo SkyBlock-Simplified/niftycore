@@ -1,5 +1,6 @@
 package net.netcoding.niftycore.mojang;
 
+import java.lang.reflect.ParameterizedType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -52,6 +53,18 @@ public abstract class MojangRepository<T extends MojangProfile> {
 		return new URL(StringUtil.format("https://api.mojang.com/user/profiles/{0}/names", uniqueId.toString().replace("-", "")));
 	}
 
+	@SuppressWarnings("unchecked")
+	protected final Class<T[]> getSuperClassArray() {
+		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
+		return (Class<T[]>)(superClass.getActualTypeArguments().length == 0 ? MojangProfile[].class : superClass.getActualTypeArguments());
+	}
+
+	@SuppressWarnings("unchecked")
+	protected final Class<T> getSuperClass() {
+		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
+		return (Class<T>)(superClass.getActualTypeArguments().length == 0 ? MojangProfile.class : superClass.getActualTypeArguments()[0]);
+	}
+
 	protected abstract boolean isOnline();
 
 	protected abstract void processOfflineUsernames(List<T> profiles, ConcurrentList<String> userList);
@@ -96,6 +109,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 	 * @return Profiles associated with the given usernames.
 	 * @throws ProfileNotFoundException If unable to locate any users profile.
 	 */
+	@SuppressWarnings("unchecked")
 	public T[] searchByUsername(Collection<String> usernames) throws ProfileNotFoundException {
 		final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.USERNAMES;
 		List<T> profiles = new ArrayList<>();
@@ -122,7 +136,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 					for (MojangProfile profile : CACHE) {
 						if (profile.getName().equalsIgnoreCase(criteriaName)) {
-							profiles.add((T) profile);
+							profiles.add((T)profile);
 							userList.remove(name);
 							break;
 						}
@@ -130,7 +144,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 					for (MojangProfile profile : CACHE) {
 						if (profile.getName().toLowerCase().startsWith(criteriaName)) {
-							profiles.add((T) profile);
+							profiles.add((T)profile);
 							userList.remove(name);
 							break;
 						}
@@ -160,7 +174,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 						HttpResponse response = HTTP.post(getProfilesUrl(), body, contentType);
 
 						if (!HttpStatus.NO_CONTENT.equals(response.getStatus())) {
-							T[] result = (T[]) GSON.fromJson(response.getBody().toString(), MojangProfile[].class);
+							T[] result = GSON.fromJson(response.getBody().toString(), this.getSuperClassArray());
 
 							if (result != null && result.length > 0) {
 								profiles.addAll(Arrays.asList(result));
@@ -179,7 +193,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 					}
 				} while (start < userList.size());
 
-				for (MojangProfile profile : profiles)
+				for (T profile : profiles)
 					userList.remove(profile.getName());
 
 				for (String user : userList) {
@@ -190,7 +204,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 						HttpResponse response = HTTP.get(getProfilesUrl(user));
 
 						if (!HttpStatus.NO_CONTENT.equals(response.getStatus())) {
-							T result = (T) GSON.fromJson(response.getBody().toString(), MojangProfile.class);
+							T result = GSON.fromJson(response.getBody().toString(), this.getSuperClass());
 
 							if (result != null) {
 								profiles.add(result);
@@ -207,7 +221,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 					}
 				}
 
-				for (MojangProfile profile : profiles)
+				for (T profile : profiles)
 					userList.remove(profile.getName());
 
 				for (String user : userList) {
@@ -218,7 +232,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 						HttpResponse response = HTTP.get(getProfilesUrl(user, false));
 
 						if (!HttpStatus.NO_CONTENT.equals(response.getStatus())) {
-							T result = (T) GSON.fromJson(response.getBody().toString(), MojangProfile.class);
+							T result = GSON.fromJson(response.getBody().toString(), this.getSuperClass());
 
 							if (result != null) {
 								profiles.add(result);
@@ -248,7 +262,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 			throw new ProfileNotFoundException(reason, type, ListUtil.toArray(usernames, String.class));
 		}
 
-		return (T[]) ListUtil.toArray(profiles, MojangProfile.class);
+		return ListUtil.toArray(profiles, this.getSuperClass());
 	}
 
 	/**
@@ -258,10 +272,10 @@ public abstract class MojangRepository<T extends MojangProfile> {
 	 * @return Profile associated with the given Unique ID.
 	 * @throws ProfileNotFoundException If unable to locate users profile.
 	 */
-	public MojangProfile searchByUniqueId(final UUID uniqueId) throws ProfileNotFoundException {
+	@SuppressWarnings("unchecked")
+	public T searchByUniqueId(final UUID uniqueId) throws ProfileNotFoundException {
 		final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.UNIQUE_ID;
-		boolean isOnline = this.isOnline();
-		MojangProfile found = null;
+		T found = null;
 		HttpStatus status = HttpStatus.OK;
 
 		try {
@@ -280,7 +294,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 			if (found == null) {
 				for (MojangProfile profile : CACHE) {
 					if (profile.getUniqueId().equals(uniqueId)) {
-						found = profile;
+						found = (T)profile;
 						break;
 					}
 				}
@@ -305,7 +319,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 							JsonObject json = new JsonObject();
 							json.addProperty("id", uniqueId.toString());
 							json.addProperty("name", result.getName());
-							found = GSON.fromJson(json.toString(), MojangProfile.class);
+							found = GSON.fromJson(json.toString(), this.getSuperClass());
 							CACHE.add(found);
 						}
 					}
