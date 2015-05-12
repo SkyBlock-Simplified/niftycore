@@ -26,9 +26,11 @@ public enum ChatColor {
 
 	public static final char COLOR_CHAR = '\u00a7';
 	private final char code;
+	private final String toString;
 
 	private ChatColor(char code) {
 		this.code = code;
+		this.toString = new String(new char[] { COLOR_CHAR, code });
 	}
 
     /**
@@ -58,7 +60,7 @@ public enum ChatColor {
 
 	@Override
 	public String toString() {
-		return StringUtil.format("{0}{1}", COLOR_CHAR, this.code);
+		return this.toString;
 	}
 
 	public static String translateAlternateColorCodes(char altColorChar, String value) {
