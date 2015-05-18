@@ -161,24 +161,12 @@ public class Reflection {
 		return this.subPackage;
 	}
 
-	public Object getValue(Class<?> type) throws Exception {
-		return this.getValue(type, null);
-	}
-
 	public Object getValue(Class<?> type, Object obj) throws Exception {
 		return this.getField(type).get(obj);
 	}
 
-	public Object getValue(String name) throws Exception {
-		return this.getValue(name, null);
-	}
-
 	public Object getValue(String name, Object obj) throws Exception {
 		return this.getField(name).get(obj);
-	}
-
-	public Object invokeMethod(String name, Object... args) throws Exception {
-		return this.invokeMethod(name, null, args);
 	}
 
 	public Object invokeMethod(String name, Object obj, Object... args) throws Exception {
@@ -189,19 +177,10 @@ public class Reflection {
 		return this.getConstructor(toPrimitiveTypeArray(args)).newInstance(args);
 	}
 
-	public void setValue(FieldEntry entry) throws Exception {
-		this.setValue(null, entry);
-	}
-
 	public void setValue(Object obj, FieldEntry entry) throws Exception {
 		Field f = this.getField(entry.getKey());
 		f.setAccessible(true);
 		f.set(obj, entry.getValue());
-	}
-
-	public void setValues(FieldEntry... entrys) throws Exception {
-		for (FieldEntry entry : entrys)
-			this.setValue(entry);
 	}
 
 	public void setValues(Object obj, FieldEntry... entrys) throws Exception {
