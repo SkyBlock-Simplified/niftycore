@@ -169,6 +169,10 @@ public class Reflection {
 		return this.getField(name).get(obj);
 	}
 
+	public Object invokeMethod(Class<?> type, Object obj, Object... args) throws Exception {
+		return this.getMethod(type, toPrimitiveTypeArray(args)).invoke(obj, args);
+	}
+
 	public Object invokeMethod(String name, Object obj, Object... args) throws Exception {
 		return this.getMethod(name, toPrimitiveTypeArray(args)).invoke(obj, args);
 	}
