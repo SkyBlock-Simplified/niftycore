@@ -81,7 +81,7 @@ public class MinecraftScheduler {
 			}
 
 			Object taskObj = SCHEDULER.invokeMethod("runTaskAsynchronously", SCHEDULER_OBJ, plugin, task);
-			int taskId = (int)BUNGEE_TASK.invokeMethod("getTaskId", taskObj);
+			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
 			return new ScheduledTask<T>(plugin, taskId, false);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -183,7 +183,7 @@ public class MinecraftScheduler {
 		try {
 			if (NiftyCore.isBungee()) {
 				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, delay, period, TimeUnit.MILLISECONDS);
-				int taskId = (int)BUKKIT_TASK.invokeMethod("getId", taskObj);
+				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
 				return new ScheduledTask<T>(plugin, taskId, true);
 			}
 
