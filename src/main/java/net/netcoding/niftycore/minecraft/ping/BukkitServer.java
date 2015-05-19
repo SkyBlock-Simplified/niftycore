@@ -10,37 +10,40 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import com.google.common.io.ByteArrayDataOutput;
-
-import net.netcoding.niftycore.minecraft.MinecraftServer;
 import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.DataUtil;
-import net.netcoding.niftycore.util.gson.Gson;
 
-public class BukkitServer extends MinecraftServer {
+import com.google.common.io.ByteArrayDataOutput;
 
-	private static final transient Gson GSON = new Gson();
+public class BukkitServer extends MinecraftPingServer {
+
 	private transient int socketTimeout = 2000;
-	private final transient BukkitServerPingListener listener;
 
-	public BukkitServer(String ip, BukkitServerPingListener listener) {
+	public BukkitServer(String ip, MinecraftPingListener listener) {
 		this(ip, 25565, listener);
 	}
 
-	public BukkitServer(String ip, int port, BukkitServerPingListener listener) {
+	public BukkitServer(String ip, int port, MinecraftPingListener listener) {
 		this(new InetSocketAddress(ip, port), listener);
 	}
 
-	public BukkitServer(InetSocketAddress address, BukkitServerPingListener listener) {
+	public BukkitServer(InetSocketAddress address, MinecraftPingListener listener) {
+		super(listener);
 		this.setAddress(address);
-		this.listener = listener;
 	}
 
-	public int getSocketTimeout() {
+	protected int getSocketTimeout() {
 		return this.socketTimeout;
 	}
 
+	@Override
+	public void onPing() {
+		if (this.getListener() != null)
+			this.getListener().onPing(this);
+	}
+
+	@Override
 	public void ping() {
 		if (this.getAddress() == null) return;
 
@@ -80,33 +83,26 @@ public class BukkitServer extends MinecraftServer {
 						setOnline(false);
 						reset();
 					} finally {
-						if (listener != null)
-							listener.onPing(BukkitServer.this);
+						onPing();
 					}
 				}
 			});
 		} catch (Exception ex) {
 			this.setOnline(false);
 			this.reset();
-
-			if (listener != null)
-				listener.onPing(BukkitServer.this);
+			this.onPing();
 		}
 	}
 
-	public void setAddress(String ip, int port) {
+	protected void setAddress(String ip, int port) {
 		this.setAddress(new InetSocketAddress(ip, port));
 	}
 
-	public void setAddress(InetSocketAddress address) {
+	protected void setAddress(InetSocketAddress address) {
 		this.address = address;
 	}
 
-	public void setName(String serverName) {
-		this.serverName = serverName;
-	}
-
-	public void setSocketTimeout(int timeout) {
+	protected void setSocketTimeout(int timeout) {
 		this.socketTimeout = timeout;
 	}
 
