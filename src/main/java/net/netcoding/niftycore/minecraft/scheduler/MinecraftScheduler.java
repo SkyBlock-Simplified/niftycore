@@ -6,7 +6,7 @@ import net.netcoding.niftycore.NiftyCore;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.util.StringUtil;
 
-public class MinecraftScheduler {
+public class MinecraftScheduler<T> {
 
 	private static final Object SCHEDULER_OBJ;
 	private static final Reflection BUNGEE_TASK = new Reflection("ScheduledTask", "net.md_5.bungee.api.scheduler");
@@ -34,17 +34,9 @@ public class MinecraftScheduler {
 		}
 	}
 
-	public final static <T extends net.md_5.bungee.api.plugin.Plugin> void cancel(T owner) {
+	public final static void cancel(Object plugin) {
 		try {
-			SCHEDULER.invokeMethod("cancel", SCHEDULER_OBJ, owner);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public final static <T extends org.bukkit.plugin.java.JavaPlugin> void cancel(T owner) {
-		try {
-			SCHEDULER.invokeMethod("cancelTasks", SCHEDULER_OBJ, owner);
+			SCHEDULER.invokeMethod(StringUtil.format("cancel{0}", (NiftyCore.isBungee() ? "" : "Tasks")), SCHEDULER_OBJ, plugin);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -56,40 +48,67 @@ public class MinecraftScheduler {
 
 	public final static ScheduledTask<?> runAsync(Runnable task) {
 		try {
-			if (NiftyCore.isBungee()) {
-				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NiftyCore.getPlugin();
-				return runAsync(owner, task);
-			}
-
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
-			return runAsync(owner, task);
+			return runAsync(NiftyCore.getPlugin(), task);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
-	public final static ScheduledTask<?> runAsync(final Runnable task, final long delay) {
+	public final static ScheduledTask<?> runAsync(Runnable task, long delay) {
+		try {
+			return runAsync(NiftyCore.getPlugin(), task, delay);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public final static ScheduledTask<?> runAsync(Runnable task, long delay, long period) {
+		try {
+			return runAsync(NiftyCore.getPlugin(), task, delay, period);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public final static <T> ScheduledTask<T> runAsync(T plugin, Runnable task) {
 		try {
 			if (NiftyCore.isBungee()) {
-				return schedule(new Runnable() {
+				Object taskObj = SCHEDULER.invokeMethod("runAsync", SCHEDULER_OBJ, plugin, task);
+				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
+				return new ScheduledTask<T>(plugin, taskId, false);
+			}
+
+			Object taskObj = SCHEDULER.invokeMethod("runTaskAsynchronously", SCHEDULER_OBJ, plugin, task);
+			int taskId = (int)BUNGEE_TASK.invokeMethod("getTaskId", taskObj);
+			return new ScheduledTask<T>(plugin, taskId, false);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public final static ScheduledTask<?> runAsync(Object plugin, final Runnable task, long delay) {
+		try {
+			if (NiftyCore.isBungee()) {
+				return schedule(plugin, new Runnable() {
 					@Override
 					public void run() {
-						runAsync(task).getId();
+						runAsync(task);
 					}
 				}, delay);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
-			return runAsync(owner, task, delay);
+			Object taskObj = SCHEDULER.invokeMethod("runTaskLaterAsynchronously", SCHEDULER_OBJ, plugin, task, delay);
+			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
+			return new ScheduledTask<>(plugin, taskId, false);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
-	public final static ScheduledTask<?> runAsync(final Runnable task, final long delay, final long period) {
+	public final static ScheduledTask<?> runAsync(Object plugin, final Runnable task, long delay, long period) {
 		try {
 			if (NiftyCore.isBungee()) {
-				return schedule(new Runnable() {
+				return schedule(plugin, new Runnable() {
 					@Override
 					public void run() {
 						runAsync(task);
@@ -97,69 +116,9 @@ public class MinecraftScheduler {
 				}, delay, period);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
-			return runAsync(owner, task, delay, period);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public final static <T extends net.md_5.bungee.api.plugin.Plugin> ScheduledTask<T> runAsync(T owner, Runnable task) {
-		try {
-			//Object taskObj = SCHEDULER.invokeMethod(StringUtil.format("run{0}Async{1}", (IS_BUNGEE ? "" : "Task"), (IS_BUNGEE ? "" : "hronously")), SCHEDULER_OBJ, plugin, task);
-			Object taskObj = SCHEDULER.invokeMethod("runAsync", SCHEDULER_OBJ, owner, task);
-			int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
-			return new ScheduledTask<T>(owner, taskId, false);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public final static <T extends org.bukkit.plugin.java.JavaPlugin> ScheduledTask<T> runAsync(T owner, Runnable task) {
-		return runAsync(owner, task, 0);
-	}
-
-	public final static <T extends org.bukkit.plugin.java.JavaPlugin> ScheduledTask<T> runAsync(T owner, Runnable task, long delay) {
-		try {
-			Object taskObj = SCHEDULER.invokeMethod("runTaskLaterAsynchronously", SCHEDULER_OBJ, owner, task, delay);
+			Object taskObj = SCHEDULER.invokeMethod("runTaskTimerAsynchronously", SCHEDULER_OBJ, plugin, task, delay, period);
 			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
-			return new ScheduledTask<T>(owner, taskId, false);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public final static <T extends net.md_5.bungee.api.plugin.Plugin> ScheduledTask<T> runAsync(T owner, final Runnable task, long delay, TimeUnit unit) {
-		try {
-			return schedule(owner, new Runnable() {
-				@Override
-				public void run() {
-					runAsync(task);
-				}
-			}, delay, unit);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public final static <T extends org.bukkit.plugin.java.JavaPlugin> ScheduledTask<T> runAsync(T owner, Runnable task, long delay, long period) {
-		try {
-			Object taskObj = SCHEDULER.invokeMethod("runTaskTimerAsynchronously", SCHEDULER_OBJ, owner, task, delay, period);
-			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
-			return new ScheduledTask<T>(owner, taskId, false);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public final static <T extends net.md_5.bungee.api.plugin.Plugin> ScheduledTask<T> runAsync(T owner, final Runnable task, long delay, long period, TimeUnit unit) {
-		try {
-			return schedule(owner, new Runnable() {
-				@Override
-				public void run() {
-					runAsync(task);
-				}
-			}, delay, period, unit);
+			return new ScheduledTask<>(plugin, taskId, false);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -167,23 +126,20 @@ public class MinecraftScheduler {
 
 	public final static ScheduledTask<?> schedule(Runnable task) {
 		try {
-			if (NiftyCore.isBungee()) {
-				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NiftyCore.getPlugin();
-				return schedule(owner, task, 0, TimeUnit.MILLISECONDS);
-			}
-
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
-			return schedule(owner, task);
+			return schedule(NiftyCore.getPlugin(), task);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
-	public final static <T extends org.bukkit.plugin.java.JavaPlugin> ScheduledTask<T> schedule(T owner, Runnable task) {
+	public final static ScheduledTask<?> schedule(Object plugin, Runnable task) {
 		try {
-			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, owner, task);
+			if (NiftyCore.isBungee())
+				return schedule(plugin, task, 0);
+
+			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task);
 			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
-			return new ScheduledTask<T>(owner, taskId, true);
+			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -191,23 +147,7 @@ public class MinecraftScheduler {
 
 	public final static ScheduledTask<?> schedule(Runnable task, long delay) {
 		try {
-			if (NiftyCore.isBungee()) {
-				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NiftyCore.getPlugin();
-				return schedule(owner, task, delay, TimeUnit.MILLISECONDS);
-			}
-
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
-			return schedule(owner, task, delay);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public final static <T extends org.bukkit.plugin.java.JavaPlugin> ScheduledTask<T> schedule(T owner, Runnable task, long delay) {
-		try {
-			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, owner, task, delay);
-			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
-			return new ScheduledTask<T>(owner, taskId, true);
+			return schedule(NiftyCore.getPlugin(), task, delay);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -215,43 +155,39 @@ public class MinecraftScheduler {
 
 	public final static ScheduledTask<?> schedule(Runnable task, long delay, long period) {
 		try {
+			return schedule(NiftyCore.getPlugin(), task, delay, period);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public final static ScheduledTask<?> schedule(Object plugin, Runnable task, long delay) {
+		try {
 			if (NiftyCore.isBungee()) {
-				net.md_5.bungee.api.plugin.Plugin owner = (net.md_5.bungee.api.plugin.Plugin)NiftyCore.getPlugin();
-				return schedule(owner, task, delay, period, TimeUnit.MILLISECONDS);
+				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, delay, TimeUnit.MILLISECONDS);
+				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
+				return new ScheduledTask<>(plugin, taskId, true);
 			}
 
-			org.bukkit.plugin.java.JavaPlugin owner = (org.bukkit.plugin.java.JavaPlugin)NiftyCore.getPlugin();
-			return schedule(owner, task, delay, period);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public final static <T extends org.bukkit.plugin.java.JavaPlugin> ScheduledTask<T> schedule(T owner, Runnable task, long delay, long period) {
-		try {
-			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncRepeatingTask", SCHEDULER_OBJ, owner, task, delay, period);
+			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task, delay);
 			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
-			return new ScheduledTask<T>(owner, taskId, true);
+			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
-	public final static <T extends net.md_5.bungee.api.plugin.Plugin> ScheduledTask<T> schedule(T owner, Runnable task, long delay, TimeUnit unit) {
+	public final static ScheduledTask<?> schedule(Object plugin, Runnable task, long delay, long period) {
 		try {
-			Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, owner, task, delay, unit);
-			int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
-			return new ScheduledTask<T>(owner, taskId, true);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-	}
+			if (NiftyCore.isBungee()) {
+				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, delay, period, TimeUnit.MILLISECONDS);
+				int taskId = (int)BUKKIT_TASK.invokeMethod("getId", taskObj);
+				return new ScheduledTask<>(plugin, taskId, true);
+			}
 
-	public final static <T extends net.md_5.bungee.api.plugin.Plugin> ScheduledTask<T> schedule(T owner, Runnable task, long delay, long period, TimeUnit unit) {
-		try {
-			Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, owner, task, delay, period, unit);
-			int taskId = (int)BUKKIT_TASK.invokeMethod("geTasktId", taskObj);
-			return new ScheduledTask<T>(owner, taskId, true);
+			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncRepeatingTask", SCHEDULER_OBJ, plugin, task, delay, period);
+			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
+			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
