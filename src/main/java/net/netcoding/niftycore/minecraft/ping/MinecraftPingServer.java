@@ -1,7 +1,8 @@
 package net.netcoding.niftycore.minecraft.ping;
 
 import net.netcoding.niftycore.minecraft.MinecraftServer;
-import net.netcoding.niftycore.util.gson.Gson;
+
+import com.google.gson.Gson;
 
 public abstract class MinecraftPingServer extends MinecraftServer {
 

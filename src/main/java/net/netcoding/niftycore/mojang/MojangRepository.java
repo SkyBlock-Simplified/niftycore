@@ -20,8 +20,9 @@ import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
-import net.netcoding.niftycore.util.gson.Gson;
-import net.netcoding.niftycore.util.gson.JsonObject;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 /**
  * A collection of methods to locate player UUID and Name throughout Bungee or offline.

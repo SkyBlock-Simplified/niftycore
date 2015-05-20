@@ -33,6 +33,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 			<version>1.14</version>
@@ -42,7 +47,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 
 	<build>
 		<defaultGoal>clean install</defaultGoal>
-		<finalName>${project.name}</finalName>
+		<finalName>${project.name}-ORIGINAL</finalName>
 
 		<plugins>
 			<plugin>
@@ -53,6 +58,30 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 					<target>${jdk.version}</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.4</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>shade</goal>
+							</goals>
+							<configuration>
+								<relocations>
+									<relocation>
+										<pattern>com.google</pattern>
+										<shadedPattern>${project.groupId}.${project.artifactId}.util</shadedPattern>
+									</relocation>
+								</relocations>
+								<createDependencyReducedPom>true</createDependencyReducedPom>
+								<shadedArtifactAttached>true</shadedArtifactAttached>
+								<finalName>${project.name}</finalName>
+							</configuration>
+						</execution>
+				   </executions>
+			   </plugin>
 		</plugins>
 	</build>
 </project>
