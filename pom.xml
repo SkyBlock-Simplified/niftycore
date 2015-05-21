@@ -1,31 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.netcoding</groupId>
 	<artifactId>niftycore</artifactId>
 	<name>NiftyCore</name>
-	<version>1.0.0</version>
 	<url>https://netcoding.net/</url>
 	<description>Core API and class files for NiftyBukkit and NiftyBungee.</description>
 
-	<organization>
-		<name>Net Coding</name>
-		<url>https://netcoding.net/</url>
-	</organization>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jdk.version>1.7</jdk.version>
-		<author>Brian Graham (CraftedFury)</author>
-	</properties>
+	<parent>
+		<groupId>net.netcoding</groupId>
+		<artifactId>niftyparent</artifactId>
+		<version>1.0.0</version>
+	</parent>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -46,42 +33,24 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	</dependencies>
 
 	<build>
-		<defaultGoal>clean install</defaultGoal>
-		<finalName>${project.name}-ORIGINAL</finalName>
-
 		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>1.4</version>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<goals>
-								<goal>shade</goal>
-							</goals>
-							<configuration>
-								<relocations>
-									<relocation>
-										<pattern>com.google</pattern>
-										<shadedPattern>${project.groupId}.${project.artifactId}.util</shadedPattern>
-									</relocation>
-								</relocations>
-								<createDependencyReducedPom>true</createDependencyReducedPom>
-								<shadedArtifactAttached>true</shadedArtifactAttached>
-								<finalName>${project.name}</finalName>
-							</configuration>
-						</execution>
-				   </executions>
-			   </plugin>
+				<executions>
+					<execution>
+						<configuration>
+							<relocations>
+								<relocation>
+									<pattern>com.google</pattern>
+									<shadedPattern>${project.groupId}.${project.artifactId}.util</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
