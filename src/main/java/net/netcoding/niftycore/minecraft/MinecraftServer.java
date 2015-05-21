@@ -7,24 +7,25 @@ import java.util.Collections;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
-public abstract class MinecraftServer {
+public abstract class MinecraftServer<T extends MojangProfile> {
 
 	protected InetSocketAddress address;
 	protected int maxPlayers = 0;
 	protected String motd = "";
 	protected boolean online = false;
-	protected final ConcurrentSet<MojangProfile> playerList = new ConcurrentSet<>();
+	protected final ConcurrentSet<T> playerList = new ConcurrentSet<>();
 	protected String serverName = "";
 	protected MinecraftVersion version = MinecraftVersion.DEFAULT;
 
 	protected MinecraftServer() { }
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
 		if (this == obj) return true;
 		if (!(obj instanceof MinecraftServer)) return false;
-		MinecraftServer server = (MinecraftServer)obj;
+		MinecraftServer<T> server = (MinecraftServer<T>)obj;
 		if (!server.getAddress().getAddress().getHostAddress().equals(this.getAddress().getAddress().getHostAddress())) return false;
 		if (server.getAddress().getPort() != this.getAddress().getPort()) return false;
 		return true;
@@ -50,7 +51,7 @@ public abstract class MinecraftServer {
 		return this.playerList.size();
 	}
 
-	public Collection<MojangProfile> getPlayerList() {
+	public Collection<T> getPlayerList() {
 		return Collections.unmodifiableSet(this.playerList);
 	}
 

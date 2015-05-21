@@ -5,36 +5,51 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import net.netcoding.niftycore.minecraft.MinecraftServer;
 import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
+import net.netcoding.niftycore.mojang.BasicMojangProfile;
 import net.netcoding.niftycore.mojang.MojangProfile;
 import net.netcoding.niftycore.util.DataUtil;
 
 import com.google.common.io.ByteArrayDataOutput;
 
-public class BukkitServer extends MinecraftPingServer {
+public class BukkitServer<T extends MojangProfile> extends MinecraftPingServer<T> {
 
 	private transient int socketTimeout = 2000;
 
-	public BukkitServer(String ip, MinecraftPingListener listener) {
+	public BukkitServer(String ip, MinecraftPingListener<T> listener) {
 		this(ip, 25565, listener);
 	}
 
-	public BukkitServer(String ip, int port, MinecraftPingListener listener) {
+	public BukkitServer(String ip, int port, MinecraftPingListener<T> listener) {
 		this(new InetSocketAddress(ip, port), listener);
 	}
 
-	public BukkitServer(InetSocketAddress address, MinecraftPingListener listener) {
+	public BukkitServer(InetSocketAddress address, MinecraftPingListener<T> listener) {
 		super(listener);
 		this.setAddress(address);
 	}
 
 	protected int getSocketTimeout() {
 		return this.socketTimeout;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected final Class<T> getSuperClass() {
+		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
+		return (Class<T>)(superClass.getActualTypeArguments().length == 0 ? BasicMojangProfileOverride.class : superClass.getActualTypeArguments()[0]);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected final Class<T[]> getSuperClassArray() {
+		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
+		return (Class<T[]>)(superClass.getActualTypeArguments().length == 0 ? BasicMojangProfileOverride[].class : superClass.getActualTypeArguments());
 	}
 
 	@Override
@@ -49,6 +64,7 @@ public class BukkitServer extends MinecraftPingServer {
 
 		try {
 			MinecraftScheduler.runAsync(new Runnable() {
+				@SuppressWarnings("unchecked")
 				@Override
 				public void run() {
 					try (Socket socket = new Socket()) {
@@ -73,7 +89,14 @@ public class BukkitServer extends MinecraftPingServer {
 
 										if (players != null) {
 											if (players.getSample() != null)
-												playerList.addAll(Arrays.asList(GSON.fromJson(GSON.toJson(players.getSample()), MojangProfile[].class)));
+												playerList.addAll(Arrays.asList(GSON.fromJson(GSON.toJson(players.getSample()), getSuperClassArray())));
+										}
+
+										if (getSuperClass().isAssignableFrom(BasicMojangProfileOverride.class)) {
+											for (T player : playerList) {
+												BasicMojangProfileOverride profile = (BasicMojangProfileOverride)player;
+												profile.setServer(BukkitServer.this);
+											}
 										}
 									}
 								}
@@ -106,21 +129,21 @@ public class BukkitServer extends MinecraftPingServer {
 		this.socketTimeout = timeout;
 	}
 
-    private byte[] preparePing() throws IOException {
-        return new byte[] { 0x00 };
-    }
+	private byte[] preparePing() throws IOException {
+		return new byte[] { 0x00 };
+	}
 
-    private byte[] prepareHandshake() throws IOException {
-    	ByteArrayDataOutput handshake = DataUtil.newDataOutput();
+	private byte[] prepareHandshake() throws IOException {
+		ByteArrayDataOutput handshake = DataUtil.newDataOutput();
 		handshake.writeByte(0x00);
 		DataUtil.writeVarInt(handshake, 4);
 		DataUtil.writeString(handshake, getAddress().getHostString());
 		handshake.writeShort(getAddress().getPort());
 		DataUtil.writeVarInt(handshake, 1);
 		return handshake.toByteArray();
-    }
+	}
 
-    private StatusResponse processResponse(DataInputStream input) throws IOException {
+	private StatusResponse processResponse(DataInputStream input) throws IOException {
 		DataUtil.readVarInt(input); // Packet Size
 
 		int id = DataUtil.readVarInt(input); // Packet ID
@@ -132,6 +155,21 @@ public class BukkitServer extends MinecraftPingServer {
 		byte[] data = new byte[length];
 		input.readFully(data);
 		return GSON.fromJson(new String(data, StandardCharsets.UTF_8), StatusResponse.class);
-    }
+	}
+
+	private class BasicMojangProfileOverride extends BasicMojangProfile {
+
+		private MinecraftServer<? extends MojangProfile> server;
+
+		@Override
+		public MinecraftServer<? extends MojangProfile> getServer() {
+			return this.server;
+		}
+
+		void setServer(MinecraftServer<? extends MojangProfile> server) {
+			this.server = server;
+		}
+
+	}
 
 }

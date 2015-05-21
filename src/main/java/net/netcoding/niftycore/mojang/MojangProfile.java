@@ -61,7 +61,7 @@ public abstract class MojangProfile {
 	 * 
 	 * @return BungeeServer Server object.
 	 */
-	public abstract MinecraftServer getServer();
+	public abstract MinecraftServer<? extends MojangProfile> getServer();
 
 	/**
 	 * Gets the players UUID.
@@ -122,13 +122,6 @@ public abstract class MojangProfile {
 	 * @return True if online, otherwise false.
 	 */
 	public abstract boolean isOnlineAnywhere();
-
-	/*/**
-	 * Sends a packet to the profiles client, if they are online.
-	 * 
-	 * @param packet Packet to send.
-	 */
-	//public abstract void sendPacket(Object packet) throws Exception;
 
 	@Override
 	public String toString() {

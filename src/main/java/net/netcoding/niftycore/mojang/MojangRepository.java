@@ -55,15 +55,15 @@ public abstract class MojangRepository<T extends MojangProfile> {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected final Class<T[]> getSuperClassArray() {
+	protected final Class<T> getSuperClass() {
 		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
-		return (Class<T[]>)(superClass.getActualTypeArguments().length == 0 ? MojangProfile[].class : superClass.getActualTypeArguments());
+		return (Class<T>)(superClass.getActualTypeArguments().length == 0 ? BasicMojangProfile.class : superClass.getActualTypeArguments()[0]);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected final Class<T> getSuperClass() {
+	protected final Class<T[]> getSuperClassArray() {
 		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
-		return (Class<T>)(superClass.getActualTypeArguments().length == 0 ? MojangProfile.class : superClass.getActualTypeArguments()[0]);
+		return (Class<T[]>)(superClass.getActualTypeArguments().length == 0 ? BasicMojangProfile[].class : superClass.getActualTypeArguments());
 	}
 
 	protected abstract boolean isOnline();
