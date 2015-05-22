@@ -22,7 +22,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.3.1</version>
+			<version>2.2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.yaml</groupId>
@@ -43,8 +43,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 						<configuration>
 							<relocations>
 								<relocation>
-									<pattern>com.google</pattern>
-									<shadedPattern>${project.groupId}.${project.artifactId}.util</shadedPattern>
+									<pattern>com.google.gson</pattern>
+									<shadedPattern>${project.groupId}.${project.artifactId}.util.gson</shadedPattern>
 								</relocation>
 							</relocations>
 						</configuration>
