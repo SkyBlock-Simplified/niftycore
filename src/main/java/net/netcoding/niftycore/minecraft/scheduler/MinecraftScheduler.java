@@ -18,11 +18,8 @@ public class MinecraftScheduler {
 	static {
 		try {
 			Reflection server = new Reflection((NiftyCore.isBungee() ? "ProxyServer" : "Bukkit"), (NiftyCore.isBungee() ? "net.md_5.bungee.api" : "org.bukkit"));
-			SCHEDULER_OBJ = server.invokeMethod("getScheduler", null);
-			System.out.println(SCHEDULER_OBJ);
-			System.out.println(SCHEDULER_OBJ.getClass());
-			System.out.println(SCHEDULER_OBJ.getClass().getClass());
-			//SCHEDULER = new Reflection(SCHEDULER_OBJ.getClass().getSimpleName(), SCHEDULER_OBJ.getClass().getPackage().toString());
+			Object serverObj = NiftyCore.isBungee() ? server.invokeMethod("getInstance", null) : null;
+			SCHEDULER_OBJ = server.invokeMethod("getScheduler", serverObj);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
