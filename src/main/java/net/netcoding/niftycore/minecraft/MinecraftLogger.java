@@ -7,7 +7,7 @@ import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
 
-public class MinecraftLogger {
+public abstract class MinecraftLogger {
 
 	private final transient Logger logger;
 
@@ -20,15 +20,15 @@ public class MinecraftLogger {
 	}
 
 	public void console(Object... args) {
-		console("", null, args);
+		this.console("", null, args);
 	}
 
 	public void console(Throwable exception, Object... args) {
-		console("", exception, args);
+		this.console("", exception, args);
 	}
 
 	public void console(String message, Object... args) {
-		console(message, null, args);
+		this.console(message, null, args);
 	}
 
 	public void console(String message, Throwable exception, Object... args) {
