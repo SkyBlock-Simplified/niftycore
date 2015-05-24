@@ -43,7 +43,7 @@ public abstract class MojangProfile {
 	public InetSocketAddress getAddress() {
 		if (this.isOnlineAnywhere()) {
 			if (StringUtil.notEmpty(this.ip) && this.ipAddress == null)
-				this.ipAddress = InetSocketAddress.createUnresolved(this.ip, this.port);
+				this.ipAddress = new InetSocketAddress(this.ip, this.port);
 		}
 
 		return this.ipAddress;
