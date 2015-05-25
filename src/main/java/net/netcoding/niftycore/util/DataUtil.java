@@ -37,6 +37,28 @@ public class DataUtil {
 		return ByteStreams.newDataOutput(size);
 	}
 
+    public static byte[] readByteArray(DataInputStream in) throws IOException {
+		int length = readVarInt(in);
+		byte[] data = new byte[length];
+		in.readFully(data);
+		return data;
+    }
+
+	public static byte[] readByteArray(ByteArrayDataInput in) throws IOException {
+		int length = readVarInt(in);
+		byte[] data = new byte[length];
+		in.readFully(data);
+		return data;
+	}
+
+	public static String readString(DataInputStream in) throws IOException {
+		return new String(readByteArray(in), StandardCharsets.UTF_8);
+	}
+
+	public static String readString(ByteArrayDataInput in) throws IOException {
+		return new String(readByteArray(in), StandardCharsets.UTF_8);
+	}
+
 	public static int readVarInt(DataInputStream in) throws IOException {
 		int i = 0;
 		int j = 0;
