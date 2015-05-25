@@ -100,8 +100,7 @@ public class Reflection {
 			}
 		}
 
-		System.out.println(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
-		return CONSTRUCTOR_CACHE.put(types, null);
+		throw new Exception(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
 	}
 
 	public Field getField(Class<?> type) throws Exception {
@@ -112,11 +111,15 @@ public class Reflection {
 			}
 		}
 
-		return null;
+		throw new Exception(StringUtil.format("The field with type {0} was not found!", type));
 	}
 
 	public Field getField(String name) throws Exception {
 		Field field = this.getClazz().getDeclaredField(name);
+
+		if (field == null)
+			throw new Exception(StringUtil.format("The field {0} was not found!", name));
+
 		field.setAccessible(true);
 		return field;
 	}
@@ -133,8 +136,7 @@ public class Reflection {
 			}
 		}
 
-		System.out.println(StringUtil.format("The method type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
-		return null;
+		throw new Exception(StringUtil.format("The method with return type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
 	}
 
 	public Method getMethod(String name, Class<?>... paramTypes) throws Exception {
@@ -149,8 +151,7 @@ public class Reflection {
 			}
 		}
 
-		System.out.println(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
-		return null;
+		throw new Exception(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
 	}
 
 	public String getPackagePath() {
