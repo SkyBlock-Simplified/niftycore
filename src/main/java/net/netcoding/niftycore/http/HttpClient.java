@@ -51,24 +51,26 @@ public class HttpClient {
 		String bodyResponse = "";
 
 		try {
-			if (proxy == null) proxy = Proxy.NO_PROXY;
-			String line;
-			StringBuffer buffer = new StringBuffer();
-			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy);
+			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
 			status = HttpStatus.getByCode(connection.getResponseCode());
-			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(status);
-			connection.setRequestMethod("GET");
+
+			if (connection.getResponseCode() >= 400)
+				throw new HttpConnectionException(status);
 
 			for (HttpHeader header : headers)
 				connection.setRequestProperty(header.getName(), header.getValue());
 
+			connection.setRequestMethod("GET");
 			connection.setConnectTimeout(timeout);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
+			StringBuffer buffer = new StringBuffer();
 
 			try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
+					String line;
+
 					while (StringUtil.notEmpty(line = reader.readLine())) {
 						buffer.append(line);
 						buffer.append('\r');
@@ -147,29 +149,31 @@ public class HttpClient {
 		String bodyResponse = "";
 
 		try {
-			if (proxy == null) proxy = Proxy.NO_PROXY;
-			String line;
 			StringBuffer buffer = new StringBuffer();
-			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy);
+			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
 			status = HttpStatus.getByCode(connection.getResponseCode());
-			if (connection.getResponseCode() >= 400) throw new HttpConnectionException(status);
-			connection.setRequestMethod("POST");
+
+			if (connection.getResponseCode() >= 400)
+				throw new HttpConnectionException(status);
 
 			for (HttpHeader header : headers)
 				connection.setRequestProperty(header.getName(), header.getValue());
 
+			connection.setRequestMethod("POST");
 			connection.setConnectTimeout(timeout);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
 
-			if (body != null) {
+			if (body != null && body.getBytes().length > 0) {
 				DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
 				writer.write(body.getBytes());
 			}
 
 			try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
+					String line;
+
 					while (StringUtil.notEmpty(line = reader.readLine())) {
 						buffer.append(line);
 						buffer.append('\r');
