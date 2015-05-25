@@ -45,6 +45,70 @@ public class MinecraftScheduler {
 		cancel(task.getId());
 	}
 
+	public final static ScheduledTask<?> repeat(Runnable task) {
+		try {
+			return repeat(NiftyCore.getPlugin(), task);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public final static <T> ScheduledTask<T> repeat(final T plugin, final Runnable task) {
+		try {
+			Runnable repeater = new Runnable() {
+				@Override
+				public void run() {
+					task.run();
+					repeat(plugin, task);
+				}
+			};
+
+			if (NiftyCore.isBungee()) {
+				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, repeater, TimeUnit.MILLISECONDS);
+				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
+				return new ScheduledTask<T>(plugin, taskId, true);
+			}
+
+			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task);
+			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
+			return new ScheduledTask<T>(plugin, taskId, true);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public final static ScheduledTask<?> repeatAsync(Runnable task) {
+		try {
+			return repeatAsync(NiftyCore.getPlugin(), task);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public final static <T> ScheduledTask<T> repeatAsync(final T plugin, final Runnable task) {
+		try {
+			Runnable repeater = new Runnable() {
+				@Override
+				public void run() {
+					task.run();
+					repeatAsync(plugin, task);
+				}
+			};
+
+			if (NiftyCore.isBungee()) {
+				Object taskObj = SCHEDULER.invokeMethod("runAsync", SCHEDULER_OBJ, plugin, repeater);
+				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
+				return new ScheduledTask<T>(plugin, taskId, false);
+			}
+
+			Object taskObj = SCHEDULER.invokeMethod("runTaskAsynchronously", SCHEDULER_OBJ, plugin, repeater);
+			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
+			return new ScheduledTask<T>(plugin, taskId, false);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
 	public final static ScheduledTask<?> runAsync(Runnable task) {
 		try {
 			return runAsync(NiftyCore.getPlugin(), task);
