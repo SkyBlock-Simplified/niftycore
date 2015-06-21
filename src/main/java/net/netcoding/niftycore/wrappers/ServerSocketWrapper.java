@@ -16,6 +16,10 @@ public class ServerSocketWrapper {
 		this.serverSocket = serverSocket;
 	}
 
+	public Socket accept() throws IOException {
+		return this.serverSocket.accept();
+	}
+
 	public ServerSocketChannel getChannel() {
 		return this.serverSocket.getChannel();
 	}
