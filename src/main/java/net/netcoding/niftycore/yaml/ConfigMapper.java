@@ -1,5 +1,19 @@
 package net.netcoding.niftycore.yaml;
 
+import net.netcoding.niftycore.util.ListUtil;
+import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.yaml.annotations.Path;
+import net.netcoding.niftycore.yaml.converters.Converter;
+import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
+import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Represent;
+import org.yaml.snakeyaml.representer.Representer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -14,29 +28,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.yaml.annotations.Path;
-import net.netcoding.niftycore.yaml.converters.Converter;
-import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
-
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
-import org.yaml.snakeyaml.error.YAMLException;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Represent;
-import org.yaml.snakeyaml.representer.Representer;
-
-public class ConfigMapper {
+public abstract class ConfigMapper {
 
 	private final transient Yaml yaml;
 	private final Map<String, ArrayList<String>> comments = new LinkedHashMap<>();
-	private final transient NullRepresenter representer = new NullRepresenter();
+	private String[] header;
+	final transient NullRepresenter representer = new NullRepresenter();
 	final transient InternalConverter converter = new InternalConverter();
 	File configFile;
-	String[] header;
 	transient ConfigSection root;
 
 	protected ConfigMapper(File folder, String fileName, String... header) {
@@ -141,7 +140,7 @@ public class ConfigMapper {
 
 			try {
 				returnMap.put(path, field.get(this));
-			} catch (IllegalAccessException e) { }
+			} catch (IllegalAccessException ignore) { }
 		}
 
 		Converter converter = this.converter.getConverter(Map.class);
