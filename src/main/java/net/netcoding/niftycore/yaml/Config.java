@@ -1,5 +1,11 @@
 package net.netcoding.niftycore.yaml;
 
+import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
+import net.netcoding.niftycore.yaml.annotations.Comment;
+import net.netcoding.niftycore.yaml.annotations.Comments;
+import net.netcoding.niftycore.yaml.annotations.Path;
+import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -12,11 +18,6 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import net.netcoding.niftycore.yaml.annotations.Comment;
-import net.netcoding.niftycore.yaml.annotations.Comments;
-import net.netcoding.niftycore.yaml.annotations.Path;
-import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
 
 public abstract class Config extends ConfigMapper implements Runnable {
 
@@ -176,7 +177,7 @@ public abstract class Config extends ConfigMapper implements Runnable {
 							} catch (Exception ex) {
 								try {
 									Thread.sleep(1000);
-								} catch (InterruptedException e) { }
+								} catch (InterruptedException ignore) { }
 							}
 						}
 						this.reloadProcessing = false;
@@ -203,29 +204,27 @@ public abstract class Config extends ConfigMapper implements Runnable {
 		this.skipFailedConversion = suppress;
 	}
 
-	// TODO: New MinecraftScheduler
 	public void startWatcher() throws Exception {
 		if (this.taskId == -1) {
 			try {
 				this.watchService = FileSystems.getDefault().newWatchService();
 				this.watchKey = this.configFile.toPath().getParent().register(this.watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
-				//this.taskId = this.getPlugin().getServer().getScheduler().runTaskTimerAsynchronously(this.getPlugin(), this, 0L, 5L).getTaskId();
+				this.taskId = MinecraftScheduler.runAsync(this, 0L, 5L).getId();
 			} catch (Exception ex) {
 				throw new RuntimeException("Unable to start watch service!", ex);
 			}
 		}
 	}
 
-	// TODO: New MinecraftScheduler
 	public void stopWatcher() {
 		if (this.taskId != -1) {
-			//this.getPlugin().getServer().getScheduler().cancelTask(this.taskId);
+			MinecraftScheduler.cancel(this.taskId);
 			this.taskId = -1;
 			this.watchKey.cancel();
 
 			try {
 				this.watchService.close();
-			} catch (IOException ioex) { }
+			} catch (IOException ignore) { }
 		}
 	}
 
@@ -234,7 +233,7 @@ public abstract class Config extends ConfigMapper implements Runnable {
 	 * <p>
 	 * Used to manually edit the passed root node when you updated the config.
 	 *
-	 * @param configSection The root ConfigSection with all sub-nodes.
+	 * @param section The root ConfigSection with all sub-nodes.
 	 */
 	public boolean update(ConfigSection section) throws InvalidConfigurationException {
 		return false;
