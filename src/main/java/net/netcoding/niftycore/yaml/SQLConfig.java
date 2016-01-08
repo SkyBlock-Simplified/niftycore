@@ -103,7 +103,7 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 					try {
 						Field portField = clazz.getField("DEFAULT_PORT");
 						this.port = portField.getInt(null);
-					} catch (Exception ex) { }
+					} catch (Exception ignore) { }
 				}
 
 				this.save();
