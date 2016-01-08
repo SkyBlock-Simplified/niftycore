@@ -18,7 +18,7 @@ import net.netcoding.niftycore.yaml.annotations.Comments;
 import net.netcoding.niftycore.yaml.annotations.Path;
 import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
 
-public class Config extends ConfigMapper implements Runnable {
+public abstract class Config extends ConfigMapper implements Runnable {
 
 	private boolean skipFailedConversion = false;
 	private int taskId = -1;
@@ -233,7 +233,7 @@ public class Config extends ConfigMapper implements Runnable {
 	 * Called after the file is loaded but before the converter gets it.
 	 * <p>
 	 * Used to manually edit the passed root node when you updated the config.
-	 * 
+	 *
 	 * @param configSection The root ConfigSection with all sub-nodes.
 	 */
 	public boolean update(ConfigSection section) throws InvalidConfigurationException {

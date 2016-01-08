@@ -1,9 +1,5 @@
 package net.netcoding.niftycore.yaml;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-
 import net.netcoding.niftycore.database.MySQL;
 import net.netcoding.niftycore.database.PostgreSQL;
 import net.netcoding.niftycore.database.SQLServer;
@@ -13,7 +9,11 @@ import net.netcoding.niftycore.yaml.annotations.Comment;
 import net.netcoding.niftycore.yaml.annotations.Path;
 import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
 
-public class SQLConfig<T extends SQLWrapper> extends Config {
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+
+public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 
 	private transient SQLWrapper factory;
 
@@ -46,7 +46,7 @@ public class SQLConfig<T extends SQLWrapper> extends Config {
 	}
 
 	public SQLConfig(File folder, String fileName, boolean skipFailedConversion, String... header) {
-		super(folder, fileName);
+		super(folder, fileName, skipFailedConversion, header);
 	}
 
 	public final String getHost() {
