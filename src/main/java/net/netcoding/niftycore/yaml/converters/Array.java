@@ -1,8 +1,10 @@
 package net.netcoding.niftycore.yaml.converters;
 
-import java.lang.reflect.ParameterizedType;
-
 import net.netcoding.niftycore.yaml.InternalConverter;
+
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Collections;
 
 @SuppressWarnings("unchecked")
 public class Array extends Converter {
@@ -18,14 +20,39 @@ public class Array extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		if (type.isAssignableFrom(section.getClass())) return section;
-		java.util.List<Object> values = (java.util.List<Object>)section;
-		return getArray(type, values);
+		Class<?> singleType = type.getComponentType();
+		java.util.List values;
+
+		if (section instanceof java.util.List)
+			values = (java.util.List) section;
+		else
+			Collections.addAll(values = new ArrayList(), (Object[]) section);
+
+		Object ret = java.lang.reflect.Array.newInstance(singleType, values.size());
+		Converter converter = this.getConverter(singleType);
+
+		if (converter == null)
+			return values.toArray((Object[]) ret);
+
+		for (int i = 0; i < values.size(); i++)
+			java.lang.reflect.Array.set(ret, i, converter.fromConfig(singleType, values.get(i), genericType));
+
+		return ret;
 	}
 
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
-		return obj;
+		Class<?> singleType = type.getComponentType();
+		Converter converter = this.getConverter(singleType);
+
+		if (converter == null)
+			return obj;
+
+		Object[] ret = new Object[java.lang.reflect.Array.getLength(obj)];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = converter.toConfig(singleType, java.lang.reflect.Array.get(obj, i), genericType);
+
+		return ret;
 	}
 
 	@Override
