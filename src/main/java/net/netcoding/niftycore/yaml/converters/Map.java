@@ -1,10 +1,10 @@
 package net.netcoding.niftycore.yaml.converters;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.HashMap;
-
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
+
+import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
 
 @SuppressWarnings("unchecked")
 public class Map extends Converter {
@@ -26,6 +26,9 @@ public class Map extends Converter {
 
 			if (genericType.getActualTypeArguments().length == 2) {
 				Class<?> keyClass = ((Class<?>)genericType.getActualTypeArguments()[0]);
+
+				if (section == null)
+					section = new HashMap<>();
 
 				java.util.Map<?, ?> map1 = (section instanceof java.util.Map) ? (java.util.Map<Object, Object>)section : ((ConfigSection)section).getRawMap();
 				for (java.util.Map.Entry<?, ?> entry : map1.entrySet()) {
