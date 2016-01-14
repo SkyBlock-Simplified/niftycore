@@ -35,7 +35,7 @@ public abstract class ConfigMapper {
 	private String[] header;
 	final transient NullRepresenter representer = new NullRepresenter();
 	final transient InternalConverter converter = new InternalConverter();
-	File configFile;
+	final File configFile;
 	transient ConfigSection root;
 
 	protected ConfigMapper(File folder, String fileName, String... header) {
@@ -86,6 +86,14 @@ public abstract class ConfigMapper {
 
 	protected static boolean doSkip(Field field) {
 		return Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers());
+	}
+
+	public final String getAbsolutePath() {
+		return this.configFile.getAbsolutePath();
+	}
+
+	public final String getName() {
+		return this.configFile.getName();
 	}
 
 	public void loadFromMap(Map<?, ?> section, Class<?> clazz) throws Exception {
