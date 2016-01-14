@@ -28,11 +28,11 @@ public class VersionUtil implements Comparable<VersionUtil> {
 	}
 
 	@Override
-	public boolean equals(Object that) {
-		if (that == null) return false;
-		if (!(that instanceof VersionUtil)) return false;
-		if (this == that) return true;
-		return this.compareTo((VersionUtil)that) == 0;
+	public boolean equals(Object obj) {
+		if (obj == null) return false;
+		if (!(obj instanceof VersionUtil)) return false;
+		if (this == obj) return true;
+		return this.compareTo((VersionUtil)obj) == 0;
 	}
 
 	public final String getVersion() {

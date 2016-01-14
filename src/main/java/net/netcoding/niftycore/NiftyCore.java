@@ -1,8 +1,8 @@
 package net.netcoding.niftycore;
 
-import java.util.logging.Logger;
-
 import net.netcoding.niftycore.reflection.Reflection;
+
+import java.util.logging.Logger;
 
 public class NiftyCore {
 
@@ -33,7 +33,7 @@ public class NiftyCore {
 				Object managerObj = bukkit.invokeMethod("getPluginManager", null);
 				pluginObj = manager.invokeMethod("getPlugin", managerObj, "NiftyBukkit");
 				logger = (Logger)plugin.invokeMethod("getLogger", pluginObj);
-			} catch (Exception ex2) { }
+			} catch (Exception ignore) { }
 		}
 
 		PLUGIN = pluginObj;
@@ -41,19 +41,19 @@ public class NiftyCore {
 		LOGGER = logger;
 	}
 
-	public static final Logger getLogger() {
+	public static Logger getLogger() {
 		return LOGGER;
 	}
 
-	public static final Object getPlugin() {
+	public static Object getPlugin() {
 		return PLUGIN;
 	}
 
-	public static final boolean isBungee() {
+	public static boolean isBungee() {
 		return IS_BUNGEE;
 	}
 
-	public static final boolean isBukkit() {
+	public static boolean isBukkit() {
 		return !IS_BUNGEE;
 	}
 

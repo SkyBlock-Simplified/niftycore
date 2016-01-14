@@ -1,9 +1,9 @@
 package net.netcoding.niftycore.minecraft;
 
-import java.util.regex.Pattern;
-
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
+
+import java.util.regex.Pattern;
 
 public enum ChatColor {
 
@@ -28,7 +28,7 @@ public enum ChatColor {
 	private final char code;
 	private final String toString;
 
-	private ChatColor(char code) {
+	ChatColor(char code) {
 		this.code = code;
 		this.toString = new String(new char[] { COLOR_CHAR, code });
 	}
@@ -51,7 +51,7 @@ public enum ChatColor {
     /**
      * Strips the given message of all color codes
      *
-     * @param input String to strip of color
+     * @param value String to strip of color
      * @return A copy of the input string, without any coloring
      */
 	public static String stripColor(String value) {

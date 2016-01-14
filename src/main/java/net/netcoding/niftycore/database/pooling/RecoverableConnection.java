@@ -21,8 +21,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Wraps any object implementing Connection interface and makes it manageable by any implementation of ConnectionPoolmanager
- * 
- * @see RecyclableConnectionPoolManager
+ *
  * @see Connection
  */
 public class RecoverableConnection implements Connection {

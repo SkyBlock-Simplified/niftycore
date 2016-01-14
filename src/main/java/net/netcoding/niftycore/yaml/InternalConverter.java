@@ -1,14 +1,14 @@
 package net.netcoding.niftycore.yaml;
 
+import net.netcoding.niftycore.yaml.converters.Converter;
+import net.netcoding.niftycore.yaml.exceptions.InvalidConverterException;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-
-import net.netcoding.niftycore.yaml.converters.Converter;
-import net.netcoding.niftycore.yaml.exceptions.InvalidConverterException;
 
 public class InternalConverter {
 
@@ -28,7 +28,7 @@ public class InternalConverter {
 		}
 	}
 
-	private final void addConverter(Class<? extends Converter> converter) throws InvalidConverterException {
+	private void addConverter(Class<? extends Converter> converter) throws InvalidConverterException {
 		try {
 			this.converters.add(converter.getConstructor(InternalConverter.class).newInstance(this));
 		} catch (NoSuchMethodException nsmex) {

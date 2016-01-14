@@ -1,5 +1,7 @@
 package net.netcoding.niftycore.yaml;
 
+import net.netcoding.niftycore.util.StringUtil;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ public class ConfigSection {
 	}
 
 	public ConfigSection(ConfigSection root, String key) {
-		this.fullPath = (!root.fullPath.equals("")) ? root.fullPath + "." + key : key;
+		this.fullPath = StringUtil.notEmpty(root.fullPath) ? (root.fullPath + ".") : key;
 	}
 
 	public ConfigSection create(String path) {

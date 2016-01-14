@@ -1,5 +1,8 @@
 package net.netcoding.niftycore.util;
 
+import com.google.common.base.Joiner;
+import net.netcoding.niftycore.minecraft.ChatColor;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,10 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.netcoding.niftycore.minecraft.ChatColor;
-
-import com.google.common.base.Joiner;
 
 /**
  * A collection of string methods for easy string
@@ -22,7 +21,7 @@ public class StringUtil {
 
 	/**
 	 * Returns a formatted string using a cached {@link MessageFormat}.
-	 * 
+	 *
 	 * @param format to format objects with
 	 * @param objects to be used for replacement
 	 * @return a formatted string
@@ -48,7 +47,7 @@ public class StringUtil {
 
 	/**
 	 * Gets a concatenated string separated by nothing.
-	 * 
+	 *
 	 * @param pieces to concatenate into string
 	 * @return concatenated string
 	 */
@@ -58,7 +57,7 @@ public class StringUtil {
 
 	/**
 	 * Gets a concatenated string separated by nothing.
-	 * 
+	 *
 	 * @param pieces to concatenate into string
 	 * @return concatenated string
 	 */
@@ -68,7 +67,7 @@ public class StringUtil {
 
 	/**
 	 * Gets a concatenated string separated by {@code glue}.
-	 * 
+	 *
 	 * @param glue to separate pieces with
 	 * @param pieces to concatenate into string
 	 * @return concatenated string
@@ -78,8 +77,8 @@ public class StringUtil {
 	}
 
 	/**
-	 * Gets a concatenated string separated by {@code glue} 
-	 * 
+	 * Gets a concatenated string separated by {@code glue}
+	 *
 	 * @param glue to separate pieces with
 	 * @param pieces to concatenate into string
 	 * @return concatenated string
@@ -91,7 +90,7 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by nothing,
 	 * and starts at index {@code start}.
-	 * 
+	 *
 	 * @param pieces to concatenate into string
 	 * @param start index to start concatenating
 	 * @return concatenated string
@@ -103,7 +102,7 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by nothing,
 	 * and starts at index {@code start}.
-	 * 
+	 *
 	 * @param pieces to concatenate into string
 	 * @param start index to start concatenating
 	 * @return concatenated string
@@ -115,7 +114,7 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by {@code glue},
 	 * and starts at index {@code start}.
-	 * 
+	 *
 	 * @param glue to separate pieces with
 	 * @param pieces to concatenate into string
 	 * @param start index to start concatenating
@@ -128,7 +127,7 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by {@code glue},
 	 * and starts at index {@code start}.
-	 * 
+	 *
 	 * @param glue to separate pieces with
 	 * @param pieces to concatenate into string
 	 * @param start index to start concatenating
@@ -141,7 +140,7 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by nothing,
 	 * starts at index {@code start} and ends at index {@code end}.
-	 * 
+	 *
 	 * @param pieces to concatenate into string
 	 * @param start index to start concatenating
 	 * @param end index to stop concatenating
@@ -154,7 +153,7 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by nothing,
 	 * starts at index {@code start} and ends at index {@code end}.
-	 * 
+	 *
 	 * @param pieces to concatenate into string
 	 * @param start index to start concatenating
 	 * @param end index to stop concatenating
@@ -167,7 +166,7 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by {@code glue},
 	 * starts at index {@code start} and ends at index {@code end}.
-	 * 
+	 *
 	 * @param glue to separate pieces with
 	 * @param pieces to concatenate into string
 	 * @param start index to start concatenating
@@ -181,9 +180,9 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by {@code glue},
 	 * starts at index {@code start} and ends at index {@code end}.
-	 * 
+	 *
 	 * @param glue to separate pieces with
-	 * @param pieces to concatenate into string
+	 * @param collection to concatenate into string
 	 * @param start index to start concatenating
 	 * @param end index to stop concatenating
 	 * @return concatenated string
@@ -191,7 +190,7 @@ public class StringUtil {
 	public static String implode(String glue, Collection<String> collection, int start, int end) {
 		if (isEmpty(glue)) glue = "";
 		if (ListUtil.isEmpty(collection)) throw new IllegalArgumentException("Pieces cannot be empty!");
-		if (start < 0) start = 0;;
+		if (start < 0) start = 0;
 		if (start > collection.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", start, collection.size()));
 		if (end < 0) end = collection.size();
 		if (end > collection.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", end, collection.size()));
@@ -206,7 +205,7 @@ public class StringUtil {
 
 	/**
 	 * Gets if the {@code value} is empty or null.
-	 * 
+	 *
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
 	 */
@@ -216,7 +215,7 @@ public class StringUtil {
 
 	/**
 	 * Gets if the {@code value} is not empty.
-	 * 
+	 *
 	 * @param value to check
 	 * @return true if not empty or null, otherwise false
 	 */
@@ -225,11 +224,11 @@ public class StringUtil {
 	}
 
 	/**
-	 * Gets a split array of the {@code value} using {@code glue}.
-	 * 
+	 * Gets a split array of the {@code value} using {@code regex}.
+	 *
 	 * @param regex The delimiting regular expression.
 	 * @param value The value to split.
-	 * @return
+	 * @return a split array using the specified regex
 	 */
 	public static String[] split(String regex, String value) {
 		return isEmpty(value) ? new String[0] : value.split(regex);
@@ -238,7 +237,7 @@ public class StringUtil {
 	/**
 	 * Removes null from {@code value} and will either be an empty
 	 * value or the original passed value.
-	 * 
+	 *
 	 * @param value to safely return
 	 * @return value or empty string
 	 */
@@ -247,9 +246,9 @@ public class StringUtil {
 	}
 
 	/**
-	 * Gets a list of the string array. If the array is empty (see {@link ListUtil#isEmpty(List)}),
+	 * Gets a list of the string array. If the array is empty (see {@link ListUtil#isEmpty(Collection)}),
 	 * then an empty list is returned.
-	 * 
+	 *
 	 * @param array to check
 	 * @return string array converted to string list
 	 */

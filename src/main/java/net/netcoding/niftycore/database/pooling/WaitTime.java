@@ -13,7 +13,7 @@ public enum WaitTime {
 
 	private int waitTime;
 
-	private WaitTime(int milliseconds) {
+	WaitTime(int milliseconds) {
 		this.waitTime = milliseconds;
 	}
 

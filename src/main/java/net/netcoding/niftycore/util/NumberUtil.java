@@ -8,8 +8,8 @@ import java.util.Random;
 
 /**
  * A collection of number utilities to assist in number checking,
- * random number generating as well as {@link #readVarInt(DataInputStream) readVarInt}
- * and {@link #writeVarInt(DataOutputStream, int) writeVarInt} used in bukkits network protocols.
+ * random number generating as well as {@link DataUtil#readVarInt(DataInputStream) readVarInt}
+ * and {@link DataUtil#writeVarInt(DataOutputStream, int) writeVarInt} used in bukkits network protocols.
  */
 public class NumberUtil {
 
@@ -17,7 +17,7 @@ public class NumberUtil {
 
 	/**
 	 * Gets if {@code value} is a valid number.
-	 * 
+	 *
 	 * @param value the value to check
 	 * @return true if the value can be casted to a number, otherwise false
 	 */
@@ -30,7 +30,7 @@ public class NumberUtil {
 
 	/**
 	 * Gets a truely random number.
-	 * 
+	 *
 	 * @param minimum the lowest number allowed
 	 * @return a random integer between the specified boundaries
 	 */
@@ -40,7 +40,7 @@ public class NumberUtil {
 
 	/**
 	 * Gets a truely random number.
-	 * 
+	 *
 	 * @param minimum the lowest number allowed
 	 * @param maximum the highest number allowed
 	 * @return a random integer between the specified boundaries

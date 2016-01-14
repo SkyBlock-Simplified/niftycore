@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * The AtomicReference changes the methods that modify the set by replacing the
  * entire set each modification. This allows for maintaining the original speed
  * of {@link HashSet#contains(Object)} and makes it cross-thread-safe.
- * 
+ *
  * @param <T>
  *            type of elements
  */
@@ -41,7 +41,7 @@ public class ConcurrentSet<T> implements Set<T> {
 			Set<T> current = this.ref.get();
 			if (current.contains(item))
 				return false;
-			Set<T> modified = new HashSet<T>(current);
+			Set<T> modified = new HashSet<>(current);
 			modified.add(item);
 			if (this.ref.compareAndSet(current, modified))
 				return true;
@@ -52,7 +52,7 @@ public class ConcurrentSet<T> implements Set<T> {
 	public boolean addAll(Collection<? extends T> collection) {
 		while (true) {
 			Set<T> current = this.ref.get();
-			Set<T> modified = new HashSet<T>(current);
+			Set<T> modified = new HashSet<>(current);
 			modified.addAll(collection);
 			if (this.ref.compareAndSet(current, modified))
 				return true;
@@ -90,7 +90,7 @@ public class ConcurrentSet<T> implements Set<T> {
 			Set<T> current = this.ref.get();
 			if (!current.contains(item))
 				return false;
-			Set<T> modified = new HashSet<T>(current);
+			Set<T> modified = new HashSet<>(current);
 			modified.remove(item);
 			if (this.ref.compareAndSet(current, modified))
 				return true;

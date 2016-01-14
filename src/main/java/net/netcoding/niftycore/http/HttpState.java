@@ -8,6 +8,6 @@ public enum HttpState {
 	OTHER,
 	REDIRECTION,
 	SERVER_RROR,
-	SUCCESS;
+	SUCCESS
 
 }

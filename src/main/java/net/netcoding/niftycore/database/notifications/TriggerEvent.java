@@ -10,7 +10,7 @@ public enum TriggerEvent {
 
 	private String id;
 
-	private TriggerEvent(String paramString) {
+	TriggerEvent(String paramString) {
 		this.id = paramString;
 	}
 

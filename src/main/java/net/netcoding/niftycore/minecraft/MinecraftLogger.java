@@ -1,11 +1,10 @@
 package net.netcoding.niftycore.minecraft;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class MinecraftLogger {
 

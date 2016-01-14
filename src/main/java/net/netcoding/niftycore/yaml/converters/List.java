@@ -1,9 +1,9 @@
 package net.netcoding.niftycore.yaml.converters;
 
+import net.netcoding.niftycore.yaml.InternalConverter;
+
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-
-import net.netcoding.niftycore.yaml.InternalConverter;
 
 @SuppressWarnings("unchecked")
 public class List extends Converter {
@@ -19,14 +19,14 @@ public class List extends Converter {
 
 		try {
 			newList = (java.util.List<Object>)type.newInstance();
-		} catch (Exception e) { }
+		} catch (Exception ignore) { }
 
 		if (genericType != null && genericType.getActualTypeArguments()[0] instanceof Class) {
 			Converter converter = this.getConverter((Class<?>)genericType.getActualTypeArguments()[0]);
 
 			if (converter != null) {
-				for (int i = 0; i < values.size(); i++)
-					newList.add(converter.fromConfig((Class<?>)genericType.getActualTypeArguments()[0], values.get(i), null));
+				for (Object value : values)
+					newList.add(converter.fromConfig((Class<?>) genericType.getActualTypeArguments()[0], value, null));
 			} else
 				newList = values;
 		} else

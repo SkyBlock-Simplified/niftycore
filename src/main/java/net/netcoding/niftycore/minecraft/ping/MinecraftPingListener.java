@@ -5,6 +5,6 @@ import net.netcoding.niftycore.mojang.MojangProfile;
 
 public interface MinecraftPingListener<T extends MojangProfile> {
 
-	public void onPing(MinecraftServer<T> server);
+	void onPing(MinecraftServer<T> server);
 
 }

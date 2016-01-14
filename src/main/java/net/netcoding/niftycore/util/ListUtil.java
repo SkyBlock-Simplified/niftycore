@@ -10,7 +10,7 @@ public class ListUtil {
 
 	/**
 	 * Gets the number of elements in this array.
-	 * 
+	 *
 	 * @param array Array to retrieve size of.
 	 * @return Number of elements in this array.
 	 */
@@ -20,7 +20,7 @@ public class ListUtil {
 
 	/**
 	 * Gets the number of elements in this collection.
-	 * 
+	 *
 	 * @param collection Collection to retrieve size of.
 	 * @return Number of elements in this collection.
 	 */
@@ -30,8 +30,8 @@ public class ListUtil {
 
 	/**
 	 * Gets if the {@code value} is empty or null.
-	 * 
-	 * @param value to check
+	 *
+	 * @param array to check
 	 * @return true if empty or null, otherwise false
 	 */
 	public static <T> boolean isEmpty(T[] array) {
@@ -40,8 +40,8 @@ public class ListUtil {
 
 	/**
 	 * Gets if the {@code value} is empty or null.
-	 * 
-	 * @param value to check
+	 *
+	 * @param collection to check
 	 * @return true if empty or null, otherwise false
 	 */
 	public static <T> boolean isEmpty(Collection<? extends T> collection) {
@@ -50,8 +50,8 @@ public class ListUtil {
 
 	/**
 	 * Gets if the {@code value} is not empty.
-	 * 
-	 * @param value to check
+	 *
+	 * @param array to check
 	 * @return true if not empty or null, otherwise false
 	 */
 	public static <T> boolean notEmpty(T[] array) {
@@ -60,8 +60,8 @@ public class ListUtil {
 
 	/**
 	 * Gets if the {@code value} is not empty.
-	 * 
-	 * @param value to check
+	 *
+	 * @param collection to check
 	 * @return true if not empty or null, otherwise false
 	 */
 	public static <T> boolean notEmpty(Collection<? extends T> collection) {
@@ -70,10 +70,10 @@ public class ListUtil {
 
 	/**
 	 * Gets a list converter to array.
-	 * 
-	 * @param list to convert to array
+	 *
+	 * @param collection to convert to array
 	 * @param type of {@code list} elements
-	 * @return
+	 * @return converted array of passed collection
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T[] toArray(Collection<? extends T> collection, Class<T> type) {

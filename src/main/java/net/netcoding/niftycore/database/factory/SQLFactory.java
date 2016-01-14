@@ -1,5 +1,10 @@
 package net.netcoding.niftycore.database.factory;
 
+import net.netcoding.niftycore.database.factory.callbacks.ResultCallback;
+import net.netcoding.niftycore.database.factory.callbacks.VoidResultCallback;
+import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
+import net.netcoding.niftycore.util.StringUtil;
+
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,11 +15,6 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.Properties;
 import java.util.UUID;
-
-import net.netcoding.niftycore.database.factory.callbacks.ResultCallback;
-import net.netcoding.niftycore.database.factory.callbacks.VoidResultCallback;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.util.StringUtil;
 
 /**
  * Factory sql classes to be inherited from when creating a wrapper.
@@ -31,7 +31,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Create a new factory instance.
-	 * 
+	 *
 	 * @param url  Database connection url.
 	 * @param user Username of the database connection.
 	 * @param pass Password of the database connection.
@@ -43,7 +43,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Create a new factory instance.
-	 * 
+	 *
 	 * @param url        Database connection url.
 	 * @param properties Properties of the database connection.
 	 * @throws SQLException
@@ -88,7 +88,7 @@ public abstract class SQLFactory {
 			else if (arg instanceof String)
 				statement.setString(index, (String)arg);
 			else if (arg instanceof UUID)
-				statement.setString(index, ((UUID)arg).toString());
+				statement.setString(index, arg.toString());
 			else if (arg == null)
 				statement.setNull(index, Types.NULL);
 			else
@@ -98,7 +98,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets if the given column name exists in the given table for the current DBMS.
-	 * 
+	 *
 	 * @param tableName  Table name to use.
 	 * @param columnName Column name to check existence of.
 	 * @return True if column exists, otherwise false.
@@ -114,7 +114,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets if the given table name exists for the current DBMS.
-	 * 
+	 *
 	 * @param tableName Table name to check existence of.
 	 * @return True if table exists, otherwise false.
 	 */
@@ -124,7 +124,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Create a table if it does not exist.
-	 * 
+	 *
 	 * @param tableName Name of the table.
 	 * @param sql       Fields and constrains of the table
 	 * @return True if the table was created, otherwise false.
@@ -133,14 +133,14 @@ public abstract class SQLFactory {
 	public boolean createTable(String tableName, String sql) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (Statement statement = connection.createStatement()) {
-				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{0}.{0}{2}{0} ({3}){4};", this.getIdentifierQuoteString(), this.getSchema(), tableName, sql, (this.getProduct().equalsIgnoreCase("MySQL") ? " ENGINE=InnoDB" : ""))) > 0;
+				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{0}.{0}{2}{0} ({3}){4};", this.getIdentifierQuoteString(), this.getSchema(), tableName, sql, ("MySQL".equalsIgnoreCase(this.getProduct()) ? " ENGINE=InnoDB" : ""))) > 0;
 			}
 		}
 	}
 
 	/**
 	 * Create a table if it does not exist asynchronously.
-	 * 
+	 *
 	 * @param tableName Name of the table.
 	 * @param sql       Table fields and constraints.
 	 */
@@ -151,9 +151,9 @@ public abstract class SQLFactory {
 				public void run() {
 					try (Connection connection = getConnection()) {
 						try (Statement statement = connection.createStatement()) {
-							statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{0}.{0}{2}{0} ({3}){4};", getIdentifierQuoteString(), getSchema(), tableName, sql, (getProduct().equals("MySQL") ? " ENGINE=InnoDB" : "")));
+							statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{0}.{0}{2}{0} ({3}){4};", getIdentifierQuoteString(), getSchema(), tableName, sql, ("MySQL".equals(getProduct()) ? " ENGINE=InnoDB" : "")));
 						}
-					} catch (SQLException sqlex) { }
+					} catch (SQLException ignore) { }
 				}
 			});
 		} catch (Exception ex) {
@@ -163,7 +163,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Drop a table if it exists.
-	 * 
+	 *
 	 * @param tableName Name of the table.
 	 */
 	public void dropTable(String tableName) throws SQLException {
@@ -172,7 +172,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets a connection to this DBMS.
-	 * 
+	 *
 	 * @return Connection to the database.
 	 */
 	protected Connection getConnection() throws SQLException {
@@ -182,7 +182,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets the registered driver class for this DBMS.
-	 * 
+	 *
 	 * @return Registered driver class.
 	 */
 	public final String getDriver() {
@@ -191,7 +191,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets the string used to quote identifiers.
-	 * 
+	 *
 	 * @return Identifier quote, a space " " if unsupported.
 	 */
 	public final String getIdentifierQuoteString() {
@@ -200,7 +200,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets the current DBMS product name.
-	 * 
+	 *
 	 * @return Name of the product for the current DBMS.
 	 */
 	public final String getProduct() {
@@ -209,7 +209,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets the properties used to create a connection for this DBMS.
-	 * 
+	 *
 	 * @return Connection property details.
 	 */
 	protected Properties getProperties() {
@@ -218,7 +218,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets the schema for this DBMS.
-	 * 
+	 *
 	 * @return Database name currently being used by connections.
 	 */
 	public final String getSchema() {
@@ -227,7 +227,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets the url for this DBMS.
-	 * 
+	 *
 	 * @return Url for this DBMS.
 	 */
 	public String getUrl() {
@@ -236,7 +236,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Gets if the given jdbc driver is available.
-	 * 
+	 *
 	 * @return True if driver available, otherwise false.
 	 */
 	public boolean isDriverAvailable() {
@@ -259,7 +259,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Run SELECT query against the DBMS.
-	 * 
+	 *
 	 * @param sql      Query to run.
 	 * @param callback Callback to process results with.
 	 * @param args     Arguments to pass to the query.
@@ -274,11 +274,10 @@ public abstract class SQLFactory {
 
 	/**
 	 * Run SELECT query against the DBMS.
-	 * 
+	 *
 	 * @param sql      Query to run.
 	 * @param callback Callback t process results with.
 	 * @param args     Arguments to pass to the query.
-	 * @return Whatever you decide to return in the callback.
 	 * @throws SQLException
 	 */
 	public void query(String sql, VoidResultCallback callback, Object... args) throws SQLException {
@@ -298,7 +297,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Run SELECT query against the DBMS asynchronously.
-	 * 
+	 *
 	 * @param sql      Query to run.
 	 * @param callback Callback to process results with.
 	 * @param args     Arguments to pass to the query.
@@ -310,7 +309,7 @@ public abstract class SQLFactory {
 				public void run() {
 					try {
 						query(sql, callback, args);
-					} catch (SQLException sqlex) { }
+					} catch (SQLException ignore) { }
 				}
 			});
 		} catch (Exception ex) {
@@ -335,8 +334,8 @@ public abstract class SQLFactory {
 
 	/**
 	 * Changes the schema currently in use.
-	 * 
-	 * @param Database name
+	 *
+	 * @param schema database name
 	 * @return True if correctly set.
 	 * @throws SQLException
 	 */
@@ -356,7 +355,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Run INSERT, UPDATE or DELETE query against this DBMS.
-	 * 
+	 *
 	 * @param sql  Query to run.
 	 * @param args Arguments to pass to the query.
 	 * @return True if query was successful, otherwise false.
@@ -373,7 +372,7 @@ public abstract class SQLFactory {
 
 	/**
 	 * Run INSERT, UPDATE or DELETE query against this DBMS asynchronously.
-	 * 
+	 *
 	 * @param sql  Query to run.
 	 * @param args Arguments to pass to the query.
 	 */
@@ -387,7 +386,7 @@ public abstract class SQLFactory {
 							assignArgs(statement, args);
 							statement.executeUpdate();
 						}
-					} catch (SQLException sqlex) { }
+					} catch (SQLException ignore) { }
 				}
 			});
 		} catch (Exception ex) {

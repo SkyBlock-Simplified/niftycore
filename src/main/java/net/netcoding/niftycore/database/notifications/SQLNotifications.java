@@ -1,12 +1,12 @@
 package net.netcoding.niftycore.database.notifications;
 
-import java.sql.SQLException;
-import java.util.Properties;
-
 import net.netcoding.niftycore.database.pooling.SQLPooling;
 import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+
+import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * Adds support for notifications through an sql server instance.
@@ -20,7 +20,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Create a new notification instance.
-	 * 
+	 *
 	 * @param url        Database connection url.
 	 * @param properties Properties of the database connection.
 	 * @throws SQLException
@@ -31,7 +31,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Create a new notification instance.
-	 * 
+	 *
 	 * @param url  Database connection url.
 	 * @param user Username of the database connection.
 	 * @param pass Password of the database connection.
@@ -43,7 +43,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Add a listener on the given table.
-	 * 
+	 *
 	 * @param table    Table name to listen to.
 	 * @param notifier Listener to send notifications to.
 	 * @throws SQLException
@@ -54,7 +54,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Add a listener on the given table.
-	 * 
+	 *
 	 * @param table     Table name to listen to.
 	 * @param notifier  Listener to send notifications to.
 	 * @param overwrite True to overwrite the triggers in the database, otherwise false.
@@ -66,7 +66,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Add a listener on the given table.
-	 * 
+	 *
 	 * @param table    Table name to listen to.
 	 * @param notifier Listener to send notifications to.
 	 * @param delay    How long in ticks to wait before checking.
@@ -78,7 +78,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Add a listener on the given table.
-	 * 
+	 *
 	 * @param table     Table name to listen to.
 	 * @param notifier  Listener to send notifications to.
 	 * @param delay     How long in ticks to wait before checking.
@@ -88,7 +88,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	public void addListener(String table, DatabaseListener notifier, long delay, boolean overwrite) throws SQLException {
 		this.createLogTable();
 		this.createPurgeEvent();
-		this.listeners.add(new DatabaseNotification(this, table, notifier, delay, overwrite));
+		this.listeners.add(new DatabaseNotification(this, table, notifier, overwrite));
 
 		if (this.taskId == -1)
 			this.taskId = MinecraftScheduler.runAsync(this, 0, delay).getId();
@@ -115,7 +115,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Remove all listeners.
-	 * 
+	 *
 	 * @param dropTriggers True to drop triggers, otherwise false.
 	 */
 	public void removeListeners(boolean dropTriggers) {
@@ -124,7 +124,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Remove listener from the given table.
-	 * 
+	 *
 	 * @param table Table name to remove listeners from.
 	 */
 	public void removeListener(String table) {
@@ -133,17 +133,17 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 	/**
 	 * Remove listener from the given table.
-	 * 
+	 *
 	 * @param table        Table name to remove listeners from.
 	 * @param dropTriggers True to drop triggers, otherwise false.
 	 */
 	public void removeListener(String table, boolean dropTriggers) {
 		for (DatabaseNotification listener : this.listeners) {
-			if (listener.getTable().equals(table) || StringUtil.isEmpty(table))
+			if (StringUtil.isEmpty(table) || listener.getTable().equals(table))
 				listener.stop(dropTriggers);
 		}
 
-		if (this.listeners.size() == 0) {
+		if (this.listeners.isEmpty()) {
 			if (this.taskId != -1) {
 				MinecraftScheduler.cancel(this.taskId);
 				this.taskId = -1;

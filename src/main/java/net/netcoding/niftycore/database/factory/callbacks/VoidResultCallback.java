@@ -5,6 +5,6 @@ import java.sql.SQLException;
 
 public interface VoidResultCallback {
 
-	public void handle(ResultSet result) throws SQLException;
+	void handle(ResultSet result) throws SQLException;
 
 }

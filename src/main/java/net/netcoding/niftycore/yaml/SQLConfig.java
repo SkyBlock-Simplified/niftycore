@@ -49,6 +49,10 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 		super(folder, fileName, skipFailedConversion, header);
 	}
 
+	public final String getDriver() {
+		return this.driver;
+	}
+
 	public final String getHost() {
 		return this.hostname;
 	}
@@ -89,7 +93,7 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 		Class<T> clazz = this.getSuperClass();
 
 		if (!SQLWrapper.class.equals(clazz)) {
-			if (this.driver.equalsIgnoreCase("sql")) {
+			if ("sql".equalsIgnoreCase(this.getDriver())) {
 				if (PostgreSQL.class.isAssignableFrom(clazz))
 					this.driver = "postgresql";
 				else if (SQLServer.class.isAssignableFrom(clazz))
@@ -112,11 +116,11 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 	}
 
 	protected void initFactory() throws Exception {
-		if (this.driver.equalsIgnoreCase("PostgreSQL"))
+		if ("PostgreSQL".equalsIgnoreCase(this.getDriver()))
 			this.factory = new PostgreSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
-		else if (this.driver.equalsIgnoreCase("SQLServer"))
+		else if ("SQLServer".equalsIgnoreCase(this.getDriver()))
 			this.factory = new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
-		else if (this.driver.equalsIgnoreCase("MySQL"))
+		else if ("MySQL".equalsIgnoreCase(this.getDriver()))
 			this.factory = new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else {
 			Class<T> clazz = this.getSuperClass();

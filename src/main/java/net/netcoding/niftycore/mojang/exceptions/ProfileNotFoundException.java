@@ -15,7 +15,7 @@ public class ProfileNotFoundException extends RuntimeException {
 
 	/**
 	 * Create a new exception instance.
-	 * 
+	 *
 	 * @param reason Mojang response type.
 	 * @param type   Lookup request type.
 	 * @param obj    Object to be used in the exception message.
@@ -26,7 +26,7 @@ public class ProfileNotFoundException extends RuntimeException {
 
 	/**
 	 * Create a new exception instance.
-	 * 
+	 *
 	 * @param reason    Mojang response type.
 	 * @param throwable Error that occured.
 	 * @param type      Lookup request type.
@@ -59,7 +59,7 @@ public class ProfileNotFoundException extends RuntimeException {
 
 		private final String cause;
 
-		private Reason(String cause) {
+		Reason(String cause) {
 			this.cause = cause;
 		}
 
@@ -75,7 +75,7 @@ public class ProfileNotFoundException extends RuntimeException {
 		OFFLINE_PLAYER,
 		UNIQUE_ID,
 		USERNAMES,
-		USERNAME;
+		USERNAME
 
 	}
 

@@ -1,12 +1,12 @@
 package net.netcoding.niftycore.database.pooling;
 
+import net.netcoding.niftycore.database.factory.SQLFactory;
+import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Vector;
-
-import net.netcoding.niftycore.database.factory.SQLFactory;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 
 /**
  * Handles database connections with connection pooling functionality.
@@ -25,7 +25,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	/**
 	 * Create a new pooling instance.
-	 * 
+	 *
 	 * @param url  Database connection url.
 	 * @param user Username of the database connection.
 	 * @param pass Password of the database connection.
@@ -38,7 +38,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	/**
 	 * Create a new pooling instance.
-	 * 
+	 *
 	 * @param url        Database connection url.
 	 * @param properties Properties of the database connection.
 	 * @throws SQLException
@@ -54,7 +54,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	/**
 	 * Gets a connection from connection pool.
-	 * 
+	 *
 	 * @return Connection to the database.
 	 * @throws SQLException When connection is not available immediately.
 	 */
@@ -73,9 +73,8 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	/**
 	 * Gets a connection from connection pool, waiting if necessary.
-	 * 
+	 *
 	 * @param waitTime     Time to wait for a connection.
-	 * @param testOnBorrow Test the connection before returning it.
 	 * @return Connection to the database.
 	 * @throws SQLException When connection is not available within given wait time.
 	 */
@@ -86,16 +85,16 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 			this.initializeConnections();
 
 			synchronized (SQLPooling.class) {
-				if (this.availableConnections.size() == 0) {
+				if (this.availableConnections.isEmpty()) {
 					if (this.usedConnections.size() < this.getMaximumConnections())
 						this.usedConnections.addElement(connection = new RecoverableConnection(super.getConnection(), this));
 					else {
-						if (waitTime.equals(WaitTime.IMMEDIATELY))
+						if (waitTime == WaitTime.IMMEDIATELY)
 							throw new SQLException("Failed to borrow connection from the available pool!");
 
 						try {
 							Thread.sleep(waitTime.getWaitTime());
-						} catch (InterruptedException ex) { }
+						} catch (InterruptedException ignore) { }
 
 						connection = this.getConnection();
 					}
@@ -126,7 +125,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	/**
 	 * Gets the minimum number of concurrent connections.
-	 * 
+	 *
 	 * @return Minimum number of connections to be stored in the pool.
 	 */
 	public int getMinimumConnections() {
@@ -135,7 +134,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	/**
 	 * Gets the maximum number of concurrent connections.
-	 * 
+	 *
 	 * @return Maximum number of connections to be stored in the pool.
 	 */
 	public int getMaximumConnections() {
@@ -145,7 +144,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	/**
 	 * Gets the query used to test for valid connections
 	 * before returning them from the pool.
-	 * 
+	 *
 	 * @return Query to run the test with.
 	 */
 	protected String getValidationQuery() {
@@ -155,7 +154,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	/**
 	 * Gets if the connection is being tested before
 	 * being returned from the pool.
-	 * 
+	 *
 	 * @return True if tested, otherwise false.
 	 */
 	protected boolean isTestingOnBorrow() {
@@ -169,7 +168,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	/**
 	 * Sets the minimum number of concurrent connections.
-	 * 
+	 *
 	 * @param count Minimum number of connections to have available.
 	 */
 	public void setMinimumConnections(int count) {
@@ -180,7 +179,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	/**
 	 * Sets the maximum number of concurrent connections.
-	 * 
+	 *
 	 * @param count Maximum number of connections to have available.
 	 */
 	public void setMaximumConnections(int count) {
@@ -191,7 +190,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	/**
 	 * Sets whether or not to test the connection when it
 	 * is requested from the pool.
-	 * 
+	 *
 	 * @param value True to test, otherwise false.
 	 */
 	protected void setTestOnBorrow(boolean value) {
@@ -201,7 +200,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	/**
 	 * Sets the query to be used to test for valid connections
 	 * before returning them from the pool.
-	 * 
+	 *
 	 * @param query Query to run the test with.
 	 */
 	protected void setValidationQuery(String query) {
@@ -217,7 +216,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 			try {
 				if (!connection.isClosed())
 					((RecoverableConnection)connection).closeOnly();
-			} catch (SQLException sqlex) { }
+			} catch (SQLException ignore) { }
 		}
 	}
 

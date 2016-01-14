@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * The AtomicReference changes the methods that modify the list by replacing the
  * entire list on each modification. This allows for maintaining the original
  * speed of {@link ArrayList#contains(Object)} and makes it cross-thread-safe.
- * 
+ *
  * @param <T>
  *            type of elements
  */
@@ -31,18 +31,16 @@ public class ConcurrentList<T> implements List<T> {
 
 	/**
 	 * Create a new concurrent list and fill it with the given collection.
-	 * 
-	 * @param collection
 	 */
 	public ConcurrentList(Collection<? extends T> collection) {
-		this.ref = new AtomicReference<List<T>>(new ArrayList<T>(collection));
+		this.ref = new AtomicReference<List<T>>(new ArrayList<>(collection));
 	}
 
 	@Override
 	public void add(int index, T item) {
 		while (true) {
 			List<T> current = this.ref.get();
-			List<T> modified = new ArrayList<T>(current);
+			List<T> modified = new ArrayList<>(current);
 			modified.add(index, item);
 			if (this.ref.compareAndSet(current, modified))
 				return;
@@ -53,7 +51,7 @@ public class ConcurrentList<T> implements List<T> {
 	public boolean add(T item) {
 		while (true) {
 			List<T> current = this.ref.get();
-			List<T> modified = new ArrayList<T>(current);
+			List<T> modified = new ArrayList<>(current);
 			modified.add(item);
 			if (this.ref.compareAndSet(current, modified))
 				return true;
@@ -64,7 +62,7 @@ public class ConcurrentList<T> implements List<T> {
 	public boolean addAll(Collection<? extends T> collection) {
 		while (true) {
 			List<T> current = this.ref.get();
-			List<T> modified = new ArrayList<T>(current);
+			List<T> modified = new ArrayList<>(current);
 			modified.addAll(collection);
 			if (this.ref.compareAndSet(current, modified))
 				return true;
@@ -75,7 +73,7 @@ public class ConcurrentList<T> implements List<T> {
 	public boolean addAll(int index, Collection<? extends T> collection) {
 		while (true) {
 			List<T> current = this.ref.get();
-			List<T> modified = new ArrayList<T>(current);
+			List<T> modified = new ArrayList<>(current);
 			modified.addAll(index, collection);
 			if (this.ref.compareAndSet(current, modified))
 				return true;
@@ -138,7 +136,7 @@ public class ConcurrentList<T> implements List<T> {
 			List<T> current = this.ref.get();
 			if (index >= current.size())
 				return null;
-			List<T> modified = new ArrayList<T>(current);
+			List<T> modified = new ArrayList<>(current);
 			T item = modified.remove(index);
 			if (this.ref.compareAndSet(current, modified))
 				return item;
@@ -151,7 +149,7 @@ public class ConcurrentList<T> implements List<T> {
 			List<T> current = this.ref.get();
 			if (!current.contains(item))
 				return false;
-			List<T> modified = new ArrayList<T>(current);
+			List<T> modified = new ArrayList<>(current);
 			modified.remove(item);
 			if (this.ref.compareAndSet(current, modified))
 				return true;
@@ -175,7 +173,7 @@ public class ConcurrentList<T> implements List<T> {
 	public T set(int index, T item) {
 		while (true) {
 			List<T> current = this.ref.get();
-			List<T> modified = new ArrayList<T>(current);
+			List<T> modified = new ArrayList<>(current);
 			modified.set(index, item);
 			if (this.ref.compareAndSet(current, modified))
 				return item;

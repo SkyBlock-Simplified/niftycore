@@ -21,7 +21,7 @@ public class Map extends Converter {
 			try {
 				map = ((java.util.Map<Object, Object>)((Class<?>)genericType.getRawType()).newInstance());
 			} catch (InstantiationException e) {
-				map = new HashMap<Object, Object>();
+				map = new HashMap<>();
 			}
 
 			if (genericType.getActualTypeArguments().length == 2) {

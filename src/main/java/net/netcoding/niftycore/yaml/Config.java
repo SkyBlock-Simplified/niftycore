@@ -115,7 +115,7 @@ public abstract class Config extends ConfigMapper implements Runnable {
 			if (field.isAnnotationPresent(Path.class))
 				path = field.getAnnotation(Path.class).value();
 
-			if (comments.size() > 0) {
+			if (!comments.isEmpty()) {
 				for (String comment : comments)
 					addComment(path, comment);
 			}

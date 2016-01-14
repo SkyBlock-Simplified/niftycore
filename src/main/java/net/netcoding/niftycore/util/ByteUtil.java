@@ -1,11 +1,11 @@
 package net.netcoding.niftycore.util;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
-
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 
 /**
  * A collection of byte array methods for easy object converting.
@@ -16,7 +16,7 @@ public class ByteUtil {
 
 	/**
 	 * Gets a byte array of converted objects.
-	 * 
+	 *
 	 * @param data to convert
 	 * @return converted objects in byte array
 	 */
@@ -26,7 +26,7 @@ public class ByteUtil {
 
 	/**
 	 * Gets a byte array of converted objects.
-	 * 
+	 *
 	 * @param data to convert
 	 * @return converted objects in byte array
 	 */
@@ -55,7 +55,7 @@ public class ByteUtil {
 			else if (obj instanceof String)
 				output.writeUTF((String)obj);
 			else if (obj instanceof UUID)
-				output.writeUTF(((UUID)obj).toString());
+				output.writeUTF(obj.toString());
 		}
 
 		return output.toByteArray();
@@ -63,7 +63,7 @@ public class ByteUtil {
 
 	/**
 	 * Gets the hexadecimal string of a byte array.
-	 * 
+	 *
 	 * @param bytes to convert
 	 * @return converted byte array as hexadecimal string
 	 */
@@ -81,7 +81,7 @@ public class ByteUtil {
 
 	/**
 	 * Gets human readable ascii of a hexadecimal string.
-	 * 
+	 *
 	 * @param hex to convert
 	 * @return converted hexadecimal string into ascii
 	 */

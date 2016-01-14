@@ -1,11 +1,11 @@
 package net.netcoding.niftycore.minecraft;
 
+import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
-
-import net.netcoding.niftycore.mojang.MojangProfile;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
 public abstract class MinecraftServer<T extends MojangProfile> {
 
@@ -23,8 +23,8 @@ public abstract class MinecraftServer<T extends MojangProfile> {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
-		if (this == obj) return true;
 		if (!(obj instanceof MinecraftServer)) return false;
+		if (this == obj) return true;
 		MinecraftServer<T> server = (MinecraftServer<T>)obj;
 		if (!server.getAddress().getAddress().getHostAddress().equals(this.getAddress().getAddress().getHostAddress())) return false;
 		if (server.getAddress().getPort() != this.getAddress().getPort()) return false;

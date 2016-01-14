@@ -198,7 +198,7 @@ public abstract class ConfigMapper {
 					keyChain.add(line.split(":")[0].trim());
 				}
 
-				String search = (keyChain.size() > 0 ? StringUtil.implode(".", keyChain) : "");
+				String search = (!keyChain.isEmpty() ? StringUtil.implode(".", keyChain) : "");
 				if (this.comments.containsKey(search)) {
 					for (String comment : comments.get(search)) {
 						writeLines.append(new String(new char[depth - 2]).replace("\0", " "));

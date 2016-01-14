@@ -1,5 +1,8 @@
 package net.netcoding.niftycore.http;
 
+import net.netcoding.niftycore.http.exceptions.HttpConnectionException;
+import net.netcoding.niftycore.util.StringUtil;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,9 +13,6 @@ import java.net.SocketException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.http.exceptions.HttpConnectionException;
 
 public class HttpClient {
 
@@ -47,8 +47,8 @@ public class HttpClient {
 	}
 
 	public HttpResponse get(URL url, int timeout, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
-		HttpStatus status = HttpStatus.OK;
-		String bodyResponse = "";
+		HttpStatus status;
+		String bodyResponse;
 
 		try {
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
@@ -65,7 +65,7 @@ public class HttpClient {
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 
 			try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
@@ -145,11 +145,11 @@ public class HttpClient {
 	}
 
 	public HttpResponse post(URL url, Proxy proxy, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
-		HttpStatus status = HttpStatus.OK;
-		String bodyResponse = "";
+		HttpStatus status;
+		String bodyResponse;
 
 		try {
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
 			status = HttpStatus.getByCode(connection.getResponseCode());
 
