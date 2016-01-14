@@ -1,14 +1,7 @@
 package net.netcoding.niftycore.mojang;
 
-import java.lang.reflect.ParameterizedType;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import net.netcoding.niftycore.http.HttpBody;
 import net.netcoding.niftycore.http.HttpClient;
 import net.netcoding.niftycore.http.HttpHeader;
@@ -21,8 +14,15 @@ import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import java.lang.reflect.ParameterizedType;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * A collection of methods to locate player UUID and Name throughout Bungee or offline.
@@ -78,14 +78,14 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 	/**
 	 * Locates the profile associated with the given username.
-	 * 
+	 *
 	 * @param username Username to search with.
 	 * @return Profile associated with the given username.
 	 * @throws ProfileNotFoundException If unable to locate users profile.
 	 */
 	public T searchByUsername(String username) throws ProfileNotFoundException {
 		try {
-			return this.searchByUsername(Arrays.asList(username))[0];
+			return this.searchByUsername(Collections.singletonList(username))[0];
 		} catch (ProfileNotFoundException pnfex) {
 			throw new ProfileNotFoundException(pnfex.getReason(), ProfileNotFoundException.LookupType.USERNAME, pnfex.getCause(), username);
 		}
@@ -93,7 +93,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 	/**
 	 * Locates the profile associated with the given username.
-	 * 
+	 *
 	 * @param usernames Usernames to search with.
 	 * @return Profiles associated with the given usernames.
 	 * @throws ProfileNotFoundException If unable to locate any users profile.
@@ -104,9 +104,8 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 	/**
 	 * Locates the profiles associated with the given usernames.
-	 * 
+	 *
 	 * @param usernames Usernames to search with.
-	 * @param useApi    Use the Mojang API in the search.
 	 * @return Profiles associated with the given usernames.
 	 * @throws ProfileNotFoundException If unable to locate any users profile.
 	 */
@@ -124,14 +123,12 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 			// Remove Expired Cache Profiles
 			for (MojangProfile profile : CACHE) {
-				if (profile.hasExpired()) {
+				if (profile.hasExpired())
 					CACHE.remove(profile);
-					continue;
-				}
 			}
 
 			// Check Cache Profiles
-			if (CACHE.size() > 0) {
+			if (CACHE.isEmpty()) {
 				for (String name : userList) {
 					String criteriaName = name.toLowerCase();
 
@@ -157,7 +154,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 			this.processOfflineUsernames(profiles, userList);
 
 			// Query Mojang API
-			if (userList.size() > 0) {
+			if (userList.isEmpty()) {
 				HttpHeader contentType = new HttpHeader("Content-Type", "application/json");
 				String[] userArray = ListUtil.toArray(userList, String.class);
 				int start = 0;
@@ -174,7 +171,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 						if (wait > 0) Thread.sleep(wait);
 						HttpResponse response = HTTP.post(getProfilesUrl(), body, contentType);
 
-						if (!HttpStatus.NO_CONTENT.equals(response.getStatus())) {
+						if (HttpStatus.NO_CONTENT != response.getStatus()) {
 							T[] result = GSON.fromJson(response.getBody().toString(), this.getSuperClassArray());
 
 							if (result != null && result.length > 0) {
@@ -183,7 +180,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 							}
 						}
 					} catch (HttpConnectionException hcex) {
-						if (HttpStatus.TOO_MANY_REQUESTS.equals(status = hcex.getStatus()))
+						if (HttpStatus.TOO_MANY_REQUESTS == (status = hcex.getStatus()))
 							break;
 
 						throw hcex;
@@ -204,7 +201,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 						if (wait > 0) Thread.sleep(wait);
 						HttpResponse response = HTTP.get(getProfilesUrl(user));
 
-						if (!HttpStatus.NO_CONTENT.equals(response.getStatus())) {
+						if (HttpStatus.NO_CONTENT != response.getStatus()) {
 							T result = GSON.fromJson(response.getBody().toString(), this.getSuperClass());
 
 							if (result != null) {
@@ -213,7 +210,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 							}
 						}
 					} catch (HttpConnectionException hcex) {
-						if (HttpStatus.TOO_MANY_REQUESTS.equals(status = hcex.getStatus()))
+						if (HttpStatus.TOO_MANY_REQUESTS == (status = hcex.getStatus()))
 							break;
 
 						throw hcex;
@@ -232,7 +229,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 						if (wait > 0) Thread.sleep(wait);
 						HttpResponse response = HTTP.get(getProfilesUrl(user, false));
 
-						if (!HttpStatus.NO_CONTENT.equals(response.getStatus())) {
+						if (HttpStatus.NO_CONTENT != response.getStatus()) {
 							T result = GSON.fromJson(response.getBody().toString(), this.getSuperClass());
 
 							if (result != null) {
@@ -241,7 +238,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 							}
 						}
 					} catch (HttpConnectionException hcex) {
-						if (HttpStatus.TOO_MANY_REQUESTS.equals(status = hcex.getStatus()))
+						if (HttpStatus.TOO_MANY_REQUESTS == (status = hcex.getStatus()))
 							break;
 
 						throw hcex;
@@ -254,10 +251,10 @@ public abstract class MojangRepository<T extends MojangProfile> {
 			throw new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, ListUtil.toArray(usernames, String.class));
 		}
 
-		if (profiles.size() == 0) {
+		if (profiles.isEmpty()) {
 			ProfileNotFoundException.Reason reason = ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER;
 
-			if (status.equals(HttpStatus.TOO_MANY_REQUESTS))
+			if (status == HttpStatus.TOO_MANY_REQUESTS)
 				reason = ProfileNotFoundException.Reason.RATE_LIMITED;
 
 			throw new ProfileNotFoundException(reason, type, ListUtil.toArray(usernames, String.class));
@@ -268,7 +265,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 	/**
 	 * Locates the profile associated with the given Unique ID.
-	 * 
+	 *
 	 * @param uniqueId Unique ID to search with.
 	 * @return Profile associated with the given Unique ID.
 	 * @throws ProfileNotFoundException If unable to locate users profile.
@@ -276,16 +273,14 @@ public abstract class MojangRepository<T extends MojangProfile> {
 	@SuppressWarnings("unchecked")
 	public T searchByUniqueId(final UUID uniqueId) throws ProfileNotFoundException {
 		final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.UNIQUE_ID;
-		T found = null;
+		T found;
 		HttpStatus status = HttpStatus.OK;
 
 		try {
 			// Remove Expired Cache Profiles
 			for (MojangProfile profile : CACHE) {
-				if (profile.hasExpired()) {
+				if (profile.hasExpired())
 					CACHE.remove(profile);
-					continue;
-				}
 			}
 
 			// Check Online Servers
@@ -312,7 +307,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 					if (wait > 0) Thread.sleep(wait);
 					HttpResponse response = HTTP.get(getNamesUrl(uniqueId));
 
-					if (!HttpStatus.NO_CONTENT.equals(response.getStatus())) {
+					if (HttpStatus.NO_CONTENT == response.getStatus()) {
 						UUIDSearchResult[] results = GSON.fromJson(response.getBody().toString(), UUIDSearchResult[].class);
 
 						if (results != null && results.length > 0) {
@@ -325,7 +320,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 						}
 					}
 				} catch (HttpConnectionException hcex) {
-					if (!HttpStatus.TOO_MANY_REQUESTS.equals(status = hcex.getStatus()))
+					if (HttpStatus.TOO_MANY_REQUESTS != (status = hcex.getStatus()))
 						throw hcex;
 				} finally {
 					LAST_HTTP_REQUEST = System.currentTimeMillis();
@@ -338,7 +333,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 		if (found == null) {
 			ProfileNotFoundException.Reason reason = ProfileNotFoundException.Reason.NO_PREMIUM_PLAYER;
 
-			if (status.equals(HttpStatus.TOO_MANY_REQUESTS))
+			if (status == HttpStatus.TOO_MANY_REQUESTS)
 				reason = ProfileNotFoundException.Reason.RATE_LIMITED;
 
 			throw new ProfileNotFoundException(reason, type, uniqueId);
