@@ -128,7 +128,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 			}
 
 			// Check Cache Profiles
-			if (CACHE.isEmpty()) {
+			if (!CACHE.isEmpty()) {
 				for (String name : userList) {
 					String criteriaName = name.toLowerCase();
 
@@ -154,7 +154,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 			this.processOfflineUsernames(profiles, userList);
 
 			// Query Mojang API
-			if (userList.isEmpty()) {
+			if (!userList.isEmpty()) {
 				HttpHeader contentType = new HttpHeader("Content-Type", "application/json");
 				String[] userArray = ListUtil.toArray(userList, String.class);
 				int start = 0;
