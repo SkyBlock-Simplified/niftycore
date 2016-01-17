@@ -69,8 +69,7 @@ public class MinecraftScheduler {
 				return new ScheduledTask<>(plugin, taskId, true);
 			}
 
-			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task);
-			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
+			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task);
 			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -200,8 +199,7 @@ public class MinecraftScheduler {
 			if (NiftyCore.isBungee())
 				return schedule(plugin, task, 0);
 
-			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task);
-			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
+			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task);
 			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -232,8 +230,7 @@ public class MinecraftScheduler {
 				return new ScheduledTask<>(plugin, taskId, true);
 			}
 
-			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task, delay);
-			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
+			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task, delay);
 			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -248,8 +245,7 @@ public class MinecraftScheduler {
 				return new ScheduledTask<>(plugin, taskId, true);
 			}
 
-			Object taskObj = SCHEDULER.invokeMethod("scheduleSyncRepeatingTask", SCHEDULER_OBJ, plugin, task, delay, period);
-			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
+			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncRepeatingTask", SCHEDULER_OBJ, plugin, task, delay, period);
 			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
