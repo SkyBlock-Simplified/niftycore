@@ -26,7 +26,9 @@ public enum ChatColor {
 	MAGIC('k'),
 	BOLD('l'),
 	STRIKETHROUGH('m'),
-	UNDERLINE('n');
+	UNDERLINE('n'),
+	ITALIC('o'),
+	RESET('r');
 
 	public static final char COLOR_CHAR = '\u00a7';
 	private final char code;
