@@ -255,4 +255,33 @@ public class StringUtil {
 		return new ArrayList<>(Arrays.asList(ListUtil.isEmpty(array) ? new String[] {} : array));
 	}
 
+	/**
+	 * Converts a string into the unicode equivalent.
+	 *
+	 * @param value String to parse
+	 * @return Unicode values of the string
+	 */
+	public static String toUnicode(String value) {
+		StringBuilder builder = new StringBuilder();
+
+		for (int i = 0; i < value.length(); i++) {
+			int codePoint = Character.codePointAt(value, i);
+			int charCount = Character.charCount(codePoint);
+
+			if (charCount > 1) {
+				i += charCount - 1;
+
+				if (i >= value.length())
+					throw new IllegalArgumentException("Truncated value unexpectedly!");
+			}
+
+			if (codePoint < 128)
+				builder.appendCodePoint(codePoint);
+			else
+				builder.append(String.format("\\u%x", codePoint));
+		}
+
+		return builder.toString();
+	}
+
 }
