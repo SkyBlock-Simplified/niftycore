@@ -256,12 +256,12 @@ public class StringUtil {
 	}
 
 	/**
-	 * Converts a string into the unicode equivalent.
+	 * Encodes unicode characters in a string.
 	 *
-	 * @param value String to parse
-	 * @return Unicode values of the string
+	 * @param value String to encode
+	 * @return Encoded unicode version of the string
 	 */
-	public static String toUnicode(String value) {
+	public static String escapeUnicode(String value) {
 		StringBuilder builder = new StringBuilder();
 
 		for (int i = 0; i < value.length(); i++) {
