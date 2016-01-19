@@ -44,7 +44,6 @@ public class StringUtil {
 		return messageFormat.format(objects);
 	}
 
-
 	/**
 	 * Gets a concatenated string separated by nothing.
 	 *
@@ -58,11 +57,11 @@ public class StringUtil {
 	/**
 	 * Gets a concatenated string separated by nothing.
 	 *
-	 * @param pieces to concatenate into string
+	 * @param collection to concatenate into string
 	 * @return concatenated string
 	 */
-	public static String implode(Collection<String> pieces) {
-		return implode("", pieces);
+	public static String implode(Collection<String> collection) {
+		return implode("", collection);
 	}
 
 	/**
@@ -80,11 +79,11 @@ public class StringUtil {
 	 * Gets a concatenated string separated by {@code glue}
 	 *
 	 * @param glue to separate pieces with
-	 * @param pieces to concatenate into string
+	 * @param collection to concatenate into string
 	 * @return concatenated string
 	 */
-	public static String implode(String glue, Collection<String> pieces) {
-		return implode(glue, pieces, 0);
+	public static String implode(String glue, Collection<String> collection) {
+		return implode(glue, collection, 0);
 	}
 
 	/**
@@ -103,12 +102,12 @@ public class StringUtil {
 	 * Gets a concatenated string separated by nothing,
 	 * and starts at index {@code start}.
 	 *
-	 * @param pieces to concatenate into string
+	 * @param collection to concatenate into string
 	 * @param start index to start concatenating
 	 * @return concatenated string
 	 */
-	public static String implode(Collection<String> pieces, int start) {
-		return implode("", pieces, start);
+	public static String implode(Collection<String> collection, int start) {
+		return implode("", collection, start);
 	}
 
 	/**
@@ -129,12 +128,12 @@ public class StringUtil {
 	 * and starts at index {@code start}.
 	 *
 	 * @param glue to separate pieces with
-	 * @param pieces to concatenate into string
+	 * @param collection to concatenate into string
 	 * @param start index to start concatenating
 	 * @return concatenated string
 	 */
-	public static String implode(String glue, Collection<String> pieces, int start) {
-		return implode(glue, pieces, start, -1);
+	public static String implode(String glue, Collection<String> collection, int start) {
+		return implode(glue, collection, start, -1);
 	}
 
 	/**
@@ -154,13 +153,13 @@ public class StringUtil {
 	 * Gets a concatenated string separated by nothing,
 	 * starts at index {@code start} and ends at index {@code end}.
 	 *
-	 * @param pieces to concatenate into string
+	 * @param collection to concatenate into string
 	 * @param start index to start concatenating
 	 * @param end index to stop concatenating
 	 * @return concatenated string
 	 */
-	public static String implode(Collection<String> pieces, int start, int end) {
-		return implode("", pieces, start, end);
+	public static String implode(Collection<String> collection, int start, int end) {
+		return implode("", collection, start, end);
 	}
 
 	/**
@@ -189,7 +188,7 @@ public class StringUtil {
 	 */
 	public static String implode(String glue, Collection<String> collection, int start, int end) {
 		if (isEmpty(glue)) glue = "";
-		if (ListUtil.isEmpty(collection)) throw new IllegalArgumentException("Pieces cannot be empty!");
+		if (ListUtil.isEmpty(collection)) throw new IllegalArgumentException("Collection cannot be empty!");
 		if (start < 0) start = 0;
 		if (start > collection.size()) throw new IndexOutOfBoundsException(String.format("Cannot access index %d out of %d total pieces!", start, collection.size()));
 		if (end < 0) end = collection.size();
