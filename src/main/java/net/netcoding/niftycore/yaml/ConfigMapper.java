@@ -92,8 +92,12 @@ public abstract class ConfigMapper {
 		return this.configFile.getAbsolutePath();
 	}
 
-	public final String getName() {
+	public final String getFullName() {
 		return this.configFile.getName();
+	}
+
+	public final String getName() {
+		return this.getFullName().replace(".yml", "");
 	}
 
 	public void loadFromMap(Map<?, ?> section, Class<?> clazz) throws Exception {
