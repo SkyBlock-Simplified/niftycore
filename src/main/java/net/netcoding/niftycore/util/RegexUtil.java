@@ -56,7 +56,7 @@ public class RegexUtil {
 					newPart = newPart.replace(matcher.group(0), replace);
 				}
 
-				newMessage = newMessage.replaceFirst(part, newPart);
+				newMessage = newMessage.replace(part, newPart);
 			}
 
 			ORDERED_MESSAGES.put(message, newMessage);
