@@ -73,6 +73,10 @@ public class RegexUtil {
 
 		private final int maxSize;
 
+		public MaxSizeHashMap() {
+			this(Integer.MAX_VALUE);
+		}
+
 		public MaxSizeHashMap(int maxSize) {
 			this.maxSize = maxSize;
 		}
