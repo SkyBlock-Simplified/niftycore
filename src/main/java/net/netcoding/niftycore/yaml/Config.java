@@ -33,7 +33,6 @@ public abstract class Config extends ConfigMapper implements Runnable {
 
 	public Config(File folder, String fileName, boolean skipFailedConversion, String... header) {
 		super(folder, fileName, header);
-		if (this.configFile == null) throw new IllegalArgumentException("Filename cannot be null!");
 		this.setSuppressFailedConversions(skipFailedConversion);
 	}
 
@@ -61,7 +60,9 @@ public abstract class Config extends ConfigMapper implements Runnable {
 	}
 
 	private void internalLoad(Class<?> clazz, boolean dontSave) throws InvalidConfigurationException {
-		if (!clazz.getSuperclass().equals(Config.class)) this.internalLoad(clazz.getSuperclass(), dontSave);
+		if (!clazz.getSuperclass().equals(Config.class))
+			this.internalLoad(clazz.getSuperclass(), dontSave);
+
 		boolean save = false;
 
 		for (Field field : clazz.getDeclaredFields()) {
@@ -84,7 +85,7 @@ public abstract class Config extends ConfigMapper implements Runnable {
 			} else {
 				try {
 					this.converter.toConfig(this, field, this.root, path);
-					this.converter.fromConfig(this,  field, this.root, path);
+					this.converter.fromConfig(this, field, this.root, path);
 					save = true;
 				} catch (Exception ex) {
 					if (!this.isSuppressingFailures())
@@ -93,11 +94,13 @@ public abstract class Config extends ConfigMapper implements Runnable {
 			}
 		}
 
-		if (save && !dontSave) this.saveToYaml();
+		if (save && !dontSave)
+			this.saveToYaml();
 	}
 
 	private void internalSave(Class<?> clazz) throws InvalidConfigurationException {
-		if (!clazz.getSuperclass().equals(Config.class)) internalSave(clazz.getSuperclass());
+		if (!clazz.getSuperclass().equals(Config.class))
+			this.internalSave(clazz.getSuperclass());
 
 		for (Field field : clazz.getDeclaredFields()) {
 			if (doSkip(field)) continue;
