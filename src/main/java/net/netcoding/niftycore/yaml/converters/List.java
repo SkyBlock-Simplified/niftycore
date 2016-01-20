@@ -26,7 +26,7 @@ public class List extends Converter {
 
 			if (converter != null) {
 				for (Object value : values)
-					newList.add(converter.fromConfig((Class<?>) genericType.getActualTypeArguments()[0], value, null));
+					newList.add(converter.fromConfig((Class<?>)genericType.getActualTypeArguments()[0], value, null));
 			} else
 				newList = values;
 		} else
