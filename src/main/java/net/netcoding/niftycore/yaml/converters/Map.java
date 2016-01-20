@@ -30,7 +30,7 @@ public class Map extends Converter {
 				if (section == null)
 					section = new HashMap<>();
 
-				java.util.Map<?, ?> map1 = (section instanceof java.util.Map) ? (java.util.Map<Object, Object>)section : ((ConfigSection)section).getRawMap();
+				java.util.Map<?, ?> map1 = (section instanceof java.util.Map) ? (java.util.Map<?, ?>)section : ((ConfigSection)section).getRawMap();
 				for (java.util.Map.Entry<?, ?> entry : map1.entrySet()) {
 					Object key;
 
@@ -49,18 +49,18 @@ public class Map extends Converter {
 
 					Class<?> clazz;
 					if (genericType.getActualTypeArguments()[1] instanceof ParameterizedType) {
-						ParameterizedType parameterizedType1 = (ParameterizedType) genericType.getActualTypeArguments()[1];
+						ParameterizedType parameterizedType1 = (ParameterizedType)genericType.getActualTypeArguments()[1];
 						clazz = (Class<?>)parameterizedType1.getRawType();
 					} else
 						clazz = (Class<?>)genericType.getActualTypeArguments()[1];
 
 					Converter converter = this.getConverter(clazz);
-					map.put(key, ( converter != null ) ? converter.fromConfig(clazz, entry.getValue(), (genericType.getActualTypeArguments()[1] instanceof ParameterizedType) ? (ParameterizedType)genericType.getActualTypeArguments()[1] : null) : entry.getValue());
+					map.put(key, (converter != null ? converter.fromConfig(clazz, entry.getValue(), (genericType.getActualTypeArguments()[1] instanceof ParameterizedType) ? (ParameterizedType)genericType.getActualTypeArguments()[1] : null) : entry.getValue()));
 				}
 			} else {
 				Converter converter = this.getConverter((Class<?>)genericType.getRawType());
 				if (converter != null) return converter.fromConfig((Class<?>)genericType.getRawType(), section, null);
-				return (section instanceof java.util.Map) ? (java.util.Map<Object, Object>) section : ((ConfigSection) section).getRawMap();
+				return (section instanceof java.util.Map) ? (java.util.Map<?, ?>) section : ((ConfigSection)section).getRawMap();
 			}
 
 			return map;
