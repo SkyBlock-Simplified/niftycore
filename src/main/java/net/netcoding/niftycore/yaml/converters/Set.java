@@ -31,7 +31,7 @@ public class Set extends Converter {
             } else
                 newList.addAll(values);
         } else
-            newList.addAll( values );
+            newList.addAll(values);
 
 		return newList;
 	}
