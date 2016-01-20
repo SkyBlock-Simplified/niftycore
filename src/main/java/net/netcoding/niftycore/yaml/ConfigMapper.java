@@ -111,7 +111,7 @@ public abstract class ConfigMapper {
 			if (field.isAnnotationPresent(Path.class))
 				path = field.getAnnotation(Path.class).value();
 
-			if(Modifier.isPrivate(field.getModifiers()))
+			if (Modifier.isPrivate(field.getModifiers()))
 				field.setAccessible(true);
 
 			this.converter.fromConfig((Config)this, field, convertFromMap(section), path);
@@ -123,7 +123,9 @@ public abstract class ConfigMapper {
 
 		try (InputStreamReader fileReader = new InputStreamReader(new FileInputStream(this.configFile), StandardCharsets.UTF_8)) {
 			Object object = this.yaml.load(fileReader);
-			if (object != null) convertMapsToSections((Map<?, ?>)object, this.root);
+
+			if (object != null)
+				convertMapsToSections((Map<?, ?>)object, this.root);
 		} catch (IOException | ClassCastException | YAMLException ex) {
 			throw new InvalidConfigurationException("Could not load YML", ex);
 		}
