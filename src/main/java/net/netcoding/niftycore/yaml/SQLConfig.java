@@ -3,6 +3,7 @@ package net.netcoding.niftycore.yaml;
 import net.netcoding.niftycore.database.MySQL;
 import net.netcoding.niftycore.database.PostgreSQL;
 import net.netcoding.niftycore.database.SQLServer;
+import net.netcoding.niftycore.database.SQLite;
 import net.netcoding.niftycore.database.factory.SQLWrapper;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.yaml.annotations.Comment;
@@ -21,9 +22,17 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 	@Path("sql.driver")
 	protected String driver = "sql";
 
+	@Comment("Database Name")
+	@Path("sql.schema")
+	protected String schema = "";
+
 	@Comment("Database Host")
 	@Path("sql.host")
 	protected String hostname = "localhost";
+
+	@Comment("Database Port")
+	@Path("sql.port")
+	protected int port = 0;
 
 	@Comment("Database Username")
 	@Path("sql.user")
@@ -32,14 +41,6 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 	@Comment("Database Password")
 	@Path("sql.pass")
 	protected String password = "";
-
-	@Comment("Database Port")
-	@Path("sql.port")
-	protected int port = 0;
-
-	@Comment("Database Name")
-	@Path("sql.schema")
-	protected String schema = "";
 
 	public SQLConfig(File folder, String fileName, String... header) {
 		this(folder, fileName, false, header);
@@ -98,8 +99,10 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 					this.driver = "postgresql";
 				else if (SQLServer.class.isAssignableFrom(clazz))
 					this.driver = "sqlserver";
-				else if (SQLServer.class.isAssignableFrom(clazz))
+				else if (MySQL.class.isAssignableFrom(clazz))
 					this.driver = "mysql";
+				else if (SQLite.class.isAssignableFrom(clazz))
+					this.driver = "sqlite";
 				else
 					this.driver = clazz.getSimpleName().toLowerCase();
 
@@ -122,6 +125,8 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 			this.factory = new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else if ("MySQL".equalsIgnoreCase(this.getDriver()))
 			this.factory = new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		else if ("SQLite".equalsIgnoreCase(this.getDriver()))
+			this.factory = new SQLite(this.configFile.getParentFile(), this.getSchema());
 		else {
 			Class<T> clazz = this.getSuperClass();
 			Reflection sqlReflect = new Reflection(clazz.getSimpleName(), clazz.getPackage().getName());
