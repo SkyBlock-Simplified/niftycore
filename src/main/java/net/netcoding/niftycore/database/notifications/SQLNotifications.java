@@ -21,17 +21,6 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	/**
 	 * Create a new notification instance.
 	 *
-	 * @param url        Database connection url.
-	 * @param properties Properties of the database connection.
-	 * @throws SQLException
-	 */
-	public SQLNotifications(String driver, String url, Properties properties) throws SQLException {
-		super(driver, url, properties);
-	}
-
-	/**
-	 * Create a new notification instance.
-	 *
 	 * @param url  Database connection url.
 	 * @param user Username of the database connection.
 	 * @param pass Password of the database connection.
@@ -39,6 +28,17 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 */
 	public SQLNotifications(String driver, String url, String user, String pass) throws SQLException {
 		super(driver, url, user, pass);
+	}
+
+	/**
+	 * Create a new notification instance.
+	 *
+	 * @param url        Database connection url.
+	 * @param properties Properties of the database connection.
+	 * @throws SQLException
+	 */
+	public SQLNotifications(String driver, String url, Properties properties) throws SQLException {
+		super(driver, url, properties);
 	}
 
 	/**
