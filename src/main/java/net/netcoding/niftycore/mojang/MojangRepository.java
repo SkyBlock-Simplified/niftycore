@@ -277,14 +277,14 @@ public abstract class MojangRepository<T extends MojangProfile> {
 		HttpStatus status = HttpStatus.OK;
 
 		try {
+			// Check Online Servers
+			found = this.processOnlineUniqueId(uniqueId);
+
 			// Remove Expired Cache Profiles
 			for (MojangProfile profile : CACHE) {
 				if (profile.hasExpired())
 					CACHE.remove(profile);
 			}
-
-			// Check Online Servers
-			found = this.processOnlineUniqueId(uniqueId);
 
 			// Check Cache Profiles
 			if (found == null) {
