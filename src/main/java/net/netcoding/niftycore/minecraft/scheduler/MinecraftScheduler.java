@@ -63,14 +63,7 @@ public class MinecraftScheduler {
 				}
 			};
 
-			if (NiftyCore.isBungee()) {
-				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, repeater, TimeUnit.MILLISECONDS);
-				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
-				return new ScheduledTask<>(plugin, taskId, true);
-			}
-
-			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task);
-			return new ScheduledTask<>(plugin, taskId, true);
+			return schedule(plugin, repeater);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -94,15 +87,7 @@ public class MinecraftScheduler {
 				}
 			};
 
-			if (NiftyCore.isBungee()) {
-				Object taskObj = SCHEDULER.invokeMethod("runAsync", SCHEDULER_OBJ, plugin, repeater);
-				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
-				return new ScheduledTask<>(plugin, taskId, false);
-			}
-
-			Object taskObj = SCHEDULER.invokeMethod("runTaskAsynchronously", SCHEDULER_OBJ, plugin, repeater);
-			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
-			return new ScheduledTask<>(plugin, taskId, false);
+			return runAsync(plugin, repeater);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -159,7 +144,7 @@ public class MinecraftScheduler {
 				}, delay);
 			}
 
-			Object taskObj = SCHEDULER.invokeMethod("runTaskLaterAsynchronously", SCHEDULER_OBJ, plugin, task, delay);
+			Object taskObj = SCHEDULER.invokeMethod("runTaskLaterAsynchronously", SCHEDULER_OBJ, plugin, task, (delay < 0L ? 0L : delay));
 			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
 			return new ScheduledTask<>(plugin, taskId, false);
 		} catch (Exception ex) {
@@ -178,7 +163,7 @@ public class MinecraftScheduler {
 				}, delay, period);
 			}
 
-			Object taskObj = SCHEDULER.invokeMethod("runTaskTimerAsynchronously", SCHEDULER_OBJ, plugin, task, delay, period);
+			Object taskObj = SCHEDULER.invokeMethod("runTaskTimerAsynchronously", SCHEDULER_OBJ, plugin, task, (delay < 0L ? 0L : delay), (period < 0L ? 0L : period));
 			int taskId = (int)BUKKIT_TASK.invokeMethod("getTaskId", taskObj);
 			return new ScheduledTask<>(plugin, taskId, false);
 		} catch (Exception ex) {
@@ -197,7 +182,7 @@ public class MinecraftScheduler {
 	public static <T> ScheduledTask<T> schedule(T plugin, Runnable task) {
 		try {
 			if (NiftyCore.isBungee())
-				return schedule(plugin, task, 0);
+				return schedule(plugin, task, 0L);
 
 			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task);
 			return new ScheduledTask<>(plugin, taskId, true);
@@ -225,12 +210,12 @@ public class MinecraftScheduler {
 	public static <T> ScheduledTask<T> schedule(T plugin, Runnable task, long delay) {
 		try {
 			if (NiftyCore.isBungee()) {
-				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, delay, TimeUnit.MILLISECONDS);
+				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, (delay < 0L ? 0L : delay), TimeUnit.MILLISECONDS);
 				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
 				return new ScheduledTask<>(plugin, taskId, true);
 			}
 
-			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task, delay);
+			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncDelayedTask", SCHEDULER_OBJ, plugin, task, (delay < 0L ? 0L : delay));
 			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -240,12 +225,12 @@ public class MinecraftScheduler {
 	public static <T> ScheduledTask<T> schedule(T plugin, Runnable task, long delay, long period) {
 		try {
 			if (NiftyCore.isBungee()) {
-				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, delay, period, TimeUnit.MILLISECONDS);
+				Object taskObj = SCHEDULER.invokeMethod("schedule", SCHEDULER_OBJ, plugin, task, (delay < 0L ? 0L : delay), (period < 0L ? 0L : period), TimeUnit.MILLISECONDS);
 				int taskId = (int)BUNGEE_TASK.invokeMethod("getId", taskObj);
 				return new ScheduledTask<>(plugin, taskId, true);
 			}
 
-			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncRepeatingTask", SCHEDULER_OBJ, plugin, task, delay, period);
+			int taskId = (int)SCHEDULER.invokeMethod("scheduleSyncRepeatingTask", SCHEDULER_OBJ, plugin, task, (delay < 0L ? 0L : delay), (period < 0L ? 0L : period));
 			return new ScheduledTask<>(plugin, taskId, true);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
