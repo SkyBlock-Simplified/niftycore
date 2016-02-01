@@ -56,7 +56,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	private void initializeTimer() {
-		MinecraftScheduler.runAsync(this, 0, 200 * (NiftyCore.isBungee() ? 100 : 0));
+		MinecraftScheduler.runAsync(this, 0, 200 * (NiftyCore.isBungee() ? 100 : 1));
 	}
 
 	/**
