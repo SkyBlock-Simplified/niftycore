@@ -1,9 +1,9 @@
 package net.netcoding.niftycore.database;
 
-import java.sql.SQLException;
-
 import net.netcoding.niftycore.database.factory.SQLWrapper;
 import net.netcoding.niftycore.util.StringUtil;
+
+import java.sql.SQLException;
 
 public class MySQL extends SQLWrapper {
 
@@ -19,11 +19,11 @@ public class MySQL extends SQLWrapper {
 
 	/**
 	 * Checks if the MySQL jdbc driver is available.
-	 * 
+	 *
 	 * @return True if available, otherwise false.
 	 */
 	@Override
-	public boolean isDriverAvailable() {
+	public final boolean isDriverAvailable() {
 		return super.isDriverAvailable();
 	}
 
