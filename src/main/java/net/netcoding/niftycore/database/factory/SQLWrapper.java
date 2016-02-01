@@ -1,9 +1,10 @@
 package net.netcoding.niftycore.database.factory;
 
+import net.netcoding.niftycore.database.notifications.SQLNotifications;
+
+import java.io.File;
 import java.sql.SQLException;
 import java.util.Properties;
-
-import net.netcoding.niftycore.database.notifications.SQLNotifications;
 
 public abstract class SQLWrapper extends SQLNotifications {
 
@@ -15,6 +16,10 @@ public abstract class SQLWrapper extends SQLNotifications {
 
 	public SQLWrapper(String driver, String url, Properties properties) throws SQLException {
 		super(driver, url, properties);
+	}
+
+	public SQLWrapper(String driver, String url, File directory, String schema, Properties properties) throws SQLException {
+		super(driver, url, directory, schema, properties);
 	}
 
 }

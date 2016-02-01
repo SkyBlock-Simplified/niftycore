@@ -5,6 +5,7 @@ import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -39,6 +40,10 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 */
 	public SQLNotifications(String driver, String url, Properties properties) throws SQLException {
 		super(driver, url, properties);
+	}
+
+	public SQLNotifications(String driver, String url, File directory, String schema, Properties properties) throws SQLException {
+		super(driver, url, directory, schema, properties);
 	}
 
 	/**
