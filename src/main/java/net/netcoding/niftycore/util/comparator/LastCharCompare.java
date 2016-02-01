@@ -19,8 +19,14 @@ public class LastCharCompare implements Comparator<String> {
 		if (s2.length() == 0 && s1.length() == 0) return 0;
 
 		char firstChar = s1.charAt(s1.length() - 1);
-		boolean isIgnored = this.ignoreCharacters.contains(firstChar);
-		return firstChar - s2.charAt(s2.length() - 1) * (isIgnored ? -1 : 0);
+		char secondChar = s2.charAt(s2.length() - 1);
+
+		if (this.ignoreCharacters.contains(firstChar))
+			return (secondChar - firstChar) * -1;
+		else if (this.ignoreCharacters.contains(secondChar))
+			return (firstChar - secondChar) * -1;
+		else
+			return firstChar - secondChar;
 	}
 
 	public void removeIgnoredCharacter(char c) {
