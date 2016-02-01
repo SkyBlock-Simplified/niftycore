@@ -5,6 +5,8 @@ import net.netcoding.niftycore.database.factory.callbacks.VoidResultCallback;
 import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 import net.netcoding.niftycore.util.StringUtil;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.Date;
@@ -28,6 +30,7 @@ public abstract class SQLFactory {
 	private final boolean driverAvailable;
 	private final String url;
 	private final Properties properties;
+	private final boolean fileStorage;
 	private String product;
 	private String schema;
 	private String quote = " ";
@@ -35,9 +38,10 @@ public abstract class SQLFactory {
 	/**
 	 * Create a new factory instance.
 	 *
-	 * @param url  Database connection url.
-	 * @param user Username of the database connection.
-	 * @param pass Password of the database connection.
+	 * @param driver Connection driver.
+	 * @param url    Database connection url.
+	 * @param user   Username of the database connection.
+	 * @param pass   Password of the database connection.
 	 * @throws SQLException
 	 */
 	public SQLFactory(String driver, String url, final String user, final String pass) throws SQLException {
@@ -47,6 +51,7 @@ public abstract class SQLFactory {
 	/**
 	 * Create a new factory instance.
 	 *
+	 * @param driver     Connection driver.
 	 * @param url        Database connection url.
 	 * @param properties Properties of the database connection.
 	 * @throws SQLException
@@ -62,7 +67,51 @@ public abstract class SQLFactory {
 
 		this.url = url;
 		this.properties = properties;
+		this.fileStorage = false;
 		this.load();
+	}
+
+	/**
+	 * Create a new factory instance.
+	 *
+	 * @param driver     Connection driver.
+	 * @param url        Database connection url.
+	 * @param directory  Directory of local database file.
+	 * @param schema     Name of database.
+	 * @param properties Properties of the database connection.
+	 * @throws SQLException
+	 */
+	public SQLFactory(String driver, String url, File directory, String schema, Properties properties) throws SQLException {
+		try {
+			Class.forName(driver);
+			this.driverAvailable = true;
+			this.driver = driver;
+		} catch (ClassNotFoundException cnfex) {
+			throw new SQLException(StringUtil.format("The specified driver {0} is not available!", driver), cnfex);
+		}
+
+		String schemaName = (schema.endsWith(".db") ? schema.substring(0, schema.length() - 3) : schema);
+		String file = StringUtil.format("{0}.db", schemaName);
+		File database = new File(directory.getAbsolutePath(), file);
+
+		try {
+			if (!database.exists()) {
+				if (!directory.exists()) {
+					if (!directory.mkdirs())
+						throw new IOException(StringUtil.format("Unable to create directory {0}!", directory.getAbsolutePath()));
+				}
+
+				if (!database.createNewFile())
+					throw new IOException(StringUtil.format("Unable to create file {0}!", file));
+			}
+		} catch (Exception ex) {
+			throw new SQLException(StringUtil.format("Unable to create specified database file {0}!", database.getAbsolutePath()), ex);
+		}
+
+		this.url = StringUtil.format(url, directory.getAbsolutePath(), StringUtil.format("{0}.db", schema));
+		this.properties = properties;
+		this.fileStorage = true;
+		this.load(schemaName);
 	}
 
 	private static void assignArgs(PreparedStatement statement, Object... args) throws SQLException {
@@ -111,12 +160,15 @@ public abstract class SQLFactory {
 	 * @return True if column exists, otherwise false.
 	 */
 	public boolean checkColumnExists(String tableName, String columnName) throws SQLException {
-		return this.query("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND (COLUMN_NAME = ? || \"\" = ?);", new ResultCallback<Boolean>() {
-			@Override
-			public Boolean handle(ResultSet result) throws SQLException {
-				return result.next();
+		boolean exists;
+
+		try (Connection connection = this.getConnection()) {
+			try (ResultSet result = connection.getMetaData().getColumns((this.fileStorage ? null : this.schema), null, tableName, columnName)) {
+				exists = result.next();
 			}
-		}, this.getSchema(), tableName, columnName, columnName);
+		}
+
+		return exists;
 	}
 
 	/**
@@ -126,7 +178,15 @@ public abstract class SQLFactory {
 	 * @return True if table exists, otherwise false.
 	 */
 	public boolean checkTableExists(String tableName) throws SQLException {
-		return this.checkColumnExists(tableName, "");
+		boolean exists;
+
+		try (Connection connection = this.getConnection()) {
+			try (ResultSet result = connection.getMetaData().getTables((this.fileStorage ? null : this.schema), null, tableName, null)) {
+				exists = result.next();
+			}
+		}
+
+		return exists;
 	}
 
 	/**
@@ -140,7 +200,7 @@ public abstract class SQLFactory {
 	public boolean createTable(String tableName, String sql) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (Statement statement = connection.createStatement()) {
-				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{0}.{0}{2}{0} ({3}){4};", this.getIdentifierQuoteString(), this.getSchema(), tableName, sql, ("MySQL".equalsIgnoreCase(this.getProduct()) ? " ENGINE=InnoDB" : ""))) > 0;
+				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{2}{1} ({3}){4};", (this.fileStorage ? "" : StringUtil.format("{0}{1}{0}.", this.getIdentifierQuoteString(), this.getSchema())), this.getIdentifierQuoteString(), tableName, sql, ("MySQL".equalsIgnoreCase(this.getProduct()) ? " ENGINE=InnoDB" : ""))) > 0;
 			}
 		}
 	}
@@ -232,7 +292,7 @@ public abstract class SQLFactory {
 	 * @return Url for this DBMS.
 	 */
 	public final String getUrl() {
-		return StringUtil.format("{0}?autoReconnectForPools=true&useUnicode=true&characterEncoding=UTF-8", this.url);
+		return StringUtil.format("{0}{1}", this.url, (this.fileStorage ? "" : "?autoReconnectForPools=true&useUnicode=true&characterEncoding=UTF-8"));
 	}
 
 	/**
@@ -240,16 +300,23 @@ public abstract class SQLFactory {
 	 *
 	 * @return True if driver available, otherwise false.
 	 */
-	public final boolean isDriverAvailable() {
+	public boolean isDriverAvailable() {
 		return this.driverAvailable;
 	}
 
 	private void load() throws SQLException {
+		this.load(null);
+	}
+
+	private void load(String schema) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			this.product = connection.getMetaData().getDatabaseProductName();
 			this.quote = connection.getMetaData().getIdentifierQuoteString();
 			this.schema = connection.getCatalog();
 		}
+
+		if (StringUtil.isEmpty(this.schema) && StringUtil.notEmpty(schema))
+			this.schema = schema;
 
 		if (StringUtil.isEmpty(this.product))
 			throw new SQLException("Unable to determine product name!");
@@ -269,19 +336,8 @@ public abstract class SQLFactory {
 	 */
 	public <T> T query(String sql, ResultCallback<T> callback, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {
-			try (PreparedStatement statement = connection.prepareStatement(sql)) {
-				assignArgs(statement, args);
-				statement.executeQuery();
-
-				if (callback != null) {
-					try (ResultSet result = statement.getResultSet()) {
-						return callback.handle(result);
-					}
-				}
-			}
+			return this.query(connection, sql, callback, args);
 		}
-
-		return null;
 	}
 
 	/**
@@ -305,6 +361,21 @@ public abstract class SQLFactory {
 				}
 			}
 		}
+	}
+
+	protected final <T> T query(Connection connection, String sql, ResultCallback<T> callback, Object... args) throws SQLException {
+		try (PreparedStatement statement = connection.prepareStatement(sql)) {
+			assignArgs(statement, args);
+			statement.executeQuery();
+
+			if (callback != null) {
+				try (ResultSet result = statement.getResultSet()) {
+					return callback.handle(result);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -333,6 +404,9 @@ public abstract class SQLFactory {
 	 * @throws SQLException
 	 */
 	public boolean setSchema(String schema) throws SQLException {
+		if (this.fileStorage)
+			throw new SQLException("Local databases cannot change schema!");
+
 		try (Connection connection = this.getConnection()) {
 			try (PreparedStatement statement = connection.prepareStatement("USE ?;")) {
 				assignArgs(statement, schema);
