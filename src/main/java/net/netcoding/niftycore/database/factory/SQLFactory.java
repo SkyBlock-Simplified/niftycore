@@ -7,11 +7,13 @@ import net.netcoding.niftycore.util.StringUtil;
 
 import java.sql.Blob;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Properties;
 import java.util.UUID;
@@ -19,6 +21,7 @@ import java.util.UUID;
 /**
  * Factory sql classes to be inherited from when creating a wrapper.
  */
+@SuppressWarnings("JDBCExecuteWithNonConstantString")
 public abstract class SQLFactory {
 
 	private final String driver;
@@ -53,8 +56,8 @@ public abstract class SQLFactory {
 			Class.forName(driver);
 			this.driverAvailable = true;
 			this.driver = driver;
-		} catch (ClassNotFoundException ex) {
-			throw new SQLException(StringUtil.format("The specific driver {0} is not available!", driver));
+		} catch (ClassNotFoundException cnfex) {
+			throw new SQLException(StringUtil.format("The specified driver {0} is not available!", driver), cnfex);
 		}
 
 		this.url = url;
@@ -85,6 +88,10 @@ public abstract class SQLFactory {
 				statement.setFloat(index, (float)arg);
 			else if (arg instanceof Blob)
 				statement.setBlob(index, (Blob)arg);
+			else if (arg instanceof Date)
+				statement.setDate(index, (Date)arg);
+			else if (arg instanceof Timestamp)
+				statement.setTimestamp(index, (Timestamp)arg);
 			else if (arg instanceof String)
 				statement.setString(index, (String)arg);
 			else if (arg instanceof UUID)
@@ -144,21 +151,15 @@ public abstract class SQLFactory {
 	 * @param tableName Name of the table.
 	 * @param sql       Table fields and constraints.
 	 */
-	public void createTableAsync(final String tableName, final String sql) throws SQLException {
-		try {
-			MinecraftScheduler.runAsync(new Runnable() {
-				@Override
-				public void run() {
-					try (Connection connection = getConnection()) {
-						try (Statement statement = connection.createStatement()) {
-							statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{0}.{0}{2}{0} ({3}){4};", getIdentifierQuoteString(), getSchema(), tableName, sql, ("MySQL".equals(getProduct()) ? " ENGINE=InnoDB" : "")));
-						}
-					} catch (SQLException ignore) { }
-				}
-			});
-		} catch (Exception ex) {
-			throw new SQLException(ex);
-		}
+	public void createTableAsync(final String tableName, final String sql) {
+		MinecraftScheduler.runAsync(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					createTable(tableName, sql);
+				} catch (SQLException ignore) { }
+			}
+		});
 	}
 
 	/**
@@ -167,7 +168,7 @@ public abstract class SQLFactory {
 	 * @param tableName Name of the table.
 	 */
 	public void dropTable(String tableName) throws SQLException {
-		this.update(StringUtil.format("DROP TABLE IF EXISTS ?;"), tableName);
+		this.update("DROP TABLE IF EXISTS ?;", tableName);
 	}
 
 	/**
@@ -176,7 +177,7 @@ public abstract class SQLFactory {
 	 * @return Connection to the database.
 	 */
 	protected Connection getConnection() throws SQLException {
-		if (!this.isDriverAvailable()) throw new SQLException("The driver for this sql instance is unavailable!");
+		if (!this.isDriverAvailable()) throw new SQLException(StringUtil.format("The sql driver {0} is unavailable!", this.getDriver()));
 		return DriverManager.getConnection(this.getUrl(), this.getProperties());
 	}
 
@@ -230,7 +231,7 @@ public abstract class SQLFactory {
 	 *
 	 * @return Url for this DBMS.
 	 */
-	public String getUrl() {
+	public final String getUrl() {
 		return StringUtil.format("{0}?autoReconnectForPools=true&useUnicode=true&characterEncoding=UTF-8", this.url);
 	}
 
@@ -239,7 +240,7 @@ public abstract class SQLFactory {
 	 *
 	 * @return True if driver available, otherwise false.
 	 */
-	public boolean isDriverAvailable() {
+	public final boolean isDriverAvailable() {
 		return this.driverAvailable;
 	}
 
@@ -268,8 +269,19 @@ public abstract class SQLFactory {
 	 */
 	public <T> T query(String sql, ResultCallback<T> callback, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {
-			return this.query(connection, sql, callback, args);
+			try (PreparedStatement statement = connection.prepareStatement(sql)) {
+				assignArgs(statement, args);
+				statement.executeQuery();
+
+				if (callback != null) {
+					try (ResultSet result = statement.getResultSet()) {
+						return callback.handle(result);
+					}
+				}
+			}
 		}
+
+		return null;
 	}
 
 	/**
@@ -302,34 +314,15 @@ public abstract class SQLFactory {
 	 * @param callback Callback to process results with.
 	 * @param args     Arguments to pass to the query.
 	 */
-	public void queryAsync(final String sql, final VoidResultCallback callback, final Object... args) throws SQLException {
-		try {
-			MinecraftScheduler.runAsync(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						query(sql, callback, args);
-					} catch (SQLException ignore) { }
-				}
-			});
-		} catch (Exception ex) {
-			throw new SQLException(ex);
-		}
-	}
-
-	protected final <T> T query(Connection connection, String sql, ResultCallback<T> callback, Object... args) throws SQLException {
-		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			assignArgs(statement, args);
-			statement.executeQuery();
-
-			if (callback != null) {
-				try (ResultSet result = statement.getResultSet()) {
-					return callback.handle(result);
-				}
+	public void queryAsync(final String sql, final VoidResultCallback callback, final Object... args) {
+		MinecraftScheduler.runAsync(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					query(sql, callback, args);
+				} catch (SQLException ignore) { }
 			}
-		}
-
-		return null;
+		});
 	}
 
 	/**
@@ -376,22 +369,18 @@ public abstract class SQLFactory {
 	 * @param sql  Query to run.
 	 * @param args Arguments to pass to the query.
 	 */
-	public void updateAsync(final String sql, final Object... args) throws SQLException {
-		try {
-			MinecraftScheduler.runAsync(new Runnable() {
-				@Override
-				public void run() {
-					try (Connection connection = getConnection()) {
-						try (PreparedStatement statement = connection.prepareStatement(sql)) {
-							assignArgs(statement, args);
-							statement.executeUpdate();
-						}
-					} catch (SQLException ignore) { }
-				}
-			});
-		} catch (Exception ex) {
-			throw new SQLException(ex);
-		}
+	public void updateAsync(final String sql, final Object... args) {
+		MinecraftScheduler.runAsync(new Runnable() {
+			@Override
+			public void run() {
+				try (Connection connection = getConnection()) {
+					try (PreparedStatement statement = connection.prepareStatement(sql)) {
+						assignArgs(statement, args);
+						statement.executeUpdate();
+					}
+				} catch (SQLException ignore) { }
+			}
+		});
 	}
 
 }
