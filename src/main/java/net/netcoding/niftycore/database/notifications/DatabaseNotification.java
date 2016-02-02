@@ -54,7 +54,15 @@ public class DatabaseNotification extends MinecraftLogger {
 			String _new = null;
 			if (TriggerEvent.INSERT != event) _old = StringUtil.format("CONCAT(OLD.{0}{1}{0})", quote, StringUtil.implode(StringUtil.format("{0}, '','', OLD.{0}", quote), this.primaryColumnNames));
 			if (TriggerEvent.DELETE != event) _new = StringUtil.format("CONCAT(NEW.{0}{1}{0})", quote, StringUtil.implode(StringUtil.format("{0}, '','', NEW.{0}", quote), this.primaryColumnNames));
-			this.sql.updateAsync(String.format(trigger + "%s, %s);", _old, _new), this.getSchema(), this.getTable(), event.toUppercase(), primaryKeys);
+
+			try {
+				this.sql.update(String.format(trigger + "%s, %s);", _old, _new), this.getSchema(), this.getTable(), event.toUppercase(), primaryKeys);
+			} catch (SQLException sqlex) {
+				if (sqlex.getMessage().contains("Access denied") && sqlex.getMessage().contains("SUPER"))
+					throw new SQLException(StringUtil.format("Unable to create trigger for schema ''{0}'', sql user lacks SUPER privilege! Notifications will not work!", this.getSchema()));
+				else
+					throw sqlex;
+			}
 		} else
 			throw new SQLException(StringUtil.format("The table {0}.{1} has no primary key columns to keep track of!", this.getSchema(), this.getTable()));
 	}
