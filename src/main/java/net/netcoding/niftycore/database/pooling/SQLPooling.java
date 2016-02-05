@@ -17,8 +17,8 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 
 	private final static int DEFAULT_MIN_CONNECTIONS = 2;
 	private final static int DEFAULT_MAX_CONNECTIONS = 10;
-	private volatile transient Vector<Connection> availableConnections = new Vector<>();
-	private volatile transient Vector<Connection> usedConnections = new Vector<>();
+	private final transient Vector<Connection> availableConnections = new Vector<>();
+	private final transient Vector<Connection> usedConnections = new Vector<>();
 	private String validationQuery = "SELECT 1;";
 	private int minimumConnections = DEFAULT_MIN_CONNECTIONS;
 	private int maximumConnections = DEFAULT_MAX_CONNECTIONS;
