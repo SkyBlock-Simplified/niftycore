@@ -14,8 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * entire set each modification. This allows for maintaining the original speed
  * of {@link HashSet#contains(Object)} and makes it cross-thread-safe.
  *
- * @param <T>
- *            type of elements
+ * @param <T> type of elements
  */
 public class ConcurrentSet<T> implements Set<T> {
 
@@ -39,10 +38,13 @@ public class ConcurrentSet<T> implements Set<T> {
 	public boolean add(T item) {
 		while (true) {
 			Set<T> current = this.ref.get();
+
 			if (current.contains(item))
 				return false;
+
 			Set<T> modified = new HashSet<>(current);
 			modified.add(item);
+
 			if (this.ref.compareAndSet(current, modified))
 				return true;
 		}
@@ -54,6 +56,7 @@ public class ConcurrentSet<T> implements Set<T> {
 			Set<T> current = this.ref.get();
 			Set<T> modified = new HashSet<>(current);
 			modified.addAll(collection);
+
 			if (this.ref.compareAndSet(current, modified))
 				return true;
 		}
@@ -88,26 +91,39 @@ public class ConcurrentSet<T> implements Set<T> {
 	public boolean remove(Object item) {
 		while (true) {
 			Set<T> current = this.ref.get();
+
 			if (!current.contains(item))
 				return false;
+
 			Set<T> modified = new HashSet<>(current);
 			modified.remove(item);
+
 			if (this.ref.compareAndSet(current, modified))
 				return true;
 		}
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> collection) {
-		boolean changed = false;
-		for (Object item : collection)
+	public boolean removeAll(Collection<?> c) {
+		while (true) {
+			Set<T> current = this.ref.get();
+			Set<T> modified = new HashSet<>(current);
+			boolean result = modified.removeAll(c);
+
+			if (this.ref.compareAndSet(current, modified))
+				return result;
+		}
+		/*boolean changed = false;
+
+		for (Object item : c)
 			changed = this.remove(item) || changed;
-		return changed;
+
+		return changed;*/
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> collection) {
-		return this.ref.get().retainAll(collection);
+	public boolean retainAll(Collection<?> c) {
+		return this.ref.get().retainAll(c);
 	}
 
 	@Override
