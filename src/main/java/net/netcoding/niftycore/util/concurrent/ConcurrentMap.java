@@ -17,21 +17,21 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <K> type of keys
  * @param <V> type of values
  */
-public class ConcurrentHashMap<K, V> implements Map<K, V> {
+public class ConcurrentMap<K, V> implements Map<K, V> {
 
 	private final AtomicReference<Map<K, V>> ref;
 
 	/**
 	 * Create a new concurrent map.
 	 */
-	public ConcurrentHashMap() {
+	public ConcurrentMap() {
 		this.ref = new AtomicReference<Map<K, V>>(new HashMap<K, V>());
 	}
 
 	/**
 	 * Create a new concurrent map and fill it with the given map.
 	 */
-	public ConcurrentHashMap(Map<? extends K, ? extends V> map) {
+	public ConcurrentMap(Map<? extends K, ? extends V> map) {
 		this.ref = new AtomicReference<Map<K, V>>(new HashMap<>(map));
 	}
 
