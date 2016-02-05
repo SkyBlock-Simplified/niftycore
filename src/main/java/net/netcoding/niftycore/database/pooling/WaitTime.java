@@ -11,7 +11,7 @@ public enum WaitTime {
 	THREE_SECONDS(3000),
 	FIVE_SECONDS(5000);
 
-	private int waitTime;
+	private final int waitTime;
 
 	WaitTime(int milliseconds) {
 		this.waitTime = milliseconds;

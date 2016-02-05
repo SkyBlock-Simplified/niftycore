@@ -8,7 +8,7 @@ public enum TriggerEvent {
 	DELETE("Delete"),
 	UPDATE("Update");
 
-	private String id;
+	private final String id;
 
 	TriggerEvent(String paramString) {
 		this.id = paramString;
