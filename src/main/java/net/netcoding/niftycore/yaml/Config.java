@@ -207,7 +207,7 @@ public abstract class Config extends ConfigMapper implements Runnable {
 		this.skipFailedConversion = suppress;
 	}
 
-	public void startWatcher() throws Exception {
+	public void startWatcher() {
 		if (this.taskId == -1) {
 			try {
 				this.watchService = FileSystems.getDefault().newWatchService();

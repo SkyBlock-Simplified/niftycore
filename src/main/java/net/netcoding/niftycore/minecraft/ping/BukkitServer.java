@@ -1,5 +1,12 @@
 package net.netcoding.niftycore.minecraft.ping;
 
+import com.google.common.io.ByteArrayDataOutput;
+import net.netcoding.niftycore.minecraft.MinecraftServer;
+import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
+import net.netcoding.niftycore.mojang.BasicMojangProfile;
+import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.niftycore.util.DataUtil;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,14 +17,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-
-import net.netcoding.niftycore.minecraft.MinecraftServer;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.mojang.BasicMojangProfile;
-import net.netcoding.niftycore.mojang.MojangProfile;
-import net.netcoding.niftycore.util.DataUtil;
-
-import com.google.common.io.ByteArrayDataOutput;
 
 public class BukkitServer<T extends MojangProfile> extends MinecraftPingServer<T> {
 
@@ -129,7 +128,7 @@ public class BukkitServer<T extends MojangProfile> extends MinecraftPingServer<T
 		this.socketTimeout = timeout;
 	}
 
-	private byte[] preparePing() throws IOException {
+	private byte[] preparePing() {
 		return new byte[] { 0x00 };
 	}
 
