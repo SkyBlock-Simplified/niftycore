@@ -1,15 +1,15 @@
 package net.netcoding.niftycore.util;
 
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 
 public class DataUtil {
 
@@ -51,7 +51,7 @@ public class DataUtil {
 		return i;
 	}
 
-	public static int readVarInt(ByteArrayDataInput in) throws IOException {
+	public static int readVarInt(ByteArrayDataInput in) {
 		int i = 0;
 		int j = 0;
 
@@ -97,7 +97,7 @@ public class DataUtil {
 		}
 	}
 
-	public static void writeVarInt(ByteArrayDataOutput out, int paramInt) throws IOException {
+	public static void writeVarInt(ByteArrayDataOutput out, int paramInt) {
 		while (true) {
 			if ((paramInt & 0xFFFFFF80) == 0) {
 				out.writeByte(paramInt);

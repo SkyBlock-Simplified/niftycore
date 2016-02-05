@@ -41,7 +41,7 @@ public class MinecraftScheduler {
 		}
 	}
 
-	public static void cancel(ScheduledTask<?> task) throws Exception {
+	public static void cancel(ScheduledTask<?> task) {
 		cancel(task.getId());
 	}
 

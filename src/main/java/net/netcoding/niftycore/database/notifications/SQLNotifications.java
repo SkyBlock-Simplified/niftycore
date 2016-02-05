@@ -103,7 +103,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 		this.createTable(ACTIVITY_TABLE, "id INT AUTO_INCREMENT PRIMARY KEY, schema_name VARCHAR(255) NOT NULL, table_name VARCHAR(255) NOT NULL, sql_action ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL, _submitted INT NOT NULL, primary_keys VARCHAR(255), old_data VARCHAR(255), new_data VARCHAR(255)");
 	}
 
-	private void createPurgeEvent() throws SQLException {
+	private void createPurgeEvent() {
 		this.updateAsync(StringUtil.format("CREATE EVENT IF NOT EXISTS purgeNiftyNotifications ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 DAY DO DELETE LOW_PRIORITY FROM {0}.{1} WHERE time < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY));", this.getSchema(), ACTIVITY_TABLE));
 	}
 
