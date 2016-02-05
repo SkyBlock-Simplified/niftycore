@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * A collection of number utilities to assist in number checking,
@@ -12,8 +12,6 @@ import java.util.Random;
  * and {@link DataUtil#writeVarInt(DataOutputStream, int) writeVarInt} used in bukkits network protocols.
  */
 public class NumberUtil {
-
-	private static final Random RANDOM = new Random();
 
 	/**
 	 * Gets if {@code value} is a valid number.
@@ -46,7 +44,7 @@ public class NumberUtil {
 	 * @return a random integer between the specified boundaries
 	 */
 	public static int rand(int minimum, int maximum) {
-		return RANDOM.nextInt((maximum - minimum) + 1) + minimum;
+		return ThreadLocalRandom.current().nextInt(minimum, maximum + (maximum < Integer.MAX_VALUE ? 1 : 0));
 	}
 
 	/**
