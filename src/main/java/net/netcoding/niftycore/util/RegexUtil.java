@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
 
 public class RegexUtil {
 
-	private static final MaxSizeHashMap<String, String> ORDERED_MESSAGES = new MaxSizeHashMap<>(50);
-	private static transient LastCharCompare CODE_COMPARE = new LastCharCompare();
+	private static final transient MaxSizeHashMap<String, String> ORDERED_MESSAGES = new MaxSizeHashMap<>(50);
+	private static final transient LastCharCompare CODE_COMPARE = new LastCharCompare();
 	private static final transient String ALL_PATTERN = "[0-9A-FK-ORa-fk-or]";
 	public static final transient String SECTOR_SYMBOL = "\u00a7";
 	public static final transient Pattern VANILLA_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+" + ALL_PATTERN + "?");
