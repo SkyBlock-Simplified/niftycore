@@ -79,10 +79,6 @@ public class ConcurrentHashMap<K, V> implements Map<K, V> {
 	public V put(K key, V value) {
 		while (true) {
 			Map<K, V> current = this.ref.get();
-
-			if (current.containsKey(key))
-				return current.get(key);
-
 			Map<K, V> modified = new HashMap<>(current);
 			modified.put(key, value);
 
