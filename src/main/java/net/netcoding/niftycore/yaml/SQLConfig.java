@@ -1,12 +1,14 @@
 package net.netcoding.niftycore.yaml;
 
 import net.netcoding.niftycore.database.MySQL;
+import net.netcoding.niftycore.database.OracleSQL;
 import net.netcoding.niftycore.database.PostgreSQL;
 import net.netcoding.niftycore.database.SQLServer;
 import net.netcoding.niftycore.database.SQLite;
 import net.netcoding.niftycore.database.factory.SQLWrapper;
 import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.yaml.annotations.Comment;
+import net.netcoding.niftycore.yaml.annotations.Comments;
 import net.netcoding.niftycore.yaml.annotations.Path;
 import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
 
@@ -18,7 +20,10 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 
 	private transient SQLWrapper factory;
 
-	@Comment("Database Driver (mysql, postgresql or sqlserver)")
+	@Comments({
+			"Database Driver",
+			"mysql, postgresql, sqlserver, oraclesql, or sqlite"
+	})
 	@Path("sql.driver")
 	protected String driver = "sql";
 
@@ -101,6 +106,8 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 					this.driver = "sqlserver";
 				else if (MySQL.class.isAssignableFrom(clazz))
 					this.driver = "mysql";
+				else if (OracleSQL.class.isAssignableFrom(clazz))
+					this.driver = "oraclesql";
 				else if (SQLite.class.isAssignableFrom(clazz))
 					this.driver = "sqlite";
 				else
@@ -125,8 +132,10 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 			this.factory = new SQLServer(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else if ("MySQL".equalsIgnoreCase(this.getDriver()))
 			this.factory = new MySQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
+		else if ("OracleSQL".equalsIgnoreCase(this.getDriver()))
+			this.factory = new OracleSQL(this.getHost(), this.getPort(), this.getUser(), this.getPass(), this.getSchema());
 		else if ("SQLite".equalsIgnoreCase(this.getDriver()))
-			this.factory = new SQLite(this.configFile.getParentFile(), this.getSchema());
+			this.factory = new SQLite(this.configFile.getAbsoluteFile().getParentFile(), this.getSchema());
 		else {
 			Class<T> clazz = this.getSuperClass();
 			Reflection sqlReflect = new Reflection(clazz.getSimpleName(), clazz.getPackage().getName());
