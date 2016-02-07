@@ -1,17 +1,17 @@
 package net.netcoding.niftycore.yaml.converters;
 
+import net.netcoding.niftycore.yaml.InternalConverter;
+
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.HashSet;
-
-import net.netcoding.niftycore.yaml.InternalConverter;
 
 public class Primitive extends Converter {
 
 	private static final transient HashSet<String> types = new HashSet<>();
 
 	static {
-		types.addAll(Arrays.asList("boolean", "char", "byte", "short", "integer", "long", "float", "double"));
+		types.addAll(Arrays.asList("boolean", "character", "byte", "short", "integer", "long", "float", "double"));
 	}
 
 	public Primitive(InternalConverter converter) {
@@ -26,9 +26,9 @@ public class Primitive extends Converter {
 		case "byte":
 			return (section instanceof Byte) ? section : new Integer((int)section).byteValue();
 		case "float":
-			if (section instanceof Integer) return new Double((int)section).floatValue();
+			if (section instanceof Integer) return new Double((int)section).intValue();
 			return (section instanceof Float) ? section : new Double((double)section).floatValue();
-		case "char":
+		case "character":
 			return (section instanceof Character) ? section : ((String)section).charAt(0);
 		default:
 			return section;
@@ -42,7 +42,7 @@ public class Primitive extends Converter {
 
 	@Override
 	public boolean supports(Class<?> type) {
-		return types.contains(type.getName());
+		return types.contains(type.getSimpleName().toLowerCase());
 	}
 
 }
