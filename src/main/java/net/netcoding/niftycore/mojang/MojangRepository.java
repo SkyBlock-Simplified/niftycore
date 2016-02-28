@@ -78,13 +78,13 @@ public abstract class MojangRepository<T extends MojangProfile> {
 						JsonObject status = services.get(i).getAsJsonObject();
 
 						if (status.get(SERVICE_API) != null)
-							available = "green".equalsIgnoreCase(status.get(SERVICE_API).getAsString());
+							available = !"red".equals(status.get(SERVICE_API).getAsString());
 					}
 				} catch (Exception ignore) { }
 
 				API_AVAILABLE = available;
 			}
-		}, 0, 10 * (NiftyCore.isBungee() ? 60000 : 1200));
+		}, 0, 5 * (NiftyCore.isBungee() ? 60000 : 1200));
 	}
 
 	protected MojangRepository() { }
