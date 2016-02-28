@@ -1,13 +1,17 @@
 package net.netcoding.niftycore.mojang;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import net.netcoding.niftycore.NiftyCore;
 import net.netcoding.niftycore.http.HttpBody;
 import net.netcoding.niftycore.http.HttpClient;
 import net.netcoding.niftycore.http.HttpHeader;
 import net.netcoding.niftycore.http.HttpResponse;
 import net.netcoding.niftycore.http.HttpStatus;
 import net.netcoding.niftycore.http.exceptions.HttpConnectionException;
+import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
 import net.netcoding.niftycore.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
@@ -30,11 +34,58 @@ import java.util.UUID;
 public abstract class MojangRepository<T extends MojangProfile> {
 
 	// API: http://wiki.vg/Mojang_API
+	protected static final transient ConcurrentSet<MojangProfile> CACHE = new ConcurrentSet<>();
+	protected static final transient HttpClient HTTP = new HttpClient();
+	protected static final transient Gson GSON = new Gson();
+	protected static final String SERVICE_API = "api.mojang.com";
 	protected static final int PROFILES_PER_REQUEST = 100;
 	protected static long LAST_HTTP_REQUEST = System.currentTimeMillis();
-	protected static final transient Gson GSON = new Gson();
-	protected static final transient HttpClient HTTP = new HttpClient();
-	protected static final transient ConcurrentSet<MojangProfile> CACHE = new ConcurrentSet<>();
+	protected static boolean API_AVAILABLE = true;
+
+	// Services
+	/*public static final String SERVICE_MINECRAFT = "minecraft.net";
+	public static final String SERVICE_SESSION_MINECRAFT = "session.minecraft.net";
+	public static final String SERVICE_SKINS_MINECRAFT = "skins.minecraft.net";
+	public static final String SERVICE_TEXTURES_MINECRAFT = "textures.minecraft.net";
+	public static final String SERVICE_ACCOUNT_MOJANG = "account.mojang.com";
+	public static final String SERVICE_AUTH_MOJANG = "auth.mojang.com";
+	public static final String SERVICE_AUTHSERVER_MOJANG = "authserver.mojang.com";
+	public static final String SERVICE_SESSION_MOJANG = "sessionserver.mojang.com";
+	public static final String SERVICE_API_MOJANG = "api.mojang.com";*/
+
+	// Method API URLs
+	/*public static final String UUID_AT_TIME_MOJANG = "https://api.mojang.com/users/profiles/minecraft";
+	public static final String STATUS_CHECK_MOJANG = "https://status.mojang.com/check";
+	public static final String PLAYERNAME_UUID_MOJANG = "https://api.mojang.com/profiles/minecraft";
+	public static final String UUID_PROFILE_SKIN_CAPE = "https://sessionserver.mojang.com/session/minecraft/profile";
+	public static final String AUTH_AUTHENTICATE_MOJANG = "https://authserver.mojang.com/authenticate";
+	public static final String AUTH_REFRESH_MOJANG = "https://authserver.mojang.com/refresh";
+	public static final String AUTH_VALIDATE_MOJANG = "https://authserver.mojang.com/validate";
+	public static final String AUTH_SIGNOUT_MOJANG = "https://authserver.mojang.com/signout";
+	public static final String AUTH_INVALIDATE_MOJANG = "https://authserver.mojang.com/invalidate";*/
+
+	static {
+		MinecraftScheduler.runAsync(new Runnable() {
+			@Override
+			public void run() {
+				boolean available = false;
+
+				try {
+					HttpResponse response = HTTP.get(getStatusUrl());
+					JsonArray services = new JsonParser().parse(response.getBody().toString()).getAsJsonArray();
+
+					for (int i = 0; i < services.size(); i++) {
+						JsonObject status = services.get(i).getAsJsonObject();
+
+						if (status.get(SERVICE_API) != null)
+							available = "green".equalsIgnoreCase(status.get(SERVICE_API).getAsString());
+					}
+				} catch (Exception ignore) { }
+
+				API_AVAILABLE = available;
+			}
+		}, 0, 10 * (NiftyCore.isBungee() ? 60000 : 1200));
+	}
 
 	protected MojangRepository() { }
 
@@ -52,6 +103,10 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 	protected static URL getNamesUrl(UUID uniqueId) throws MalformedURLException {
 		return new URL(StringUtil.format("https://api.mojang.com/user/profiles/{0}/names", uniqueId.toString().replace("-", "")));
+	}
+
+	protected static URL getStatusUrl() throws MalformedURLException {
+		return new URL("https://status.mojang.com/check");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -154,7 +209,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 			this.processOfflineUsernames(profiles, userList);
 
 			// Query Mojang API
-			if (!userList.isEmpty()) {
+			if (!userList.isEmpty() && API_AVAILABLE) {
 				HttpHeader contentType = new HttpHeader("Content-Type", "application/json");
 				String[] userArray = ListUtil.toArray(userList, String.class);
 				int start = 0;
@@ -301,7 +356,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 				found = this.processOfflineUniqueId(uniqueId);
 
 			// Query Mojang API
-			if (found == null) {
+			if (found == null && API_AVAILABLE) {
 				try {
 					long wait = LAST_HTTP_REQUEST + 100 - System.currentTimeMillis();
 					if (wait > 0) Thread.sleep(wait);
