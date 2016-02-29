@@ -6,6 +6,7 @@ import net.netcoding.niftycore.util.StringUtil;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
@@ -48,14 +49,11 @@ public class HttpClient {
 
 	public HttpResponse get(URL url, int timeout, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
 		HttpStatus status;
-		String bodyResponse;
+		HttpBody response;
 
 		try {
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
 			status = HttpStatus.getByCode(connection.getResponseCode());
-
-			if (connection.getResponseCode() >= 400)
-				throw new HttpConnectionException(status);
 
 			for (HttpHeader header : headers)
 				connection.setRequestProperty(header.getName(), header.getValue());
@@ -66,8 +64,9 @@ public class HttpClient {
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
 			StringBuilder buffer = new StringBuilder();
+			InputStream stream = (connection.getResponseCode() < 400) ? connection.getInputStream() : connection.getErrorStream();
 
-			try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
+			try (InputStreamReader streamReader = new InputStreamReader(stream)) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
 					String line;
 
@@ -78,7 +77,10 @@ public class HttpClient {
 				}
 			}
 
-			bodyResponse = buffer.toString();
+			response = new HttpBody(buffer.toString());
+
+			if (connection.getResponseCode() >= 400)
+				throw new HttpConnectionException(status, response);
 		} catch (HttpConnectionException hcex) {
 			throw hcex;
 		} catch (SocketException sex) {
@@ -89,7 +91,7 @@ public class HttpClient {
 			throw new HttpConnectionException(ex);
 		}
 
-		return new HttpResponse(status, new HttpBody(bodyResponse));
+		return new HttpResponse(status, response);
 	}
 
 	public HttpResponse post(URL url, HttpHeader... headers) throws HttpConnectionException {
@@ -146,15 +148,12 @@ public class HttpClient {
 
 	public HttpResponse post(URL url, Proxy proxy, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		HttpStatus status;
-		String bodyResponse;
+		HttpBody response;
 
 		try {
 			StringBuilder buffer = new StringBuilder();
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
 			status = HttpStatus.getByCode(connection.getResponseCode());
-
-			if (connection.getResponseCode() >= 400)
-				throw new HttpConnectionException(status);
 
 			for (HttpHeader header : headers)
 				connection.setRequestProperty(header.getName(), header.getValue());
@@ -165,12 +164,16 @@ public class HttpClient {
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
 
-			if (body != null && body.getBytes().length > 0) {
-				DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-				writer.write(body.getBytes());
+			if (connection.getResponseCode() < 400) {
+				if (body != null && body.getBytes().length > 0) {
+					DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+					writer.write(body.getBytes());
+				}
 			}
 
-			try (InputStreamReader streamReader = new InputStreamReader(connection.getInputStream())) {
+			InputStream stream = (connection.getResponseCode() < 400) ? connection.getInputStream() : connection.getErrorStream();
+
+			try (InputStreamReader streamReader = new InputStreamReader(stream)) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
 					String line;
 
@@ -181,7 +184,10 @@ public class HttpClient {
 				}
 			}
 
-			bodyResponse = buffer.toString();
+			response = new HttpBody(buffer.toString());
+
+			if (connection.getResponseCode() >= 400)
+				throw new HttpConnectionException(status, response);
 		} catch (HttpConnectionException hcex) {
 			throw hcex;
 		} catch (SocketException sex) {
@@ -192,7 +198,7 @@ public class HttpClient {
 			throw new HttpConnectionException(ex);
 		}
 
-		return new HttpResponse(status, new HttpBody(bodyResponse));
+		return new HttpResponse(status, response);
 	}
 
 }
