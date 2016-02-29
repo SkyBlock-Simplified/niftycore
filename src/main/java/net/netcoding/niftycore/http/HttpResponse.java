@@ -2,8 +2,8 @@ package net.netcoding.niftycore.http;
 
 public class HttpResponse {
 
-	private final HttpStatus status;
 	private final HttpBody body;
+	private final HttpStatus status;
 
 	public HttpResponse(HttpStatus status, HttpBody body) {
 		this.body = body;
