@@ -2,6 +2,7 @@ package net.netcoding.niftycore.http;
 
 public class HttpBody {
 
+	public static final HttpBody EMPTY = new HttpBody(null);
 	private final String bodyString;
 
 	public HttpBody(String bodyString) {
