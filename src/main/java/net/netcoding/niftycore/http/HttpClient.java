@@ -53,7 +53,6 @@ public class HttpClient {
 
 		try {
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
-			status = HttpStatus.getByCode(connection.getResponseCode());
 
 			for (HttpHeader header : headers)
 				connection.setRequestProperty(header.getName(), header.getValue());
@@ -64,7 +63,8 @@ public class HttpClient {
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
 			StringBuilder buffer = new StringBuilder();
-			InputStream stream = (connection.getResponseCode() < 400) ? connection.getInputStream() : connection.getErrorStream();
+			status = HttpStatus.getByCode(connection.getResponseCode());
+			InputStream stream = (status.getCode() < 400) ? connection.getInputStream() : connection.getErrorStream();
 
 			try (InputStreamReader streamReader = new InputStreamReader(stream)) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
@@ -72,7 +72,7 @@ public class HttpClient {
 
 					while (StringUtil.notEmpty(line = reader.readLine())) {
 						buffer.append(line);
-						buffer.append('\r');
+						buffer.append('\n');
 					}
 				}
 			}
@@ -153,7 +153,6 @@ public class HttpClient {
 		try {
 			StringBuilder buffer = new StringBuilder();
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy == null ? Proxy.NO_PROXY : proxy);
-			status = HttpStatus.getByCode(connection.getResponseCode());
 
 			for (HttpHeader header : headers)
 				connection.setRequestProperty(header.getName(), header.getValue());
@@ -163,15 +162,16 @@ public class HttpClient {
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
+			status = HttpStatus.getByCode(connection.getResponseCode());
 
-			if (connection.getResponseCode() < 400) {
+			if (status.getCode() < 400) {
 				if (body != null && body.getBytes().length > 0) {
 					DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
 					writer.write(body.getBytes());
 				}
 			}
 
-			InputStream stream = (connection.getResponseCode() < 400) ? connection.getInputStream() : connection.getErrorStream();
+			InputStream stream = (status.getCode() < 400) ? connection.getInputStream() : connection.getErrorStream();
 
 			try (InputStreamReader streamReader = new InputStreamReader(stream)) {
 				try (BufferedReader reader = new BufferedReader(streamReader)) {
@@ -179,7 +179,7 @@ public class HttpClient {
 
 					while (StringUtil.notEmpty(line = reader.readLine())) {
 						buffer.append(line);
-						buffer.append('\r');
+						buffer.append('\n');
 					}
 				}
 			}
