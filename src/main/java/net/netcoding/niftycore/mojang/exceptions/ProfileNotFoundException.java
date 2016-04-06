@@ -82,25 +82,25 @@ public class ProfileNotFoundException extends RuntimeException {
 
 	private static String getCustomMessage(LookupType type, Object obj) {
 		switch (type) {
-		case OFFLINE_PLAYERS:
-			String players = "";
-			MojangProfile[] profiles = (MojangProfile[])obj;
+			case OFFLINE_PLAYERS:
+				String players = "";
+				MojangProfile[] profiles = (MojangProfile[])obj;
 
-			for (MojangProfile profile : profiles)
-				players += StringUtil.format("'{'{{0}},{{1}}'}'", profile.getUniqueId(), profile.getName());
+				for (MojangProfile profile : profiles)
+					players += StringUtil.format("'{'{{0}},{{1}}'}'", profile.getUniqueId(), profile.getName());
 
-			return StringUtil.format("The profile data for offline players '{'{0}'}' could not be found!", players);
-		case OFFLINE_PLAYER:
-			MojangProfile profile = (MojangProfile)obj;
-			return StringUtil.format("The profile data for offline player '{'{{0}},{{1}}'}' could not be found!", profile.getUniqueId(), profile.getName());
-		case UNIQUE_ID:
-			return StringUtil.format("The profile data for uuid {{0}} could not be found!", obj);
-		case USERNAMES:
-			return StringUtil.format("The profile data for users '{'{{0}}'}' could not be found!", StringUtil.implode((ChatColor.GRAY + ", " + ChatColor.RED), (String[])obj));
-		case USERNAME:
-			return StringUtil.format("The profile data for user {{0}} could not be found!", obj);
-		default:
-			return StringUtil.format("The profile data for ''{{0}}'' could not be found!", obj);
+				return StringUtil.format("The profile data for offline players '{'{0}'}' could not be found!", players);
+			case OFFLINE_PLAYER:
+				MojangProfile profile = (MojangProfile)obj;
+				return StringUtil.format("The profile data for offline player '{'{{0}},{{1}}'}' could not be found!", profile.getUniqueId(), profile.getName());
+			case UNIQUE_ID:
+				return StringUtil.format("The profile data for uuid {{0}} could not be found!", obj);
+			case USERNAMES:
+				return StringUtil.format("The profile data for users '{'{{0}}'}' could not be found!", StringUtil.implode((ChatColor.GRAY + ", " + ChatColor.RED), (String[])obj));
+			case USERNAME:
+				return StringUtil.format("The profile data for user {{0}} could not be found!", obj);
+			default:
+				return StringUtil.format("The profile data for ''{{0}}'' could not be found!", obj);
 		}
 	}
 
