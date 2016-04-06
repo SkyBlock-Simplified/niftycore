@@ -1,11 +1,11 @@
 package net.netcoding.niftycore.mojang;
 
+import net.netcoding.niftycore.minecraft.MinecraftServer;
+import net.netcoding.niftycore.util.StringUtil;
+
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
-import net.netcoding.niftycore.minecraft.MinecraftServer;
-import net.netcoding.niftycore.util.StringUtil;
 
 /**
  * Container for a players unique id and name.
@@ -37,7 +37,7 @@ public abstract class MojangProfile {
 
 	/**
 	 * Gets the ip address of the player if they are online.
-	 * 
+	 *
 	 * @return Socket address of the player if online, otherwise null.
 	 */
 	public InetSocketAddress getAddress() {
@@ -51,21 +51,21 @@ public abstract class MojangProfile {
 
 	/**
 	 * Gets the players name associated to this UUID.
-	 * 
+	 *
 	 * @return Current player name.
 	 */
 	public abstract String getName();
 
 	/**
 	 * Gets the server this profile belongs to.
-	 * 
+	 *
 	 * @return BungeeServer Server object.
 	 */
 	public abstract MinecraftServer<? extends MojangProfile> getServer();
 
 	/**
 	 * Gets the players UUID.
-	 * 
+	 *
 	 * @return Player UUID.
 	 */
 	public UUID getUniqueId() {
@@ -77,7 +77,7 @@ public abstract class MojangProfile {
 
 	/**
 	 * Checks if this profile has an assigned ip address.
-	 * 
+	 *
 	 * @return True if address exists, otherwise false.
 	 */
 	public boolean hasAddress() {
@@ -86,7 +86,7 @@ public abstract class MojangProfile {
 
 	/**
 	 * Checks if this players profile is expired.
-	 * 
+	 *
 	 * @return True if expired, otherwise false.
 	 */
 	public boolean hasExpired() {
@@ -100,7 +100,7 @@ public abstract class MojangProfile {
 
 	/**
 	 * Gets if the account is unpaid.
-	 * 
+	 *
 	 * @return True if unpaid, otherwise false.
 	 */
 	public boolean isDemo() {
@@ -109,7 +109,7 @@ public abstract class MojangProfile {
 
 	/**
 	 * Gets if the account has not been migrated to Mojang.
-	 * 
+	 *
 	 * @return True if not migrated, otherwise false.
 	 */
 	public boolean isLegacy() {
@@ -118,7 +118,7 @@ public abstract class MojangProfile {
 
 	/**
 	 * Checks if this profile is found anywhere on BungeeCord.
-	 * 
+	 *
 	 * @return True if online, otherwise false.
 	 */
 	public abstract boolean isOnlineAnywhere();
