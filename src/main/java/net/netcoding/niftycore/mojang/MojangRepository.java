@@ -18,6 +18,7 @@ import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
 import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -117,8 +118,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 	@SuppressWarnings("unchecked")
 	protected final Class<T[]> getSuperClassArray() {
-		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
-		return (Class<T[]>)(superClass.getActualTypeArguments().length == 0 ? BasicMojangProfile[].class : superClass.getActualTypeArguments());
+		return (Class<T[]>)Array.newInstance(this.getSuperClass(), 0).getClass();
 	}
 
 	protected abstract boolean isOnline();
