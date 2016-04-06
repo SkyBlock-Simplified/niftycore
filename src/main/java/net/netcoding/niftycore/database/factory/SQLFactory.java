@@ -17,7 +17,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -108,7 +110,7 @@ public abstract class SQLFactory {
 			throw new SQLException(StringUtil.format("Unable to create specified database file {0}!", database.getAbsolutePath()), ex);
 		}
 
-		this.url = StringUtil.format(url, directory.getAbsolutePath(), StringUtil.format("{0}.db", schema));
+		this.url = StringUtil.format(url, directory.getAbsolutePath(), file);
 		this.properties = properties;
 		this.fileStorage = true;
 		this.load(schemaName);
@@ -232,6 +234,25 @@ public abstract class SQLFactory {
 	}
 
 	/**
+	 * Get all columns belonging to a table.
+	 *
+	 * @param tableName Table name to get columns from.
+	 * @return All columns belonging to the passed table name.
+	 */
+	public final Set<String> getColumns(String tableName) throws SQLException {
+		Set<String> columns = new HashSet<>();
+
+		try (Connection connection = this.getConnection()) {
+			try (ResultSet result = connection.getMetaData().getColumns((this.fileStorage ? null : this.schema), null, tableName, null)) {
+				while (result.next())
+					columns.add(result.getString("COLUMN_NAME"));
+			}
+		}
+
+		return columns;
+	}
+
+	/**
 	 * Gets a connection to this DBMS.
 	 *
 	 * @return Connection to the database.
@@ -284,6 +305,24 @@ public abstract class SQLFactory {
 	 */
 	public final String getSchema() {
 		return this.schema;
+	}
+
+	/**
+	 * Get all tables in the current schema.
+	 *
+	 * @return All tables names in the current schema.
+	 */
+	public final Set<String> getTables() throws SQLException {
+		Set<String> tables = new HashSet<>();
+
+		try (Connection connection = this.getConnection()) {
+			try (ResultSet result = connection.getMetaData().getTables((this.fileStorage ? null : this.schema), null, "%", null)) {
+				while (result.next())
+					tables.add(result.getString("TABLE_NAME"));
+			}
+		}
+
+		return tables;
 	}
 
 	/**
@@ -352,12 +391,10 @@ public abstract class SQLFactory {
 		try (Connection connection = this.getConnection()) {
 			try (PreparedStatement statement = connection.prepareStatement(sql)) {
 				assignArgs(statement, args);
-				statement.executeQuery();
 
-				if (callback != null) {
-					try (ResultSet result = statement.getResultSet()) {
+				try (ResultSet result = statement.executeQuery()) {
+					if (callback != null)
 						callback.handle(result);
-					}
 				}
 			}
 		}
@@ -366,12 +403,10 @@ public abstract class SQLFactory {
 	protected final <T> T query(Connection connection, String sql, ResultCallback<T> callback, Object... args) throws SQLException {
 		try (PreparedStatement statement = connection.prepareStatement(sql)) {
 			assignArgs(statement, args);
-			statement.executeQuery();
 
-			if (callback != null) {
-				try (ResultSet result = statement.getResultSet()) {
+			try (ResultSet result = statement.executeQuery()) {
+				if (callback != null)
 					return callback.handle(result);
-				}
 			}
 		}
 
