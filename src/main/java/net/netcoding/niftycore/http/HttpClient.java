@@ -162,15 +162,13 @@ public class HttpClient {
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
 			connection.setUseCaches(false);
-			status = HttpStatus.getByCode(connection.getResponseCode());
 
-			if (status.getCode() < 400) {
-				if (body != null && body.getBytes().length > 0) {
-					DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-					writer.write(body.getBytes());
-				}
+			if (body != null && body.getBytes().length > 0) {
+				DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+				writer.write(body.getBytes());
 			}
 
+			status = HttpStatus.getByCode(connection.getResponseCode());
 			InputStream stream = (status.getCode() < 400) ? connection.getInputStream() : connection.getErrorStream();
 
 			try (InputStreamReader streamReader = new InputStreamReader(stream)) {
