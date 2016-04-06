@@ -355,18 +355,17 @@ public abstract class MojangRepository<T extends MojangProfile> {
 			if (found == null)
 				found = this.processOfflineUniqueId(uniqueId);
 
-			// Query Mojang API
 			if (found == null && API_AVAILABLE) {
 				try {
 					long wait = LAST_HTTP_REQUEST + 100 - System.currentTimeMillis();
 					if (wait > 0) Thread.sleep(wait);
 					HttpResponse response = HTTP.get(getNamesUrl(uniqueId));
 
-					if (HttpStatus.NO_CONTENT == response.getStatus()) {
+					if (HttpStatus.NO_CONTENT != response.getStatus()) {
 						UUIDSearchResult[] results = GSON.fromJson(response.getBody().toString(), UUIDSearchResult[].class);
 
 						if (results != null && results.length > 0) {
-							UUIDSearchResult result = results[0];
+							UUIDSearchResult result = results[results.length - 1];
 							JsonObject json = new JsonObject();
 							json.addProperty("id", uniqueId.toString());
 							json.addProperty("name", result.getName());
