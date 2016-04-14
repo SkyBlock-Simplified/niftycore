@@ -141,7 +141,8 @@ public abstract class Config extends ConfigMapper implements Runnable {
 	}
 
 	public void load() throws InvalidConfigurationException {
-		this.reload(false);
+		this.loadFromYaml();
+		this.internalLoad(this.getClass(), false);
 	}
 
 	public void reload() throws InvalidConfigurationException {
