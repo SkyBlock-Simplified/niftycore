@@ -184,21 +184,17 @@ public abstract class ConfigMapper {
 					if (line.startsWith(new String(new char[depth - 2]).replace("\0", " ")))
 						keyChain.remove(keyChain.size() - 1);
 					else {
-						int spaces = 0;
-						for (int i = 0; i < line.length(); i++) {
-							if (line.charAt(i) == ' ')
-								spaces++;
-							else
-								break;
-						}
+						int spaces = line.length() - line.replaceAll("^\\s+", "").length();
 
-						if (spaces == 0) writeLines.append("\n");
-						depth = spaces;
+						if (spaces == 0)
+							writeLines.append('\n');
+
 						if (spaces == 0) {
 							keyChain = new ArrayList<>();
 							depth = 2;
 						} else {
 							ArrayList<String> temp = new ArrayList<>();
+							depth = spaces;
 							int index = 0;
 
 							for (int i = 0; i < spaces; i += 2, index++)
@@ -222,8 +218,18 @@ public abstract class ConfigMapper {
 					}
 				}
 
+				if (y > 0 && y < yamlSplit.length - 1) {
+					String nextLine = yamlSplit[y + 1];
+					int nextSpaces = nextLine.length() - nextLine.replaceAll("^\\s+", "").length();
+
+					if (depth == 2 && nextSpaces == 2)
+						writeLines.append('\n');
+				}
+
 				writeLines.append(line);
-				if (y < yamlSplit.length - 1) writeLines.append("\n");
+
+				if (y < yamlSplit.length - 1)
+					writeLines.append("\n");
 			}
 
 			fileWriter.write(writeLines.toString());
