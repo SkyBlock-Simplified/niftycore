@@ -59,9 +59,9 @@ public abstract class Config extends ConfigMapper implements Runnable {
 			this.load();
 	}
 
-	private void internalLoad(Class<?> clazz, boolean dontSave) throws InvalidConfigurationException {
+	private void internalLoad(Class<?> clazz, boolean doSave) throws InvalidConfigurationException {
 		if (!clazz.getSuperclass().equals(Config.class))
-			this.internalLoad(clazz.getSuperclass(), dontSave);
+			this.internalLoad(clazz.getSuperclass(), doSave);
 
 		boolean save = false;
 
@@ -94,7 +94,7 @@ public abstract class Config extends ConfigMapper implements Runnable {
 			}
 		}
 
-		if (save && !dontSave)
+		if (save && doSave)
 			this.saveToYaml();
 	}
 
@@ -141,18 +141,17 @@ public abstract class Config extends ConfigMapper implements Runnable {
 	}
 
 	public void load() throws InvalidConfigurationException {
-		this.loadFromYaml();
-		if (this.update(this.root)) this.save();
-		this.internalLoad(this.getClass(), true);
+		this.reload(false);
 	}
 
 	public void reload() throws InvalidConfigurationException {
-		this.reload(true);
+		this.reload(false);
 	}
 
-	private void reload(boolean dontSave) throws InvalidConfigurationException {
+	private void reload(boolean doSave) throws InvalidConfigurationException {
 		this.loadFromYaml();
-		this.internalLoad(this.getClass(), dontSave);
+		if (this.update(this.root)) this.save();
+		this.internalLoad(this.getClass(), doSave);
 	}
 
 	@Override
@@ -173,9 +172,10 @@ public abstract class Config extends ConfigMapper implements Runnable {
 				if (path.equals(this.configFile.toString())) {
 					if (!this.reloadProcessing) {
 						this.reloadProcessing = true;
+
 						while (true) {
 							try {
-								this.reload(true);
+								this.reload();
 								break;
 							} catch (Exception ex) {
 								try {
@@ -183,6 +183,7 @@ public abstract class Config extends ConfigMapper implements Runnable {
 								} catch (InterruptedException ignore) { }
 							}
 						}
+
 						this.reloadProcessing = false;
 					}
 				}
