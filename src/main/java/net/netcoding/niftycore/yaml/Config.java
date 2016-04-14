@@ -59,9 +59,9 @@ public abstract class Config extends ConfigMapper implements Runnable {
 			this.load();
 	}
 
-	private void internalLoad(Class<?> clazz, boolean doSave) throws InvalidConfigurationException {
+	private void internalLoad(Class<?> clazz) throws InvalidConfigurationException {
 		if (!clazz.getSuperclass().equals(Config.class))
-			this.internalLoad(clazz.getSuperclass(), doSave);
+			this.internalLoad(clazz.getSuperclass());
 
 		boolean save = false;
 
@@ -94,7 +94,7 @@ public abstract class Config extends ConfigMapper implements Runnable {
 			}
 		}
 
-		if (save && doSave)
+		if (save)
 			this.saveToYaml();
 	}
 
@@ -142,17 +142,14 @@ public abstract class Config extends ConfigMapper implements Runnable {
 
 	public void load() throws InvalidConfigurationException {
 		this.loadFromYaml();
-		this.internalLoad(this.getClass(), false);
+		if (this.update(this.root)) this.save();
+		this.internalLoad(this.getClass());
 	}
 
 	public void reload() throws InvalidConfigurationException {
-		this.reload(false);
-	}
-
-	private void reload(boolean doSave) throws InvalidConfigurationException {
 		this.loadFromYaml();
 		if (this.update(this.root)) this.save();
-		this.internalLoad(this.getClass(), doSave);
+		this.internalLoad(this.getClass());
 	}
 
 	@Override
