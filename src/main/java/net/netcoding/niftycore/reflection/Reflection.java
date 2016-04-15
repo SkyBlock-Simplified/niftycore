@@ -1,13 +1,13 @@
 package net.netcoding.niftycore.reflection;
 
+import net.netcoding.niftycore.util.ListUtil;
+import net.netcoding.niftycore.util.StringUtil;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
-
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
 
 public class Reflection {
 
@@ -91,10 +91,11 @@ public class Reflection {
 		if (CONSTRUCTOR_CACHE.containsKey(types))
 			return CONSTRUCTOR_CACHE.get(types);
 
-		for (Constructor<?> constructor : this.getClazz().getConstructors()) {
+		for (Constructor<?> constructor : this.getClazz().getDeclaredConstructors()) {
 			Class<?>[] constructorTypes = toPrimitiveTypeArray(constructor.getParameterTypes());
 
 			if (isEqualsTypeArray(constructorTypes, types)) {
+				constructor.setAccessible(true);
 				CONSTRUCTOR_CACHE.put(constructorTypes, constructor);
 				return constructor;
 			}
@@ -127,7 +128,7 @@ public class Reflection {
 	public Method getMethod(Class<?> type, Class<?>... paramTypes) throws Exception {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
-		for (Method method : this.getClazz().getMethods()) {
+		for (Method method : this.getClazz().getDeclaredMethods()) {
 			Class<?>[] methodTypes = toPrimitiveTypeArray(method.getParameterTypes());
 
 			if ((method.getReturnType().equals(type) || type.isAssignableFrom(method.getReturnType())) && isEqualsTypeArray(methodTypes, types)) {
@@ -142,7 +143,7 @@ public class Reflection {
 	public Method getMethod(String name, Class<?>... paramTypes) throws Exception {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
-		for (Method method : this.getClazz().getMethods()) {
+		for (Method method : this.getClazz().getDeclaredMethods()) {
 			Class<?>[] methodTypes = toPrimitiveTypeArray(method.getParameterTypes());
 
 			if (method.getName().equals(name) && isEqualsTypeArray(methodTypes, types)) {
