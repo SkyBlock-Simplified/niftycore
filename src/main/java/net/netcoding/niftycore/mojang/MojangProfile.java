@@ -16,8 +16,8 @@ public abstract class MojangProfile {
 	private String id;
 	private UUID uuid;
 	protected String name;
-	private String ip;
-	private int port;
+	protected String ip;
+	protected int port;
 	private boolean legacy = false;
 	private boolean demo = false;
 	private InetSocketAddress ipAddress;
