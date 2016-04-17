@@ -23,19 +23,25 @@ public enum ChatColor {
 	LIGHT_PURPLE('d'),
 	YELLOW('e'),
 	WHITE('f'),
-	MAGIC('k'),
-	BOLD('l'),
-	STRIKETHROUGH('m'),
-	UNDERLINE('n'),
-	ITALIC('o'),
+	MAGIC('k', true),
+	BOLD('l', true),
+	STRIKETHROUGH('m', true),
+	UNDERLINE('n', true),
+	ITALIC('o', true),
 	RESET('r');
 
 	public static final char COLOR_CHAR = '\u00a7';
 	private final char code;
+	private final boolean isFormat;
 	private final String toString;
 
 	ChatColor(char code) {
+		this(code, false);
+	}
+
+	ChatColor(char code, boolean isFormat) {
 		this.code = code;
+		this.isFormat = isFormat;
 		this.toString = new String(new char[] { COLOR_CHAR, code });
 	}
 
@@ -54,8 +60,16 @@ public enum ChatColor {
 		return null;
 	}
 
+	public boolean isColor() {
+		return !this.isFormat() && this != RESET;
+	}
+
+	public boolean isFormat() {
+		return this.isFormat;
+	}
+
     /**
-     * Strips the given message of all color codes
+     * Strips the given message of all color and format codes
      *
      * @param value String to strip of color
      * @return A copy of the input string, without any coloring
@@ -64,14 +78,14 @@ public enum ChatColor {
 		return RegexUtil.strip(StringUtil.stripNull(value), RegexUtil.VANILLA_PATTERN);
 	}
 
-	@Override
-	public String toString() {
-		return this.toString;
-	}
-
 	public static String translateAlternateColorCodes(char altColorChar, String value) {
 		Pattern replaceAltColor = Pattern.compile(StringUtil.format("(?<!{0}){0}([0-9a-fk-orA-FK-OR])", altColorChar));
 		return RegexUtil.replaceColor(value, replaceAltColor);
+	}
+
+	@Override
+	public String toString() {
+		return this.toString;
 	}
 
 }
