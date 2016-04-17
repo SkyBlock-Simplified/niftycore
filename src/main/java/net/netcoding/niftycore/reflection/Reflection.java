@@ -2,18 +2,18 @@ package net.netcoding.niftycore.reflection;
 
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Reflection {
 
-	private static final transient ConcurrentHashMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentHashMap<>();
-	private static final transient ConcurrentHashMap<Class<?>[], Constructor<?>> CONSTRUCTOR_CACHE = new ConcurrentHashMap<>();
-	private static final transient ConcurrentHashMap<String, Class<?>> CLASS_CACHE = new ConcurrentHashMap<>();
+	private static final transient ConcurrentMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentMap<>();
+	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], Constructor<?>>> CONSTRUCTOR_CACHE = new ConcurrentMap<>();
+	private static final transient ConcurrentMap<String, Class<?>> CLASS_CACHE = new ConcurrentMap<>();
 	private final String className;
 	private final String subPackage;
 	private final String packagePath;
@@ -81,22 +81,29 @@ public class Reflection {
 	}
 
 	public Class<?> getClazz() throws Exception {
-		if (!CLASS_CACHE.containsKey(this.getClassPath())) CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
+		if (!CLASS_CACHE.containsKey(this.getClassPath()))
+			CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
+
 		return CLASS_CACHE.get(this.getClassPath());
 	}
 
 	public Constructor<?> getConstructor(Class<?>... paramTypes) throws Exception {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
-		if (CONSTRUCTOR_CACHE.containsKey(types))
-			return CONSTRUCTOR_CACHE.get(types);
+		if (CONSTRUCTOR_CACHE.containsKey(this.getClazz())) {
+			ConcurrentMap<Class<?>[], Constructor<?>> constructors = CONSTRUCTOR_CACHE.get(this.getClazz());
+
+			if (constructors.containsKey(types))
+				return constructors.get(types);
+		} else
+			CONSTRUCTOR_CACHE.put(this.getClazz(), new ConcurrentMap<Class<?>[], Constructor<?>>());
 
 		for (Constructor<?> constructor : this.getClazz().getDeclaredConstructors()) {
 			Class<?>[] constructorTypes = toPrimitiveTypeArray(constructor.getParameterTypes());
 
 			if (isEqualsTypeArray(constructorTypes, types)) {
 				constructor.setAccessible(true);
-				CONSTRUCTOR_CACHE.put(constructorTypes, constructor);
+				CONSTRUCTOR_CACHE.get(this.getClazz()).put(types, constructor);
 				return constructor;
 			}
 		}
