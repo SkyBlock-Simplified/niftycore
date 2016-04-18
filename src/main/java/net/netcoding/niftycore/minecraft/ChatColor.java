@@ -23,16 +23,17 @@ public enum ChatColor {
 	LIGHT_PURPLE('d'),
 	YELLOW('e'),
 	WHITE('f'),
-	MAGIC('k', true),
+	MAGIC('k', true, "obfuscated"),
 	BOLD('l', true),
 	STRIKETHROUGH('m', true),
-	UNDERLINE('n', true),
+	UNDERLINE('n', true, "underlined"),
 	ITALIC('o', true),
 	RESET('r');
 
 	public static final char COLOR_CHAR = '\u00a7';
 	private final char code;
 	private final boolean isFormat;
+	private final String jsonName;
 	private final String toString;
 
 	ChatColor(char code) {
@@ -40,8 +41,13 @@ public enum ChatColor {
 	}
 
 	ChatColor(char code, boolean isFormat) {
+		this(code, isFormat, null);
+	}
+
+	ChatColor(char code, boolean isFormat, String jsonName) {
 		this.code = code;
 		this.isFormat = isFormat;
+		this.jsonName = jsonName;
 		this.toString = new String(new char[] { COLOR_CHAR, code });
 	}
 
@@ -60,11 +66,19 @@ public enum ChatColor {
 		return null;
 	}
 
-	public boolean isColor() {
+	public final char getCode() {
+		return this.code;
+	}
+
+	public final String getJsonName() {
+		return StringUtil.isEmpty(this.jsonName) ? this.name().toLowerCase() : this.jsonName;
+	}
+
+	public final boolean isColor() {
 		return !this.isFormat() && this != RESET;
 	}
 
-	public boolean isFormat() {
+	public final boolean isFormat() {
 		return this.isFormat;
 	}
 
