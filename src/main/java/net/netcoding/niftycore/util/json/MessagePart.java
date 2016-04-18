@@ -10,7 +10,9 @@ import net.netcoding.niftycore.util.json.event.HoverEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class MessagePart implements Cloneable {
 
@@ -72,6 +74,30 @@ public final class MessagePart implements Cloneable {
 
 	public boolean hasText() {
 		return this.text != null;
+	}
+
+	public Map<String, Object> serialize() {
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("text", this.text);
+		map.put("styles", this.styles);
+		map.put("color", this.color.getCode());
+		map.put("hoverEvent", this.hoverEvent);
+		map.put("clickEvent", this.clickEvent);
+		map.put("insertion", this.insertionData);
+		map.put("translationReplacements",  this.translationReplacements);
+		return map;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static MessagePart deserialize(Map<String, Object> serialized){
+		MessagePart part = new MessagePart((TextualComponent)serialized.get("text"));
+		part.styles = (List<ChatColor>)serialized.get("styles");
+		part.color = ChatColor.getByChar((char)serialized.get("color"));
+		part.hoverEvent = (HoverEvent)serialized.get("hoverEvent");
+		part.clickEvent = (ClickEvent)serialized.get("clickEvent");
+		part.insertionData = (String)serialized.get("insertion");
+		part.translationReplacements = (ArrayList<JsonRepresentedObject>)serialized.get("translationReplacements");
+		return part;
 	}
 
 	public void writeJson(JsonWriter writer) throws IOException {
