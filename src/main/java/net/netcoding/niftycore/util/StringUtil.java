@@ -208,8 +208,28 @@ public class StringUtil {
 	 * @param value to check
 	 * @return true if empty or null, otherwise false
 	 */
+	public static boolean isEmpty(CharSequence value) {
+		return value == null || "".equals(value) || value.length() == 0;
+	}
+
+	/**
+	 * Gets if the {@code value} is empty or null.
+	 *
+	 * @param value to check
+	 * @return true if empty or null, otherwise false
+	 */
 	public static boolean isEmpty(String value) {
-		return "".equals(value) || value == null;
+		return value == null || "".equals(value) || value.length() == 0;
+	}
+
+	/**
+	 * Gets if the {@code value} is not empty.
+	 *
+	 * @param value to check
+	 * @return true if not empty or null, otherwise false
+	 */
+	public static boolean notEmpty(CharSequence value) {
+		return !isEmpty(value);
 	}
 
 	/**
