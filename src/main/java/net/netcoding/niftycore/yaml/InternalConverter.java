@@ -1,10 +1,12 @@
 package net.netcoding.niftycore.yaml;
 
+import net.netcoding.niftycore.yaml.annotations.PreserveStatic;
 import net.netcoding.niftycore.yaml.converters.Converter;
 import net.netcoding.niftycore.yaml.exceptions.InvalidConverterException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -47,34 +49,54 @@ public class InternalConverter {
 		this.customConverters.add(converter);
 	}
 
-	public void fromConfig(Config config, Field field, ConfigSection root, String path) throws Exception {
-		Object obj = field.get(config);
+	public void fromConfig(YamlConfig yamlConfig, Field field, ConfigSection root, String path) throws Exception {
+		Object obj = field.get(yamlConfig);
 		Converter converter;
 
 		if (obj != null) {
 			converter = this.getConverter(obj.getClass());
 
 			if (converter != null) {
-				field.set(config, converter.fromConfig(obj.getClass(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(PreserveStatic.class)) {
+					if (!field.getAnnotation(PreserveStatic.class).value())
+						return;
+				}
+
+				field.set(yamlConfig, converter.fromConfig(obj.getClass(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
 				return;
 			}
 
 			converter = this.getConverter(field.getType());
 
 			if (converter != null) {
-				field.set(config, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(PreserveStatic.class)) {
+					if (!field.getAnnotation(PreserveStatic.class).value())
+						return;
+				}
+
+				field.set(yamlConfig, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
 				return;
 			}
 		} else {
 			converter = this.getConverter(field.getType());
 
 			if (converter != null) {
-				field.set(config, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(PreserveStatic.class)) {
+					if (!field.getAnnotation(PreserveStatic.class).value())
+						return;
+				}
+
+				field.set(yamlConfig, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
 				return;
 			}
 		}
 
-		field.set(config, root.get(path));
+		if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(PreserveStatic.class)) {
+			if (!field.getAnnotation(PreserveStatic.class).value())
+				return;
+		}
+
+		field.set(yamlConfig, root.get(path));
 	}
 
 	public Converter getConverter(Class<?> type) {
@@ -90,9 +112,8 @@ public class InternalConverter {
 		return this.customConverters;
 	}
 
-	public void toConfig(Config config, Field field, ConfigSection root, String path) throws Exception {
-		Object obj = field.get(config);
-
+	public void toConfig(YamlConfig yamlConfig, Field field, ConfigSection root, String path) throws Exception {
+		Object obj = field.get(yamlConfig);
 		Converter converter;
 
 		if (obj != null) {

@@ -1,10 +1,11 @@
 package net.netcoding.niftycore.yaml.converters;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.Map;
-
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
+import net.netcoding.niftycore.yaml.YamlConfig;
+
+import java.lang.reflect.ParameterizedType;
+import java.util.Map;
 
 public class Config extends Converter {
 
@@ -14,7 +15,7 @@ public class Config extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		net.netcoding.niftycore.yaml.Config obj = (net.netcoding.niftycore.yaml.Config)newInstance(type);
+		YamlConfig obj = (YamlConfig)newInstance(type);
 
 		for (Class<? extends Converter> clazz : this.getCustomConverters())
 			obj.addCustomConverter(clazz);
@@ -25,7 +26,7 @@ public class Config extends Converter {
 
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
-		return (obj instanceof Map) ? obj : ((net.netcoding.niftycore.yaml.Config)obj).saveToMap(obj.getClass());
+		return (obj instanceof Map) ? obj : ((YamlConfig)obj).saveToMap(obj.getClass());
 	}
 
 	public Object newInstance(Class<?> type) throws Exception {
@@ -39,7 +40,7 @@ public class Config extends Converter {
 
 	@Override
 	public boolean supports(Class<?> type) {
-		return net.netcoding.niftycore.yaml.Config.class.isAssignableFrom(type);
+		return YamlConfig.class.isAssignableFrom(type);
 	}
 
 }

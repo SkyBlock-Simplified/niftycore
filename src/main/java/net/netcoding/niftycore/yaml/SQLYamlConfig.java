@@ -16,7 +16,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 
-public abstract class SQLConfig<T extends SQLWrapper> extends Config {
+public abstract class SQLYamlConfig<T extends SQLWrapper> extends YamlConfig {
 
 	private transient SQLWrapper factory;
 
@@ -47,11 +47,11 @@ public abstract class SQLConfig<T extends SQLWrapper> extends Config {
 	@Path("sql.pass")
 	protected String password = "";
 
-	public SQLConfig(File folder, String fileName, String... header) {
+	public SQLYamlConfig(File folder, String fileName, String... header) {
 		this(folder, fileName, false, header);
 	}
 
-	public SQLConfig(File folder, String fileName, boolean skipFailedConversion, String... header) {
+	public SQLYamlConfig(File folder, String fileName, boolean skipFailedConversion, String... header) {
 		super(folder, fileName, skipFailedConversion, header);
 	}
 
