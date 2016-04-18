@@ -21,7 +21,7 @@ public class Array extends Converter {
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		Class<?> singleType = type.getComponentType();
-		java.util.List values;
+		java.util.List<Object> values;
 
 		if (section instanceof java.util.List)
 			values = (java.util.List) section;
