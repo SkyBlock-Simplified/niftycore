@@ -8,14 +8,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class InternalConverter {
 
-	private final transient LinkedHashSet<Converter> converters = new LinkedHashSet<>();
-	private final transient List<Class<? extends Converter>> customConverters = new ArrayList<>();
+	private final transient Set<Converter> converters = new HashSet<>();
+	private final transient Set<Class<? extends Converter>> customConverters = new HashSet<>();
 
 	public InternalConverter() {
 		try {
@@ -108,7 +107,7 @@ public class InternalConverter {
 		return null;
 	}
 
-	public List<Class<? extends Converter>> getCustomConverters() {
+	public Set<Class<? extends Converter>> getCustomConverters() {
 		return this.customConverters;
 	}
 

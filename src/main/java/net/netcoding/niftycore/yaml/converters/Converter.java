@@ -1,8 +1,8 @@
 package net.netcoding.niftycore.yaml.converters;
 
-import java.lang.reflect.ParameterizedType;
-
 import net.netcoding.niftycore.yaml.InternalConverter;
+
+import java.lang.reflect.ParameterizedType;
 
 public abstract class Converter {
 
@@ -16,7 +16,7 @@ public abstract class Converter {
 		return this.converter.getConverter(type);
 	}
 
-	protected java.util.List<Class<? extends Converter>> getCustomConverters() {
+	protected java.util.Set<Class<? extends Converter>> getCustomConverters() {
 		return this.converter.getCustomConverters();
 	}
 
