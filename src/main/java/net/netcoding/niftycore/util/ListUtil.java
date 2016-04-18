@@ -1,5 +1,7 @@
 package net.netcoding.niftycore.util;
 
+import com.google.common.collect.Iterables;
+
 import java.lang.reflect.Array;
 import java.util.Collection;
 
@@ -80,7 +82,23 @@ public class ListUtil {
 		try {
 			return collection.toArray((T[])Array.newInstance(type, collection.size()));
 		} catch (NullPointerException npe) {
-			return (T[])new Object[] { };
+			return (T[])Array.newInstance(type, 0);
+		}
+	}
+
+	/**
+	 * Gets a list converter to array.
+	 *
+	 * @param iterable to convert to array
+	 * @param type of {@code list} elements
+	 * @return converted array of passed collection
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
+		try {
+			return Iterables.toArray(iterable, type);
+		} catch (NullPointerException npe) {
+			return (T[])Array.newInstance(type, 0);
 		}
 	}
 
