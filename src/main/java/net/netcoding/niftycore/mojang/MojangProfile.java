@@ -2,6 +2,7 @@ package net.netcoding.niftycore.mojang;
 
 import net.netcoding.niftycore.minecraft.MinecraftServer;
 import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.util.json.JsonMessage;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
@@ -122,6 +123,20 @@ public abstract class MojangProfile {
 	 * @return True if online, otherwise false.
 	 */
 	public abstract boolean isOnlineAnywhere();
+
+	/**
+	 * Send a json message to the profile.
+	 *
+	 * @param message Json message to send.
+	 */
+	public abstract void sendMessage(JsonMessage message) throws Exception;
+
+	/**
+	 * Send a message to the profile.
+	 *
+	 * @param message Message to send.
+	 */
+	public abstract void sendMessage(String message);
 
 	@Override
 	public String toString() {
