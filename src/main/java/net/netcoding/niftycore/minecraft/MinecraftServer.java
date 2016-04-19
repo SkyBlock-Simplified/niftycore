@@ -15,7 +15,7 @@ public abstract class MinecraftServer<T extends MojangProfile> {
 	protected boolean online = false;
 	protected final ConcurrentSet<T> playerList = new ConcurrentSet<>();
 	protected String serverName = "";
-	protected MinecraftVersion version = MinecraftVersion.DEFAULT;
+	protected Version version = Version.DEFAULT;
 
 	protected MinecraftServer() { }
 
@@ -55,7 +55,7 @@ public abstract class MinecraftServer<T extends MojangProfile> {
 		return Collections.unmodifiableSet(this.playerList);
 	}
 
-	public MinecraftVersion getVersion() {
+	public Version getVersion() {
 		return this.version;
 	}
 
@@ -72,7 +72,7 @@ public abstract class MinecraftServer<T extends MojangProfile> {
 		this.motd = "";
 		this.maxPlayers = 0;
 		this.playerList.clear();
-		this.version = MinecraftVersion.DEFAULT;
+		this.version = Version.DEFAULT;
 	}
 
 	protected void setMaxPlayers(int maxPlayers) {
@@ -88,7 +88,28 @@ public abstract class MinecraftServer<T extends MojangProfile> {
 	}
 
 	protected void setVersion(String name, int protocol) {
-		this.version = new MinecraftVersion(name, protocol);
+		this.version = new Version(name, protocol);
+	}
+
+	public static class Version {
+
+		static final Version DEFAULT = new Version("", 0);
+		private final String name;
+		private final int protocol;
+
+		public Version(String name, int protocol) {
+			this.name = name;
+			this.protocol = protocol;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public int getProtocol() {
+			return this.protocol;
+		}
+
 	}
 
 }
