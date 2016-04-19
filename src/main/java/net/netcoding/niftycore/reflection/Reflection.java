@@ -108,6 +108,9 @@ public class Reflection {
 			}
 		}
 
+		if (this.getClazz().getSuperclass() != null)
+			return this.getSuperReflection().getConstructor(paramTypes);
+
 		throw new Exception(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
 	}
 
@@ -119,14 +122,21 @@ public class Reflection {
 			}
 		}
 
+		if (this.getClazz().getSuperclass() != null)
+			return this.getSuperReflection().getField(type);
+
 		throw new Exception(StringUtil.format("The field with type {0} was not found!", type));
 	}
 
 	public Field getField(String name) throws Exception {
 		Field field = this.getClazz().getDeclaredField(name);
 
-		if (field == null)
+		if (field == null) {
+			if (this.getClazz().getSuperclass() != null)
+				return this.getSuperReflection().getField(name);
+
 			throw new Exception(StringUtil.format("The field {0} was not found!", name));
+		}
 
 		field.setAccessible(true);
 		return field;
@@ -144,6 +154,9 @@ public class Reflection {
 			}
 		}
 
+		if (this.getClazz().getSuperclass() != null)
+			return this.getSuperReflection().getMethod(type, paramTypes);
+
 		throw new Exception(StringUtil.format("The method with return type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
 	}
 
@@ -159,6 +172,9 @@ public class Reflection {
 			}
 		}
 
+		if (this.getClazz().getSuperclass() != null)
+			return this.getSuperReflection().getMethod(name, paramTypes);
+
 		throw new Exception(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
 	}
 
@@ -168,6 +184,11 @@ public class Reflection {
 
 	public String getSubPackage() {
 		return this.subPackage;
+	}
+
+	private Reflection getSuperReflection() throws Exception {
+		Class<?> superClass = this.getClazz().getSuperclass();
+		return new Reflection(superClass.getSimpleName(), superClass.getPackage().toString());
 	}
 
 	public Object getValue(Class<?> type, Object obj) throws Exception {
