@@ -29,6 +29,10 @@ public class Reflection {
 		CORRESPONDING_TYPES.put(Boolean.class, boolean.class);
 	}
 
+	public Reflection(Class<?> clazz) {
+		this(clazz.getSimpleName(), clazz.getPackage().toString());
+	}
+
 	public Reflection(String className, String packagePath) {
 		this(className, "", packagePath);
 	}
