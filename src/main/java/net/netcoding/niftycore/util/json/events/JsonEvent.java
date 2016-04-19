@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.util.json.event;
+package net.netcoding.niftycore.util.json.events;
 
 abstract class JsonEvent<T> {
 

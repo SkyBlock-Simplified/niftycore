@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.util.json.event;
+package net.netcoding.niftycore.util.json.events;
 
 import net.netcoding.niftycore.util.json.JsonRepresentedObject;
 

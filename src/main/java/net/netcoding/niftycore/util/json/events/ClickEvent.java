@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.util.json.event;
+package net.netcoding.niftycore.util.json.events;
 
 public final class ClickEvent extends JsonEvent<String> {
 

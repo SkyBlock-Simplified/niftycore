@@ -8,8 +8,8 @@ import com.google.gson.stream.JsonWriter;
 import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.json.event.ClickEvent;
-import net.netcoding.niftycore.util.json.event.HoverEvent;
+import net.netcoding.niftycore.util.json.events.ClickEvent;
+import net.netcoding.niftycore.util.json.events.HoverEvent;
 
 import java.io.IOException;
 import java.io.StringWriter;
