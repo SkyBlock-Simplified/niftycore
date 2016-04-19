@@ -84,14 +84,18 @@ public class Reflection {
 		return this.getPackagePath() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
 	}
 
-	public Class<?> getClazz() throws Exception {
-		if (!CLASS_CACHE.containsKey(this.getClassPath()))
-			CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
+	public Class<?> getClazz() {
+		try {
+			if (!CLASS_CACHE.containsKey(this.getClassPath()))
+				CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
 
-		return CLASS_CACHE.get(this.getClassPath());
+			return CLASS_CACHE.get(this.getClassPath());
+		} catch (Exception ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
-	public Constructor<?> getConstructor(Class<?>... paramTypes) throws Exception {
+	public Constructor<?> getConstructor(Class<?>... paramTypes) {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		if (CONSTRUCTOR_CACHE.containsKey(this.getClazz())) {
@@ -115,10 +119,10 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getConstructor(paramTypes);
 
-		throw new Exception(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
+		throw new IllegalStateException(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
 	}
 
-	public Field getField(Class<?> type) throws Exception {
+	public Field getField(Class<?> type) {
 		for (Field field : this.getClazz().getDeclaredFields()) {
 			if (field.getType().equals(type) || type.isAssignableFrom(field.getType())) {
 				field.setAccessible(true);
@@ -129,24 +133,24 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getField(type);
 
-		throw new Exception(StringUtil.format("The field with type {0} was not found!", type));
+		throw new IllegalStateException(StringUtil.format("The field with type {0} was not found!", type));
 	}
 
-	public Field getField(String name) throws Exception {
-		Field field = this.getClazz().getDeclaredField(name);
-
-		if (field == null) {
-			if (this.getClazz().getSuperclass() != null)
-				return this.getSuperReflection().getField(name);
-
-			throw new Exception(StringUtil.format("The field {0} was not found!", name));
+	public Field getField(String name) {
+		for (Field field : this.getClazz().getDeclaredFields()) {
+			if (field.getName().equals(name)) {
+				field.setAccessible(true);
+				return field;
+			}
 		}
 
-		field.setAccessible(true);
-		return field;
+		if (this.getClazz().getSuperclass() != null)
+			return this.getSuperReflection().getField(name);
+
+		throw new IllegalStateException(StringUtil.format("The field {0} was not found!", name));
 	}
 
-	public Method getMethod(Class<?> type, Class<?>... paramTypes) throws Exception {
+	public Method getMethod(Class<?> type, Class<?>... paramTypes) {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		for (Method method : this.getClazz().getDeclaredMethods()) {
@@ -161,10 +165,10 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getMethod(type, paramTypes);
 
-		throw new Exception(StringUtil.format("The method with return type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
+		throw new IllegalStateException(StringUtil.format("The method with return type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
 	}
 
-	public Method getMethod(String name, Class<?>... paramTypes) throws Exception {
+	public Method getMethod(String name, Class<?>... paramTypes) {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		for (Method method : this.getClazz().getDeclaredMethods()) {
@@ -179,7 +183,7 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getMethod(name, paramTypes);
 
-		throw new Exception(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
+		throw new IllegalStateException(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
 	}
 
 	public String getPackagePath() {
@@ -190,7 +194,7 @@ public class Reflection {
 		return this.subPackage;
 	}
 
-	private Reflection getSuperReflection() throws Exception {
+	private Reflection getSuperReflection() {
 		Class<?> superClass = this.getClazz().getSuperclass();
 		return new Reflection(superClass.getSimpleName(), superClass.getPackage().toString());
 	}
