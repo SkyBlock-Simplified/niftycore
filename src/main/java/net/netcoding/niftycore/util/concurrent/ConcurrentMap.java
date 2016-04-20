@@ -1,5 +1,6 @@
 package net.netcoding.niftycore.util.concurrent;
 
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <K> type of keys
  * @param <V> type of values
  */
-public class ConcurrentMap<K, V> implements Map<K, V> {
+public class ConcurrentMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
 
 	private final AtomicReference<Map<K, V>> ref;
 
