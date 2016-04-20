@@ -30,7 +30,7 @@ public class Reflection {
 	}
 
 	public Reflection(Class<?> clazz) {
-		this(clazz.getSimpleName(), clazz.getPackage().toString());
+		this(clazz.getSimpleName(), clazz.getPackage().getName());
 	}
 
 	public Reflection(String className, String packagePath) {
