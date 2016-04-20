@@ -1,5 +1,6 @@
 package net.netcoding.niftycore.reflection;
 
+import net.netcoding.niftycore.reflection.exceptions.ReflectionException;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
@@ -84,18 +85,18 @@ public class Reflection {
 		return this.getPackagePath() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
 	}
 
-	public Class<?> getClazz() {
+	public Class<?> getClazz() throws ReflectionException {
 		try {
 			if (!CLASS_CACHE.containsKey(this.getClassPath()))
 				CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
 
 			return CLASS_CACHE.get(this.getClassPath());
 		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
+			throw new ReflectionException(ex);
 		}
 	}
 
-	public Constructor<?> getConstructor(Class<?>... paramTypes) {
+	public Constructor<?> getConstructor(Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		if (CONSTRUCTOR_CACHE.containsKey(this.getClazz())) {
@@ -119,10 +120,10 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getConstructor(paramTypes);
 
-		throw new IllegalStateException(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
+		throw new ReflectionException(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
 	}
 
-	public Field getField(Class<?> type) {
+	public Field getField(Class<?> type) throws ReflectionException {
 		for (Field field : this.getClazz().getDeclaredFields()) {
 			if (field.getType().equals(type) || type.isAssignableFrom(field.getType())) {
 				field.setAccessible(true);
@@ -133,10 +134,10 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getField(type);
 
-		throw new IllegalStateException(StringUtil.format("The field with type {0} was not found!", type));
+		throw new ReflectionException(StringUtil.format("The field with type {0} was not found!", type));
 	}
 
-	public Field getField(String name) {
+	public Field getField(String name) throws ReflectionException {
 		for (Field field : this.getClazz().getDeclaredFields()) {
 			if (field.getName().equals(name)) {
 				field.setAccessible(true);
@@ -147,10 +148,10 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getField(name);
 
-		throw new IllegalStateException(StringUtil.format("The field {0} was not found!", name));
+		throw new ReflectionException(StringUtil.format("The field {0} was not found!", name));
 	}
 
-	public Method getMethod(Class<?> type, Class<?>... paramTypes) {
+	public Method getMethod(Class<?> type, Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		for (Method method : this.getClazz().getDeclaredMethods()) {
@@ -165,10 +166,10 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getMethod(type, paramTypes);
 
-		throw new IllegalStateException(StringUtil.format("The method with return type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
+		throw new ReflectionException(StringUtil.format("The method with return type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
 	}
 
-	public Method getMethod(String name, Class<?>... paramTypes) {
+	public Method getMethod(String name, Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		for (Method method : this.getClazz().getDeclaredMethods()) {
@@ -183,7 +184,7 @@ public class Reflection {
 		if (this.getClazz().getSuperclass() != null)
 			return this.getSuperReflection().getMethod(name, paramTypes);
 
-		throw new IllegalStateException(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
+		throw new ReflectionException(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
 	}
 
 	public String getPackagePath() {
@@ -194,38 +195,66 @@ public class Reflection {
 		return this.subPackage;
 	}
 
-	private Reflection getSuperReflection() {
+	private Reflection getSuperReflection() throws ReflectionException {
 		Class<?> superClass = this.getClazz().getSuperclass();
 		return new Reflection(superClass.getSimpleName(), superClass.getPackage().toString());
 	}
 
-	public Object getValue(Class<?> type, Object obj) throws Exception {
-		return this.getField(type).get(obj);
+	public Object getValue(Class<?> type, Object obj) throws ReflectionException {
+		Field field = this.getField(type);
+
+		try {
+			return field.get(obj);
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
 	}
 
-	public Object getValue(String name, Object obj) throws Exception {
-		return this.getField(name).get(obj);
+	public Object getValue(String name, Object obj) throws ReflectionException {
+		Field field = this.getField(name);
+
+		try {
+			return field.get(obj);
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
 	}
 
-	public Object invokeMethod(Class<?> type, Object obj, Object... args) throws Exception {
-		return this.getMethod(type, toPrimitiveTypeArray(args)).invoke(obj, args);
+	public Object invokeMethod(Class<?> type, Object obj, Object... args) throws ReflectionException {
+		try {
+			return this.getMethod(type, toPrimitiveTypeArray(args)).invoke(obj, args);
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
 	}
 
-	public Object invokeMethod(String name, Object obj, Object... args) throws Exception {
-		return this.getMethod(name, toPrimitiveTypeArray(args)).invoke(obj, args);
+	public Object invokeMethod(String name, Object obj, Object... args) throws ReflectionException {
+		try {
+			return this.getMethod(name, toPrimitiveTypeArray(args)).invoke(obj, args);
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
 	}
 
-	public Object newInstance(Object... args) throws Exception {
-		return this.getConstructor(toPrimitiveTypeArray(args)).newInstance(args);
+	public Object newInstance(Object... args) throws ReflectionException {
+		try {
+			return this.getConstructor(toPrimitiveTypeArray(args)).newInstance(args);
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
 	}
 
-	public void setValue(Object obj, FieldEntry entry) throws Exception {
+	public void setValue(Object obj, FieldEntry entry) throws ReflectionException {
 		Field f = this.getField(entry.getKey());
-		f.setAccessible(true);
-		f.set(obj, entry.getValue());
+
+		try {
+			f.set(obj, entry.getValue());
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
 	}
 
-	public void setValues(Object obj, FieldEntry... entrys) throws Exception {
+	public void setValues(Object obj, FieldEntry... entrys) throws ReflectionException {
 		for (FieldEntry entry : entrys)
 			this.setValue(obj, entry);
 	}
