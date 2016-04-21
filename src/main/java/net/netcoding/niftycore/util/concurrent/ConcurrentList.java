@@ -1,5 +1,6 @@
 package net.netcoding.niftycore.util.concurrent;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @param <T> type of elements
  */
-public class ConcurrentList<T> implements List<T> {
+public class ConcurrentList<T> extends AbstractList<T>  implements List<T> {
 
 	private final AtomicReference<List<T>> ref;
 
