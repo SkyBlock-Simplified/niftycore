@@ -30,7 +30,7 @@ public class ByteUtil {
 	 * @param data to convert
 	 * @return converted objects in byte array
 	 */
-	public static byte[] toByteArray(Collection<Object> data) {
+	public static byte[] toByteArray(Collection<?> data) {
 		ByteArrayDataOutput output = ByteStreams.newDataOutput();
 
 		for (Object obj : data) {
