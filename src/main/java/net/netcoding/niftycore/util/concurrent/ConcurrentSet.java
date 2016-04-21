@@ -1,5 +1,6 @@
 package net.netcoding.niftycore.util.concurrent;
 
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @param <T> type of elements
  */
-public class ConcurrentSet<T> implements Set<T> {
+public class ConcurrentSet<T> extends AbstractSet<T> implements Set<T> {
 
 	private final AtomicReference<Set<T>> ref;
 
