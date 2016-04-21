@@ -77,11 +77,11 @@ public class Reflection {
 		return types;
 	}
 
-	public String getClassName() {
+	public final String getClassName() {
 		return this.className;
 	}
 
-	public String getClassPath() {
+	public final String getClassPath() {
 		return this.getPackagePath() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
 	}
 
@@ -187,11 +187,11 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
 	}
 
-	public String getPackagePath() {
+	public final String getPackagePath() {
 		return this.packagePath;
 	}
 
-	public String getSubPackage() {
+	public final String getSubPackage() {
 		return this.subPackage;
 	}
 
