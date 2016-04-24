@@ -197,7 +197,7 @@ public class Reflection {
 
 	private Reflection getSuperReflection() throws ReflectionException {
 		Class<?> superClass = this.getClazz().getSuperclass();
-		return new Reflection(superClass.getSimpleName(), superClass.getPackage().toString());
+		return new Reflection(superClass.getSimpleName(), superClass.getPackage().getName());
 	}
 
 	public Object getValue(Class<?> type, Object obj) throws ReflectionException {
