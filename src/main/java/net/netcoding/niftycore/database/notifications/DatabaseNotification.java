@@ -4,7 +4,7 @@ import net.netcoding.niftycore.NiftyCore;
 import net.netcoding.niftycore.database.factory.SQLFactory;
 import net.netcoding.niftycore.database.factory.callbacks.ResultCallback;
 import net.netcoding.niftycore.database.factory.callbacks.VoidResultCallback;
-import net.netcoding.niftycore.minecraft.MinecraftLogger;
+import net.netcoding.niftycore.minecraft.ConsoleLogger;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentList;
 
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * An sql listener used to check for updates to its associated table and notify plugins.
  */
-public class DatabaseNotification extends MinecraftLogger {
+public class DatabaseNotification extends ConsoleLogger {
 
 	private TriggerEvent event;
 	private final transient DatabaseListener listener;
