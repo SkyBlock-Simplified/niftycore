@@ -2,14 +2,13 @@ package net.netcoding.niftycore.util;
 
 import com.google.common.base.Joiner;
 import net.netcoding.niftycore.minecraft.ChatColor;
+import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A collection of string methods for easy string
@@ -17,7 +16,7 @@ import java.util.Map;
  */
 public class StringUtil {
 
-	private static final transient Map<String, MessageFormat> MESSAGE_CACHE = new HashMap<>();
+	private static final transient ConcurrentMap<String, MessageFormat> MESSAGE_CACHE = new ConcurrentMap<>();
 
 	/**
 	 * Returns a formatted string using a cached {@link MessageFormat}.
@@ -27,21 +26,25 @@ public class StringUtil {
 	 * @return a formatted string
 	 */
 	public static String format(String format, Object... objects) {
-		format = RegexUtil.replace(format, RegexUtil.LOG_PATTERN, (ChatColor.RED + "$1" + ChatColor.GRAY));
-		MessageFormat messageFormat = MESSAGE_CACHE.get(format);
+		if (!MESSAGE_CACHE.containsKey(format)) {
+			MessageFormat messageFormat = null;
+			String newFormat = RegexUtil.replace(format, RegexUtil.LOG_PATTERN, (ChatColor.RED + "$1" + ChatColor.GRAY));
 
-		if (messageFormat == null) {
 			try {
-				messageFormat = new MessageFormat(format);
-			} catch (IllegalArgumentException e) {
-				format = format.replaceAll("\\{(\\D*?)\\}", "\\[$1\\]");
-				messageFormat = new MessageFormat(format);
+				messageFormat = new MessageFormat(newFormat);
+			} catch (IllegalArgumentException iaex) {
+				newFormat = newFormat.replaceAll(RegexUtil.LOG_PATTERN.pattern(), "\\[$1\\]");
+
+				try {
+					messageFormat = new MessageFormat(newFormat);
+				} catch (IllegalArgumentException ignore) { }
 			}
 
 			MESSAGE_CACHE.put(format, messageFormat);
 		}
 
-		return messageFormat.format(objects);
+		MessageFormat messageFormat = MESSAGE_CACHE.get(format);
+		return (messageFormat != null ? messageFormat.format(objects) : format);
 	}
 
 	/**
