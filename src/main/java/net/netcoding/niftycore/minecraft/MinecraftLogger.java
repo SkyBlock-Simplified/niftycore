@@ -14,9 +14,19 @@ public abstract class MinecraftLogger {
 		this.logger = logger;
 	}
 
-	public String getPrefix(String text) {
-		return StringUtil.format("{0}[{1}{2}{0}]{3}", ChatColor.DARK_GRAY, ChatColor.RED, text, ChatColor.GRAY);
+	public void broadcast(Object... args) {
+		this.broadcast("", null, args);
 	}
+
+	public void broadcast(Throwable exception, Object... args) {
+		this.broadcast("", exception, args);
+	}
+
+	public void broadcast(String message, Object... args) {
+		this.broadcast(message, null, args);
+	}
+
+	public abstract void broadcast(String message, Throwable exception, Object... args);
 
 	public void console(Object... args) {
 		this.console("", null, args);
@@ -38,6 +48,10 @@ public abstract class MinecraftLogger {
 			this.logger.log(Level.SEVERE, message, exception);
 		else
 			this.logger.log(Level.INFO, message);
+	}
+
+	public String getPrefix(String text) {
+		return StringUtil.format("{0}[{1}{2}{0}]{3} ", ChatColor.DARK_GRAY, ChatColor.RED, text, ChatColor.GRAY);
 	}
 
 	public String parse(String message, Object... args) {
