@@ -244,21 +244,35 @@ public class Reflection {
 		}
 	}
 
-	public void setValue(Object obj, FieldEntry entry) throws ReflectionException {
-		Field f;
-
-		if (entry.iskeyBased())
-			f = this.getField(entry.getKey());
-		else
-			f = this.getField(entry.getClazz());
+	public void setValue(String name, Object obj, Object value) throws ReflectionException {
+		Field f = this.getField(name);
 
 		try {
-			f.set(obj, entry.getValue());
+			f.set(obj, value);
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
 	}
 
+	public void setValue(Class<?> clazz, Object obj, Object value) throws ReflectionException {
+		Field f = this.getField(clazz);
+
+		try {
+			f.set(obj, value);
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
+	}
+
+	@Deprecated
+	public void setValue(Object obj, FieldEntry entry) throws ReflectionException {
+		if (entry.iskeyBased())
+			this.setValue(entry.getKey(), obj, entry.getValue());
+		else
+			this.setValue(entry.getClazz(), obj, entry.getValue());
+	}
+
+	@Deprecated
 	public void setValues(Object obj, FieldEntry... entrys) throws ReflectionException {
 		for (FieldEntry entry : entrys)
 			this.setValue(obj, entry);
