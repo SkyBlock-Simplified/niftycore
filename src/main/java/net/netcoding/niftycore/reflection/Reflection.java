@@ -245,7 +245,12 @@ public class Reflection {
 	}
 
 	public void setValue(Object obj, FieldEntry entry) throws ReflectionException {
-		Field f = this.getField(entry.getKey());
+		Field f;
+
+		if (entry.iskeyBased())
+			f = this.getField(entry.getKey());
+		else
+			f = this.getField(entry.getClazz());
 
 		try {
 			f.set(obj, entry.getValue());
