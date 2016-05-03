@@ -13,7 +13,6 @@ import java.util.Arrays;
 
 public class Reflection extends Annotations {
 
-	public static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
 	private static final transient ConcurrentMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentMap<>();
 	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], Constructor<?>>> CONSTRUCTOR_CACHE = new ConcurrentMap<>();
 	private static final transient ConcurrentMap<String, Class<?>> CLASS_CACHE = new ConcurrentMap<>();

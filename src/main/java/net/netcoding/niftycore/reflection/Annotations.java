@@ -19,6 +19,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class Annotations {
 
+	public static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
 	private static Constructor<?> AnnotationInvocationHandler_constructor;
 	private static Constructor<?> AnnotationData_constructor;
 	private static Method Class_annotationData;
@@ -36,7 +37,7 @@ public class Annotations {
 			AnnotationInvocationHandler_constructor = AnnotationInvocationHandler_class.getDeclaredConstructor(Class.class, Map.class);
 			Class_classRedefinedCount = Class.class.getDeclaredField("classRedefinedCount");
 
-			if (Reflection.JAVA_VERSION >= 1.8) {
+			if (JAVA_VERSION >= 1.8) {
 				Atomic_class = Class.forName("java.lang.Class$Atomic");
 				Class<?> AnnotationData_class = Class.forName("java.lang.Class$AnnotationData");
 
@@ -51,7 +52,7 @@ public class Annotations {
 
 				Atomic_casAnnotationData = Atomic_class.getDeclaredMethod("casAnnotationData", Class.class, AnnotationData_class, AnnotationData_class);
 				Atomic_casAnnotationData.setAccessible(true);
-			} else if (Reflection.JAVA_VERSION >= 1.7) {
+			} else if (JAVA_VERSION >= 1.7) {
 				AnnotationData_annotations = Class.class.getDeclaredField("annotations");
 				AnnotationData_declaredAnotations = Class.class.getDeclaredField("declaredAnnotations");
 			}
@@ -104,7 +105,7 @@ public class Annotations {
 
 	public static <T extends Annotation> void putAnnotation(Class<?> clazz, Class<T> annotationClass, T annotation) throws ReflectionException {
 		try {
-			if (Reflection.JAVA_VERSION >= 1.8) {
+			if (JAVA_VERSION >= 1.8) {
 				while (true) { // retry loop
 					int classRedefinedCount = Class_classRedefinedCount.getInt(clazz);
 					Object annotationData = Class_annotationData.invoke(clazz); // 1.7+
@@ -115,7 +116,7 @@ public class Annotations {
 					if ((boolean) Atomic_casAnnotationData.invoke(Atomic_class, clazz, annotationData, newAnnotationData)) // 1.8+
 						break; // successfully installed new AnnotationData
 				}
-			} else if (Reflection.JAVA_VERSION >= 1.7) {
+			} else if (JAVA_VERSION >= 1.7) {
 				long declaredAnnotationsOffset = Reflection.getUnsafe().objectFieldOffset(AnnotationData_declaredAnotations);
 				long annotationsOffset = Reflection.getUnsafe().objectFieldOffset(AnnotationData_annotations);
 				Map<Class<? extends Annotation>, Annotation> declaredAnnotations = getDeclaredAnnotations(Class.class);
@@ -131,7 +132,7 @@ public class Annotations {
 						break;
 				}
 			} else
-				throw new ReflectionException(StringUtil.format("Runtime annotation modification does not support: {0}!", Reflection.JAVA_VERSION));
+				throw new ReflectionException(StringUtil.format("Runtime annotation modification does not support: {0}!", JAVA_VERSION));
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
