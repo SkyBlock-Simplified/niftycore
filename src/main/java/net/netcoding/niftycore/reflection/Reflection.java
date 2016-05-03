@@ -4,13 +4,14 @@ import net.netcoding.niftycore.reflection.exceptions.ReflectionException;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import sun.misc.Unsafe;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-public class Reflection {
+public class Reflection extends Annotations {
 
 	public static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
 	private static final transient ConcurrentMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentMap<>();
@@ -29,6 +30,8 @@ public class Reflection {
 		CORRESPONDING_TYPES.put(Float.class, float.class);
 		CORRESPONDING_TYPES.put(Double.class, double.class);
 		CORRESPONDING_TYPES.put(Boolean.class, boolean.class);
+
+		sun.reflect.Reflection.registerMethodsToFilter(Reflection.class, "getUnsafe");
 	}
 
 	public Reflection(Class<?> clazz) {
@@ -47,6 +50,20 @@ public class Reflection {
 
 	private static Class<?> getPrimitiveType(Class<?> clazz) {
 		return clazz != null ? CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz : null;
+	}
+
+	/**
+	 * WILL PROBABLY IMPLODE
+	 */
+	static Unsafe getUnsafe() throws ReflectionException {
+		try {
+			Class<?> c = Class.forName("sun.misc.Unsafe", false, Reflection.class.getClassLoader());
+			Field theUnsafe = c.getDeclaredField("theUnsafe");
+			theUnsafe.setAccessible(true);
+			return (Unsafe)theUnsafe.get(null);
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
 	}
 
 	private static boolean isEqualsTypeArray(Class<?>[] a, Class<?>[] o) {
@@ -106,7 +123,7 @@ public class Reflection {
 			if (constructors.containsKey(types))
 				return constructors.get(types);
 		} else
-			CONSTRUCTOR_CACHE.put(this.getClazz(), new ConcurrentMap<>());
+			CONSTRUCTOR_CACHE.put(this.getClazz(), new ConcurrentMap<Class<?>[], Constructor<?>>());
 
 		for (Constructor<?> constructor : this.getClazz().getDeclaredConstructors()) {
 			Class<?>[] constructorTypes = toPrimitiveTypeArray(constructor.getParameterTypes());
