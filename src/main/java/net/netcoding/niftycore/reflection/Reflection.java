@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 public class Reflection {
 
+	public static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
 	private static final transient ConcurrentMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentMap<>();
 	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], Constructor<?>>> CONSTRUCTOR_CACHE = new ConcurrentMap<>();
 	private static final transient ConcurrentMap<String, Class<?>> CLASS_CACHE = new ConcurrentMap<>();
@@ -105,7 +106,7 @@ public class Reflection {
 			if (constructors.containsKey(types))
 				return constructors.get(types);
 		} else
-			CONSTRUCTOR_CACHE.put(this.getClazz(), new ConcurrentMap<Class<?>[], Constructor<?>>());
+			CONSTRUCTOR_CACHE.put(this.getClazz(), new ConcurrentMap<>());
 
 		for (Constructor<?> constructor : this.getClazz().getDeclaredConstructors()) {
 			Class<?>[] constructorTypes = toPrimitiveTypeArray(constructor.getParameterTypes());
@@ -262,20 +263,6 @@ public class Reflection {
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
-	}
-
-	@Deprecated
-	public void setValue(Object obj, FieldEntry entry) throws ReflectionException {
-		if (entry.iskeyBased())
-			this.setValue(entry.getKey(), obj, entry.getValue());
-		else
-			this.setValue(entry.getClazz(), obj, entry.getValue());
-	}
-
-	@Deprecated
-	public void setValues(Object obj, FieldEntry... entrys) throws ReflectionException {
-		for (FieldEntry entry : entrys)
-			this.setValue(obj, entry);
 	}
 
 }
