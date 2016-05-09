@@ -17,37 +17,37 @@ import java.util.List;
 
 public class HttpClient {
 
-	private final int DEFAULT_TIMEOUT = 3000;
+	private static final int DEFAULT_TIMEOUT = 3000;
 
-	public HttpResponse get(URL url, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse get(URL url, HttpHeader... headers) throws HttpConnectionException {
 		return get(url, DEFAULT_TIMEOUT, Arrays.asList(headers));
 	}
 
-	public HttpResponse get(URL url, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse get(URL url, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return get(url, timeout, Arrays.asList(headers));
 	}
 
-	public HttpResponse get(URL url, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse get(URL url, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
 		return get(url, DEFAULT_TIMEOUT, proxy, Arrays.asList(headers));
 	}
 
-	public HttpResponse get(URL url, int timeout, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse get(URL url, int timeout, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
 		return get(url, timeout, proxy, Arrays.asList(headers));
 	}
 
-	public HttpResponse get(URL url, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse get(URL url, List<HttpHeader> headers) throws HttpConnectionException {
 		return get(url, null, headers);
 	}
 
-	public HttpResponse get(URL url, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse get(URL url, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		return get(url, timeout, null, headers);
 	}
 
-	public HttpResponse get(URL url, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse get(URL url, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
 		return get(url, DEFAULT_TIMEOUT, proxy, headers);
 	}
 
-	public HttpResponse get(URL url, int timeout, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse get(URL url, int timeout, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
 		HttpStatus status;
 		HttpBody response;
 
@@ -94,59 +94,59 @@ public class HttpClient {
 		return new HttpResponse(status, response);
 	}
 
-	public HttpResponse post(URL url, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, DEFAULT_TIMEOUT, headers);
 	}
 
-	public HttpResponse post(URL url, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, null, null, timeout, headers);
 	}
 
-	public HttpResponse post(URL url, HttpBody body, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, HttpBody body, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, null, body, DEFAULT_TIMEOUT, headers);
 	}
 
-	public HttpResponse post(URL url, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, Proxy proxy, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, proxy, null, DEFAULT_TIMEOUT, headers);
 	}
 
-	public HttpResponse post(URL url, HttpBody body, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, HttpBody body, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, null, body, timeout, headers);
 	}
 
-	public HttpResponse post(URL url, Proxy proxy, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, Proxy proxy, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, proxy, null, timeout, headers);
 	}
 
-	public HttpResponse post(URL url, Proxy proxy, HttpBody body, int timeout, HttpHeader... headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, Proxy proxy, HttpBody body, int timeout, HttpHeader... headers) throws HttpConnectionException {
 		return post(url, proxy, body, timeout, Arrays.asList(headers));
 	}
 
-	public HttpResponse post(URL url, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, null, null, DEFAULT_TIMEOUT, headers);
 	}
 
-	public HttpResponse post(URL url, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, null, null, timeout, headers);
 	}
 
-	public HttpResponse post(URL url, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, Proxy proxy, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, proxy, null, DEFAULT_TIMEOUT, headers);
 	}
 
-	public HttpResponse post(URL url, HttpBody body, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, HttpBody body, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, null, body, DEFAULT_TIMEOUT, headers);
 	}
 
-	public HttpResponse post(URL url, Proxy proxy, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, Proxy proxy, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, proxy, null, timeout, headers);
 	}
 
-	public HttpResponse post(URL url, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		return post(url, null, body, timeout, headers);
 	}
 
-	public HttpResponse post(URL url, Proxy proxy, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
+	public static HttpResponse post(URL url, Proxy proxy, HttpBody body, int timeout, List<HttpHeader> headers) throws HttpConnectionException {
 		HttpStatus status;
 		HttpBody response;
 
