@@ -22,6 +22,7 @@ public class InternalConverter {
 			this.addConverter(net.netcoding.niftycore.yaml.converters.Config.class);
 			this.addConverter(net.netcoding.niftycore.yaml.converters.Array.class);
 			this.addConverter(net.netcoding.niftycore.yaml.converters.List.class);
+			this.addConverter(net.netcoding.niftycore.yaml.converters.Enum.class);
 			this.addConverter(net.netcoding.niftycore.yaml.converters.Map.class);
 			this.addConverter(net.netcoding.niftycore.yaml.converters.Set.class);
 		} catch (InvalidConverterException icex) {
