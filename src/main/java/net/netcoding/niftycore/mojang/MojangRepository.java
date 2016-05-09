@@ -36,7 +36,6 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 	// API: http://wiki.vg/Mojang_API
 	protected static final transient ConcurrentSet<MojangProfile> CACHE = new ConcurrentSet<>();
-	protected static final transient HttpClient HTTP = new HttpClient();
 	protected static final transient Gson GSON = new Gson();
 	protected static final String SERVICE_API = "api.mojang.com";
 	protected static final int PROFILES_PER_REQUEST = 100;
@@ -72,7 +71,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 				boolean available = false;
 
 				try {
-					HttpResponse response = HTTP.get(getStatusUrl());
+					HttpResponse response = HttpClient.get(getStatusUrl());
 					JsonArray services = new JsonParser().parse(response.getBody().toString()).getAsJsonArray();
 
 					for (int i = 0; i < services.size(); i++) {
@@ -224,7 +223,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 					try {
 						if (wait > 0) Thread.sleep(wait);
-						HttpResponse response = HTTP.post(getProfilesUrl(), body, contentType);
+						HttpResponse response = HttpClient.post(getProfilesUrl(), body, contentType);
 
 						if (HttpStatus.NO_CONTENT != response.getStatus()) {
 							T[] result = GSON.fromJson(response.getBody().toString(), this.getSuperClassArray());
@@ -254,7 +253,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 					try {
 						if (wait > 0) Thread.sleep(wait);
-						HttpResponse response = HTTP.get(getProfilesUrl(user));
+						HttpResponse response = HttpClient.get(getProfilesUrl(user));
 
 						if (HttpStatus.NO_CONTENT != response.getStatus()) {
 							T result = GSON.fromJson(response.getBody().toString(), this.getSuperClass());
@@ -282,7 +281,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 
 					try {
 						if (wait > 0) Thread.sleep(wait);
-						HttpResponse response = HTTP.get(getProfilesUrl(user, false));
+						HttpResponse response = HttpClient.get(getProfilesUrl(user, false));
 
 						if (HttpStatus.NO_CONTENT != response.getStatus()) {
 							T result = GSON.fromJson(response.getBody().toString(), this.getSuperClass());
@@ -359,7 +358,7 @@ public abstract class MojangRepository<T extends MojangProfile> {
 				try {
 					long wait = LAST_HTTP_REQUEST + 100 - System.currentTimeMillis();
 					if (wait > 0) Thread.sleep(wait);
-					HttpResponse response = HTTP.get(getNamesUrl(uniqueId));
+					HttpResponse response = HttpClient.get(getNamesUrl(uniqueId));
 
 					if (HttpStatus.NO_CONTENT != response.getStatus()) {
 						UUIDSearchResult[] results = GSON.fromJson(response.getBody().toString(), UUIDSearchResult[].class);
