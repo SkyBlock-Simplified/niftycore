@@ -8,21 +8,21 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 public class InternalConverter {
 
-	private final transient Set<Converter> converters = new HashSet<>();
-	private final transient Set<Class<? extends Converter>> customConverters = new HashSet<>();
+	private final transient LinkedHashSet<Converter> converters = new LinkedHashSet<>();
+	private final transient LinkedHashSet<Converter> customConverters = new LinkedHashSet<>();
+	//private final transient Set<Class<? extends Converter>> customConverters = new HashSet<>();
 
 	public InternalConverter() {
 		try {
-			this.addConverter(net.netcoding.niftycore.yaml.converters.Array.class);
+			this.addConverter(net.netcoding.niftycore.yaml.converters.Primitive.class);
 			this.addConverter(net.netcoding.niftycore.yaml.converters.Config.class);
+			this.addConverter(net.netcoding.niftycore.yaml.converters.Array.class);
 			this.addConverter(net.netcoding.niftycore.yaml.converters.List.class);
 			this.addConverter(net.netcoding.niftycore.yaml.converters.Map.class);
-			this.addConverter(net.netcoding.niftycore.yaml.converters.Primitive.class);
 			this.addConverter(net.netcoding.niftycore.yaml.converters.Set.class);
 		} catch (InvalidConverterException icex) {
 			throw new IllegalStateException(icex);
@@ -30,8 +30,12 @@ public class InternalConverter {
 	}
 
 	private void addConverter(Class<? extends Converter> converter) throws InvalidConverterException {
+		this.addConverter(converter, this.converters);
+	}
+
+	private void addConverter(Class<? extends Converter> converter, LinkedHashSet<Converter> converters) throws InvalidConverterException {
 		try {
-			this.converters.add(converter.getConstructor(InternalConverter.class).newInstance(this));
+			converters.add(converter.getConstructor(InternalConverter.class).newInstance(this));
 		} catch (NoSuchMethodException nsmex) {
 			throw new InvalidConverterException("Converter does not implement a constructor which takes the InternalConverter instance!", nsmex);
 		} catch (InvocationTargetException itex) {
@@ -43,9 +47,9 @@ public class InternalConverter {
 		}
 	}
 
-	public void addCustomConverter(Class<? extends Converter> converter) throws InvalidConverterException {
-		this.addConverter(converter);
-		this.customConverters.add(converter);
+	protected void addCustomConverter(Class<? extends Converter> converter) throws InvalidConverterException {
+		this.addConverter(converter, this.customConverters);
+		//this.customConverters.add(converter);
 	}
 
 	public void fromConfig(YamlConfig yamlConfig, Field field, ConfigSection root, String path) throws Exception {
@@ -98,8 +102,13 @@ public class InternalConverter {
 		field.set(yamlConfig, root.get(path));
 	}
 
-	public Converter getConverter(Class<?> type) {
-		for(Converter converter : this.converters) {
+	public final Converter getConverter(Class<?> type) {
+		for (Converter converter : this.customConverters) {
+			if (converter.supports(type))
+				return converter;
+		}
+
+		for (Converter converter : this.converters) {
 			if (converter.supports(type))
 				return converter;
 		}
@@ -107,9 +116,9 @@ public class InternalConverter {
 		return null;
 	}
 
-	public Set<Class<? extends Converter>> getCustomConverters() {
-		return this.customConverters;
-	}
+	//public final Set<Class<? extends Converter>> getCustomConverters() {
+	//	return Collections.unmodifiableSet(this.customConverters);
+	//}
 
 	public void toConfig(YamlConfig yamlConfig, Field field, ConfigSection root, String path) throws Exception {
 		Object obj = field.get(yamlConfig);
