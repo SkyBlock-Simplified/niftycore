@@ -1,9 +1,10 @@
-package net.netcoding.niftycore.util.concurrent;
+package net.netcoding.niftycore.util.concurrent.linked;
 
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -17,33 +18,33 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @param <T> type of elements
  */
-public class ConcurrentSet<T> extends AbstractSet<T> implements Set<T> {
+public class ConcurrentLinkedSet<T> extends AbstractSet<T> implements Set<T> {
 
-	private final AtomicReference<HashSet<T>> ref;
+	private final AtomicReference<LinkedHashSet<T>> ref;
 
 	/**
 	 * Create a new concurrent set.
 	 */
-	public ConcurrentSet() {
-		this.ref = new AtomicReference<>(new HashSet<T>());
+	public ConcurrentLinkedSet() {
+		this.ref = new AtomicReference<>(new LinkedHashSet<T>());
 	}
 
 	/**
 	 * Create a new concurrent set and fill it with the given collection.
 	 */
-	public ConcurrentSet(Collection<? extends T> collection) {
-		this.ref = new AtomicReference<>(new HashSet<>(collection));
+	public ConcurrentLinkedSet(Collection<? extends T> collection) {
+		this.ref = new AtomicReference<>(new LinkedHashSet<>(collection));
 	}
 
 	@Override
 	public boolean add(T item) {
 		while (true) {
-			HashSet<T> current = this.ref.get();
+			LinkedHashSet<T> current = this.ref.get();
 
 			if (current.contains(item))
 				return false;
 
-			HashSet<T> modified = new HashSet<>(current);
+			LinkedHashSet<T> modified = new LinkedHashSet<>(current);
 			modified.add(item);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -54,8 +55,8 @@ public class ConcurrentSet<T> extends AbstractSet<T> implements Set<T> {
 	@Override
 	public boolean addAll(Collection<? extends T> collection) {
 		while (true) {
-			HashSet<T> current = this.ref.get();
-			HashSet<T> modified = new HashSet<>(current);
+			LinkedHashSet<T> current = this.ref.get();
+			LinkedHashSet<T> modified = new LinkedHashSet<>(current);
 			modified.addAll(collection);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -92,25 +93,26 @@ public class ConcurrentSet<T> extends AbstractSet<T> implements Set<T> {
 	@Override
 	public boolean remove(Object item) {
 		while (true) {
-			HashSet<T> current = this.ref.get();
+			LinkedHashSet<T> current = this.ref.get();
 
 			if (!current.contains(item))
 				return false;
 
-			HashSet<T> modified = new HashSet<>(current);
-			boolean result = modified.remove(item);
+			LinkedHashSet<T> modified = new LinkedHashSet<>(current);
+			modified.remove(item);
 
 			if (this.ref.compareAndSet(current, modified))
-				return result;
+				return true;
 		}
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
 		while (true) {
-			HashSet<T> current = this.ref.get();
-			HashSet<T> modified = new HashSet<>(current);
+			LinkedHashSet<T> current = this.ref.get();
+			LinkedHashSet<T> modified = new LinkedHashSet<>(current);
 			boolean result = modified.removeAll(c);
+			super.toArray();
 
 			if (this.ref.compareAndSet(current, modified))
 				return result;

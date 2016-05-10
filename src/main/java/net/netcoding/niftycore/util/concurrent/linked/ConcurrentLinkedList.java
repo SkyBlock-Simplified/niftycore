@@ -1,9 +1,10 @@
-package net.netcoding.niftycore.util.concurrent;
+package net.netcoding.niftycore.util.concurrent.linked;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,29 +19,29 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @param <T> type of elements
  */
-public class ConcurrentList<T> extends AbstractList<T> implements List<T> {
+public class ConcurrentLinkedList<T> extends AbstractList<T> implements List<T> {
 
-	private final AtomicReference<ArrayList<T>> ref;
+	private final AtomicReference<LinkedList<T>> ref;
 
 	/**
 	 * Create a new concurrent list.
 	 */
-	public ConcurrentList() {
-		this.ref = new AtomicReference<>(new ArrayList<T>());
+	public ConcurrentLinkedList() {
+		this.ref = new AtomicReference<>(new LinkedList<T>());
 	}
 
 	/**
 	 * Create a new concurrent list and fill it with the given collection.
 	 */
-	public ConcurrentList(Collection<? extends T> collection) {
-		this.ref = new AtomicReference<>(new ArrayList<>(collection));
+	public ConcurrentLinkedList(Collection<? extends T> collection) {
+		this.ref = new AtomicReference<>(new LinkedList<>(collection));
 	}
 
 	@Override
 	public void add(int index, T item) {
 		while (true) {
-			ArrayList<T> current = this.ref.get();
-			ArrayList<T> modified = new ArrayList<>(current);
+			LinkedList<T> current = this.ref.get();
+			LinkedList<T> modified = new LinkedList<>(current);
 			modified.add(index, item);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -51,8 +52,8 @@ public class ConcurrentList<T> extends AbstractList<T> implements List<T> {
 	@Override
 	public boolean add(T item) {
 		while (true) {
-			ArrayList<T> current = this.ref.get();
-			ArrayList<T> modified = new ArrayList<>(current);
+			LinkedList<T> current = this.ref.get();
+			LinkedList<T> modified = new LinkedList<>(current);
 			modified.add(item);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -63,8 +64,8 @@ public class ConcurrentList<T> extends AbstractList<T> implements List<T> {
 	@Override
 	public boolean addAll(Collection<? extends T> collection) {
 		while (true) {
-			ArrayList<T> current = this.ref.get();
-			ArrayList<T> modified = new ArrayList<>(current);
+			LinkedList<T> current = this.ref.get();
+			LinkedList<T> modified = new LinkedList<>(current);
 			modified.addAll(collection);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -75,8 +76,8 @@ public class ConcurrentList<T> extends AbstractList<T> implements List<T> {
 	@Override
 	public boolean addAll(int index, Collection<? extends T> collection) {
 		while (true) {
-			ArrayList<T> current = this.ref.get();
-			ArrayList<T> modified = new ArrayList<>(current);
+			LinkedList<T> current = this.ref.get();
+			LinkedList<T> modified = new LinkedList<>(current);
 			modified.addAll(index, collection);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -137,12 +138,12 @@ public class ConcurrentList<T> extends AbstractList<T> implements List<T> {
 	@Override
 	public T remove(int index) {
 		while (true) {
-			ArrayList<T> current = this.ref.get();
+			LinkedList<T> current = this.ref.get();
 
 			if (index >= current.size())
 				return null;
 
-			ArrayList<T> modified = new ArrayList<>(current);
+			LinkedList<T> modified = new LinkedList<>(current);
 			T item = modified.remove(index);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -154,12 +155,12 @@ public class ConcurrentList<T> extends AbstractList<T> implements List<T> {
 	@Override
 	public boolean remove(Object item) {
 		while (true) {
-			ArrayList<T> current = this.ref.get();
+			LinkedList<T> current = this.ref.get();
 
 			if (!current.contains(item))
 				return false;
 
-			ArrayList<T> modified = new ArrayList<>(current);
+			LinkedList<T> modified = new LinkedList<>(current);
 			boolean result = modified.remove(item);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -170,8 +171,8 @@ public class ConcurrentList<T> extends AbstractList<T> implements List<T> {
 	@Override
 	public boolean removeAll(Collection<?> c) {
 		while (true) {
-			ArrayList<T> current = this.ref.get();
-			ArrayList<T> modified = new ArrayList<>(current);
+			LinkedList<T> current = this.ref.get();
+			LinkedList<T> modified = new LinkedList<>(current);
 			boolean result = modified.removeAll(c);
 
 			if (this.ref.compareAndSet(current, modified))
@@ -187,8 +188,8 @@ public class ConcurrentList<T> extends AbstractList<T> implements List<T> {
 	@Override
 	public T set(int index, T item) {
 		while (true) {
-			ArrayList<T> current = this.ref.get();
-			ArrayList<T> modified = new ArrayList<>(current);
+			LinkedList<T> current = this.ref.get();
+			LinkedList<T> modified = new LinkedList<>(current);
 			modified.set(index, item);
 
 			if (this.ref.compareAndSet(current, modified))
