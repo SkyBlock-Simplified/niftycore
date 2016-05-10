@@ -8,13 +8,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class InternalConverter {
 
 	private final transient LinkedHashSet<Converter> converters = new LinkedHashSet<>();
 	private final transient LinkedHashSet<Converter> customConverters = new LinkedHashSet<>();
-	//private final transient Set<Class<? extends Converter>> customConverters = new HashSet<>();
+	private final transient Set<Class<? extends Converter>> customConverterClasses = new HashSet<>();
 
 	public InternalConverter() {
 		try {
@@ -50,7 +53,7 @@ public class InternalConverter {
 
 	protected void addCustomConverter(Class<? extends Converter> converter) throws InvalidConverterException {
 		this.addConverter(converter, this.customConverters);
-		//this.customConverters.add(converter);
+		this.customConverterClasses.add(converter);
 	}
 
 	public void fromConfig(YamlConfig yamlConfig, Field field, ConfigSection root, String path) throws Exception {
@@ -117,9 +120,9 @@ public class InternalConverter {
 		return null;
 	}
 
-	//public final Set<Class<? extends Converter>> getCustomConverters() {
-	//	return Collections.unmodifiableSet(this.customConverters);
-	//}
+	public final Set<Class<? extends Converter>> getCustomConverters() {
+		return Collections.unmodifiableSet(this.customConverterClasses);
+	}
 
 	public void toConfig(YamlConfig yamlConfig, Field field, ConfigSection root, String path) throws Exception {
 		Object obj = field.get(yamlConfig);

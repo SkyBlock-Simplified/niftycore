@@ -16,7 +16,7 @@ public abstract class Converter {
 		return this.converter.getConverter(type);
 	}
 
-	protected java.util.Set<Class<? extends Converter>> getCustomConverters() {
+	protected final java.util.Set<Class<? extends Converter>> getCustomConverters() {
 		return this.converter.getCustomConverters();
 	}
 
