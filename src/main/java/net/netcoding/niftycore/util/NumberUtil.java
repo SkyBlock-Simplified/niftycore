@@ -44,7 +44,7 @@ public class NumberUtil {
 	 * @return a random integer between the specified boundaries
 	 */
 	public static int rand(int minimum, int maximum) {
-		return ThreadLocalRandom.current().nextInt(minimum, maximum + (maximum < Integer.MAX_VALUE ? 1 : 0));
+		return ThreadLocalRandom.current().nextInt(minimum, maximum + 1);
 	}
 
 	/**
