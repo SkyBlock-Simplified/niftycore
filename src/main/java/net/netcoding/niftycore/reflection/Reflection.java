@@ -11,9 +11,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+@SuppressWarnings("AccessOfSystemProperties")
 public class Reflection {
 
-	public static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
+	private static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
 	private static final transient ConcurrentMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentMap<>();
 	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], Constructor<?>>> CONSTRUCTOR_CACHE = new ConcurrentMap<>();
 	private static final transient ConcurrentMap<String, Class<?>> CLASS_CACHE = new ConcurrentMap<>();
@@ -46,53 +47,6 @@ public class Reflection {
 		this.className = className;
 		this.subPackage = StringUtil.stripNull(subPackage).replaceAll("\\.$", "").replaceAll("^\\.", "");
 		this.packagePath = packagePath;
-	}
-
-	private static Class<?> getPrimitiveType(Class<?> clazz) {
-		return clazz != null ? CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz : null;
-	}
-
-	/**
-	 * WILL PROBABLY IMPLODE
-	 */
-	static Unsafe getUnsafe() throws ReflectionException {
-		try {
-			Class<?> c = Class.forName("sun.misc.Unsafe", false, Reflection.class.getClassLoader());
-			Field theUnsafe = c.getDeclaredField("theUnsafe");
-			theUnsafe.setAccessible(true);
-			return (Unsafe)theUnsafe.get(null);
-		} catch (Exception ex) {
-			throw new ReflectionException(ex);
-		}
-	}
-
-	private static boolean isEqualsTypeArray(Class<?>[] a, Class<?>[] o) {
-		if (a.length != o.length) return false;
-
-		for (int i = 0; i < a.length; i++) {
-			if (o[i] != null && !a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
-				return false;
-		}
-
-		return true;
-	}
-
-	private static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
-		Class<?>[] types = new Class<?>[ListUtil.notEmpty(classes) ? classes.length : 0];
-
-		for (int i = 0; i < types.length; i++)
-			types[i] = getPrimitiveType(classes[i]);
-
-		return types;
-	}
-
-	private static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
-		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
-
-		for (int i = 0; i < types.length; i++)
-			types[i] = getPrimitiveType(objects[i] != null ? objects[i].getClass() : null);
-
-		return types;
 	}
 
 	public final String getClassName() {
@@ -169,6 +123,10 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The field {0} was not found!", name));
 	}
 
+	public static double getJavaVersion() {
+		return JAVA_VERSION;
+	}
+
 	public Method getMethod(Class<?> type, Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
@@ -209,6 +167,10 @@ public class Reflection {
 		return this.packagePath;
 	}
 
+	public static Class<?> getPrimitiveType(Class<?> clazz) {
+		return (clazz != null ? (CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz) : null);
+	}
+
 	public final String getSubPackage() {
 		return this.subPackage;
 	}
@@ -236,6 +198,31 @@ public class Reflection {
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
+	}
+
+	/**
+	 * WILL PROBABLY IMPLODE
+	 */
+	static Unsafe getUnsafe() throws ReflectionException {
+		try {
+			Class<?> c = Class.forName("sun.misc.Unsafe", false, Reflection.class.getClassLoader());
+			Field theUnsafe = c.getDeclaredField("theUnsafe");
+			theUnsafe.setAccessible(true);
+			return (Unsafe)theUnsafe.get(null);
+		} catch (Exception ex) {
+			throw new ReflectionException(ex);
+		}
+	}
+
+	private static boolean isEqualsTypeArray(Class<?>[] a, Class<?>[] o) {
+		if (a.length != o.length) return false;
+
+		for (int i = 0; i < a.length; i++) {
+			if (o[i] != null && !a[i].equals(o[i]) && !a[i].isAssignableFrom(o[i]))
+				return false;
+		}
+
+		return true;
 	}
 
 	public Object invokeMethod(Class<?> type, Object obj, Object... args) throws ReflectionException {
@@ -280,6 +267,24 @@ public class Reflection {
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
+	}
+
+	public static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
+		Class<?>[] types = new Class<?>[ListUtil.notEmpty(classes) ? classes.length : 0];
+
+		for (int i = 0; i < types.length; i++)
+			types[i] = getPrimitiveType(classes[i]);
+
+		return types;
+	}
+
+	public static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
+		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
+
+		for (int i = 0; i < types.length; i++)
+			types[i] = getPrimitiveType(objects[i] != null ? objects[i].getClass() : null);
+
+		return types;
 	}
 
 }
