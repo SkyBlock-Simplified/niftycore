@@ -19,6 +19,35 @@ public class StringUtil {
 	private static final transient ConcurrentMap<String, MessageFormat> MESSAGE_CACHE = new ConcurrentMap<>();
 
 	/**
+	 * Encodes unicode characters in a string.
+	 *
+	 * @param value String to encode
+	 * @return Encoded unicode version of the string
+	 */
+	public static String escapeUnicode(String value) {
+		StringBuilder builder = new StringBuilder();
+
+		for (int i = 0; i < value.length(); i++) {
+			int codePoint = Character.codePointAt(value, i);
+			int charCount = Character.charCount(codePoint);
+
+			if (charCount > 1) {
+				i += charCount - 1;
+
+				if (i >= value.length())
+					throw new IllegalArgumentException("Truncated value unexpectedly!");
+			}
+
+			if (codePoint < 128)
+				builder.appendCodePoint(codePoint);
+			else
+				builder.append(String.format("\\u%x", codePoint));
+		}
+
+		return builder.toString();
+	}
+
+	/**
 	 * Returns a formatted string using a cached {@link MessageFormat}.
 	 *
 	 * @param format to format objects with
@@ -257,6 +286,17 @@ public class StringUtil {
 	}
 
 	/**
+	 * Repeats the string {@code value} by the passed number of {@code times}.
+	 *
+	 * @param value The value to repeat.
+	 * @param times The number of times to repeat.
+	 * @return a repeated string of the specified value
+	 */
+	public static String repeat(String value, int times) {
+		return new String(new char[value.length() * times]).replaceAll("\0", value);
+	}
+
+	/**
 	 * Removes null from {@code value} and will either be an empty
 	 * value or the original passed value.
 	 *
@@ -276,35 +316,6 @@ public class StringUtil {
 	 */
 	public static List<String> toList(String... array) {
 		return new ArrayList<>(Arrays.asList(ListUtil.isEmpty(array) ? new String[] {} : array));
-	}
-
-	/**
-	 * Encodes unicode characters in a string.
-	 *
-	 * @param value String to encode
-	 * @return Encoded unicode version of the string
-	 */
-	public static String escapeUnicode(String value) {
-		StringBuilder builder = new StringBuilder();
-
-		for (int i = 0; i < value.length(); i++) {
-			int codePoint = Character.codePointAt(value, i);
-			int charCount = Character.charCount(codePoint);
-
-			if (charCount > 1) {
-				i += charCount - 1;
-
-				if (i >= value.length())
-					throw new IllegalArgumentException("Truncated value unexpectedly!");
-			}
-
-			if (codePoint < 128)
-				builder.appendCodePoint(codePoint);
-			else
-				builder.append(String.format("\\u%x", codePoint));
-		}
-
-		return builder.toString();
 	}
 
 }
