@@ -2,10 +2,6 @@ package net.netcoding.niftycore.yaml;
 
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.yaml.annotations.ConfigMode;
-import net.netcoding.niftycore.yaml.annotations.Path;
-import net.netcoding.niftycore.yaml.annotations.PreserveStatic;
-import net.netcoding.niftycore.yaml.converters.Converter;
 import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -22,21 +18,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class ConfigMapper {
+public abstract class ConfigMapper extends YamlMap {
 
 	private final transient Yaml yaml;
 	private final Map<String, ArrayList<String>> comments = new LinkedHashMap<>();
 	private String[] header;
 	final transient NullRepresenter representer = new NullRepresenter();
-	final transient InternalConverter converter = new InternalConverter();
 	final File configFile;
 	transient ConfigSection root;
 
@@ -58,18 +50,8 @@ public abstract class ConfigMapper {
 		this.comments.get(key).add(value);
 	}
 
-	public void addCustomConverter(Class<? extends Converter> converter) {
-		this.converter.addCustomConverter(converter);
-	}
-
 	public void clearComments() {
 		this.comments.clear();
-	}
-
-	public static ConfigSection convertFromMap(Map<?, ?> config) {
-		ConfigSection section = new ConfigSection();
-		section.map.putAll(config);
-		return section;
 	}
 
 	private void convertMapsToSections(Map<?, ?> input, ConfigSection section) {
@@ -86,16 +68,6 @@ public abstract class ConfigMapper {
 		}
 	}
 
-	protected static boolean doSkip(Field field) {
-		if (Modifier.isTransient(field.getModifiers()) || Modifier.isFinal(field.getModifiers()))
-			return true;
-
-		if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(PreserveStatic.class))
-			return !field.getAnnotation(PreserveStatic.class).value();
-
-		return false;
-	}
-
 	public final String getAbsolutePath() {
 		return this.configFile.getAbsolutePath();
 	}
@@ -106,46 +78,6 @@ public abstract class ConfigMapper {
 
 	public final String getName() {
 		return this.getFullName().replace(".yml", "");
-	}
-
-	protected final String getPathMode(Field field) {
-		String path = field.getName();
-
-		if (this.getClass().isAnnotationPresent(ConfigMode.class)) {
-			switch (this.getClass().getAnnotation(ConfigMode.class).type()) {
-				case FIELD_IS_KEY:
-					path = path.replace("_", ".");
-					break;
-				case PATH_BY_UNDERSCORE:
-					break;
-				case DEFAULT:
-				default:
-					if (path.contains("_"))
-						path = path.replace("_", ".");
-
-					break;
-			}
-		}
-
-		return path;
-	}
-
-	public void loadFromMap(Map<?, ?> section, Class<?> clazz) throws Exception {
-		if (!clazz.getSuperclass().equals(YamlConfig.class))
-			loadFromMap(section, clazz.getSuperclass());
-
-		for (Field field : this.getClass().getDeclaredFields()) {
-			if (doSkip(field)) continue;
-			String path = this.getPathMode(field);
-
-			if (field.isAnnotationPresent(Path.class))
-				path = field.getAnnotation(Path.class).value();
-
-			if (Modifier.isPrivate(field.getModifiers()))
-				field.setAccessible(true);
-
-			this.converter.fromConfig((YamlConfig)this, field, convertFromMap(section), path);
-		}
 	}
 
 	protected void loadFromYaml() throws InvalidConfigurationException {
@@ -159,36 +91,6 @@ public abstract class ConfigMapper {
 		} catch (IOException | ClassCastException | YAMLException ex) {
 			throw new InvalidConfigurationException("Could not load YML", ex);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> saveToMap(Class<?> clazz) throws Exception {
-		Map<String, Object> returnMap = new HashMap<>();
-
-		if (!clazz.getSuperclass().equals(YamlConfig.class) && !clazz.getSuperclass().equals(Object.class)) {
-			Map<String, Object> map = saveToMap(clazz.getSuperclass());
-
-			for (Map.Entry<String, Object> entry : map.entrySet())
-				returnMap.put(entry.getKey(), entry.getValue());
-		}
-
-		for (Field field : this.getClass().getDeclaredFields()) {
-			if (doSkip(field)) continue;
-			String path = this.getPathMode(field);
-
-			if (field.isAnnotationPresent(Path.class))
-				path = field.getAnnotation(Path.class).value();
-
-			if (Modifier.isPrivate(field.getModifiers()))
-				field.setAccessible(true);
-
-			try {
-				returnMap.put(path, field.get(this));
-			} catch (IllegalAccessException ignore) { }
-		}
-
-		Converter converter = this.converter.getConverter(Map.class);
-		return (Map<String, Object>)converter.toConfig(HashMap.class, returnMap, null);
 	}
 
 	protected void saveToYaml() throws InvalidConfigurationException {
