@@ -3,14 +3,12 @@ package net.netcoding.niftycore.util;
 import net.netcoding.niftycore.util.comparator.LastCharCompare;
 
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexUtil {
 
-	private static final transient MaxSizeHashMap<String, String> ORDERED_MESSAGES = new MaxSizeHashMap<>(50);
+	private static final transient MaxSizeLinkedMap<String, String> ORDERED_MESSAGES = new MaxSizeLinkedMap<>(50);
 	private static final transient LastCharCompare CODE_COMPARE = new LastCharCompare();
 	private static final transient String ALL_PATTERN = "[0-9A-FK-ORa-fk-or]";
 	public static final transient String SECTOR_SYMBOL = "\u00a7";
@@ -71,29 +69,6 @@ public class RegexUtil {
 
 	public static String strip(String message, Pattern pattern) {
 		return replace(message, pattern, "");
-	}
-
-	private static class MaxSizeHashMap<K, V> extends LinkedHashMap<K, V> {
-
-		private final int maxSize;
-
-		public MaxSizeHashMap() {
-			this(Integer.MAX_VALUE);
-		}
-
-		public MaxSizeHashMap(int maxSize) {
-			this.maxSize = maxSize;
-		}
-
-		public boolean removeEldestEntry() {
-			return this.removeEldestEntry(null);
-		}
-
-		@Override
-		protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-			return this.size() > this.maxSize;
-		}
-
 	}
 
 }
