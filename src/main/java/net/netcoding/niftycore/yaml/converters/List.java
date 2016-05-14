@@ -1,5 +1,6 @@
 package net.netcoding.niftycore.yaml.converters;
 
+import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.yaml.InternalConverter;
 
 import java.lang.reflect.ParameterizedType;
@@ -27,9 +28,9 @@ public class List extends Converter {
 			if (converter != null) {
 				for (Object value : values)
 					newList.add(converter.fromConfig((Class<?>)genericType.getActualTypeArguments()[0], value, null));
-			} else
+			} else if (ListUtil.notEmpty(values))
 				newList.addAll(values);
-		} else
+		} else if (ListUtil.notEmpty(values))
 			newList.addAll(values);
 
 		return newList;
@@ -40,9 +41,11 @@ public class List extends Converter {
 		java.util.List<Object> values = (java.util.List<Object>)obj;
 		java.util.List<Object> newList = new ArrayList<>();
 
-		for (Object value : values) {
-			Converter converter = this.getConverter(value.getClass());
-			newList.add(converter != null ? converter.toConfig(value.getClass(), value, null) : value);
+		if (ListUtil.notEmpty(values)) {
+			for (Object value : values) {
+				Converter converter = this.getConverter(value.getClass());
+				newList.add(converter != null ? converter.toConfig(value.getClass(), value, null) : value);
+			}
 		}
 
 		return newList;
