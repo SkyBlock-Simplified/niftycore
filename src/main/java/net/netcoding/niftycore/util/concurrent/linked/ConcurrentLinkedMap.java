@@ -1,6 +1,5 @@
 package net.netcoding.niftycore.util.concurrent.linked;
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <K> type of keys
  * @param <V> type of values
  */
-public class ConcurrentLinkedMap<K, V> extends AbstractMap<K, V> implements Map<K, V> {
+public class ConcurrentLinkedMap<K, V> extends LinkedHashMap<K, V> implements Map<K, V> {
 
 	private final AtomicReference<LinkedHashMap<K, V>> ref;
 
@@ -27,6 +26,7 @@ public class ConcurrentLinkedMap<K, V> extends AbstractMap<K, V> implements Map<
 	 * Create a new concurrent map.
 	 */
 	public ConcurrentLinkedMap() {
+
 		this.ref = new AtomicReference<>(new LinkedHashMap<K, V>());
 	}
 
