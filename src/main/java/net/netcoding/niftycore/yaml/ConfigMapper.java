@@ -110,6 +110,7 @@ public abstract class ConfigMapper extends YamlMap {
 
 			for (int y = 0; y < yamlSplit.length; y++) {
 				String line = yamlSplit[y];
+				int spaces = line.length() - line.replaceAll("^\\s+", "").length();
 
 				if (line.startsWith(new String(new char[depth]).replace("\0", " "))) {
 					keyChain.add(line.split(":")[0].trim());
@@ -118,21 +119,6 @@ public abstract class ConfigMapper extends YamlMap {
 					if (line.startsWith(new String(new char[depth - 2]).replace("\0", " ")))
 						keyChain.remove(keyChain.size() - 1);
 					else {
-						int spaces = line.length() - line.replaceAll("^\\s+", "").length();
-
-						if (spaces == 0) {
-							if (y > 0){// && y < yamlSplit.length - 1) {
-								String nextLine = yamlSplit[y + 1];
-								int nextSpaces = nextLine.length() - nextLine.replaceAll("^\\s+", "").length();
-
-								if (nextSpaces == 0) {
-									writeLines.append('\n');
-									System.out.println("Increase Spacing 1: " + line + ":" + depth);
-								}
-							}
-							//writeLines.append('\n');
-						}
-
 						if (spaces == 0) {
 							keyChain = new ArrayList<>();
 							depth = 2;
@@ -162,20 +148,17 @@ public abstract class ConfigMapper extends YamlMap {
 					}
 				}
 
-				if (y > 0 && y < yamlSplit.length - 1) {
+				writeLines.append(line);
+
+				if (y < yamlSplit.length - 1) {
 					String nextLine = yamlSplit[y + 1];
 					int nextSpaces = nextLine.length() - nextLine.replaceAll("^\\s+", "").length();
 
-					if (depth == 2 && nextSpaces == 2) {
+					if ((spaces == 0 && nextSpaces == 0) || nextSpaces == 0)
 						writeLines.append('\n');
-						System.out.println("Increase Spacing 2: " + line);
-					}
-				}
 
-				writeLines.append(line);
-
-				if (y < yamlSplit.length - 1)
 					writeLines.append("\n");
+				}
 			}
 
 			fileWriter.write(writeLines.toString());
