@@ -152,10 +152,13 @@ public abstract class ConfigMapper extends YamlMap {
 
 				if (y < yamlSplit.length - 1) {
 					String nextLine = yamlSplit[y + 1];
-					int nextSpaces = nextLine.length() - nextLine.replaceAll("^\\s+", "").length();
+					String nextLineStripped = nextLine.replaceAll("^\\s+", "");
+					int nextSpaces = nextLine.length() - nextLineStripped.length();
 
-					if ((spaces == 0 && nextSpaces == 0) || nextSpaces == 0)
-						writeLines.append('\n');
+					if (!nextLineStripped.startsWith("-")) {
+						if ((spaces == 0 && nextSpaces == 0) || nextSpaces == 0)
+							writeLines.append('\n');
+					}
 
 					writeLines.append("\n");
 				}
