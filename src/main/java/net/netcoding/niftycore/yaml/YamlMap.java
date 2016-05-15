@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class YamlMap {
 
@@ -18,13 +19,13 @@ public abstract class YamlMap {
 		this.converter.addCustomConverter(converter);
 	}
 
-	protected static ConfigSection convertFromMap(Map<?, ?> config) {
+	static ConfigSection convertFromMap(Map<?, ?> config) {
 		ConfigSection section = new ConfigSection();
 		section.map.putAll(config);
 		return section;
 	}
 
-	protected static boolean doSkip(Field field) {
+	static boolean doSkip(Field field) {
 		if (Modifier.isTransient(field.getModifiers()) || Modifier.isFinal(field.getModifiers()))
 			return true;
 
@@ -32,6 +33,10 @@ public abstract class YamlMap {
 			return !field.getAnnotation(PreserveStatic.class).value();
 
 		return false;
+	}
+
+	public final Set<Class<? extends Converter>> getCustomConverters() {
+		return this.converter.getCustomConverters();
 	}
 
 	protected final String getPathMode(Field field) {
@@ -57,8 +62,8 @@ public abstract class YamlMap {
 	}
 
 	public void loadFromMap(Map<?, ?> section, Class<?> clazz) throws Exception {
-		if (!clazz.getSuperclass().equals(YamlConfig.class))
-			loadFromMap(section, clazz.getSuperclass());
+		if (!clazz.getSuperclass().equals(YamlMap.class))
+			this.loadFromMap(section, clazz.getSuperclass());
 
 		for (Field field : this.getClass().getDeclaredFields()) {
 			if (doSkip(field)) continue;
@@ -70,7 +75,7 @@ public abstract class YamlMap {
 			if (Modifier.isPrivate(field.getModifiers()))
 				field.setAccessible(true);
 
-			this.converter.fromConfig((YamlConfig)this, field, convertFromMap(section), path);
+			this.converter.fromConfig(this, field, convertFromMap(section), path);
 		}
 	}
 
@@ -78,8 +83,8 @@ public abstract class YamlMap {
 	public Map<String, Object> saveToMap(Class<?> clazz) throws Exception {
 		Map<String, Object> returnMap = new HashMap<>();
 
-		if (!ConfigMapper.class.isAssignableFrom(clazz) && !clazz.getSuperclass().equals(Object.class)) {
-			Map<String, Object> map = saveToMap(clazz.getSuperclass());
+		if (!clazz.getSuperclass().equals(YamlMap.class) && !clazz.getSuperclass().equals(Object.class)) {
+			Map<String, Object> map = this.saveToMap(clazz.getSuperclass());
 
 			for (Map.Entry<String, Object> entry : map.entrySet())
 				returnMap.put(entry.getKey(), entry.getValue());

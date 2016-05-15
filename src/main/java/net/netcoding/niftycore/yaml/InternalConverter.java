@@ -56,8 +56,8 @@ public class InternalConverter {
 		this.customConverterClasses.add(converter);
 	}
 
-	public void fromConfig(YamlConfig yamlConfig, Field field, ConfigSection root, String path) throws Exception {
-		Object obj = field.get(yamlConfig);
+	public void fromConfig(YamlMap yamlMap, Field field, ConfigSection root, String path) throws Exception {
+		Object obj = field.get(yamlMap);
 		Converter converter;
 
 		if (obj != null) {
@@ -69,7 +69,7 @@ public class InternalConverter {
 						return;
 				}
 
-				field.set(yamlConfig, converter.fromConfig(obj.getClass(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				field.set(yamlMap, converter.fromConfig(obj.getClass(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
 				return;
 			}
 
@@ -81,7 +81,7 @@ public class InternalConverter {
 						return;
 				}
 
-				field.set(yamlConfig, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				field.set(yamlMap, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
 				return;
 			}
 		} else {
@@ -93,7 +93,7 @@ public class InternalConverter {
 						return;
 				}
 
-				field.set(yamlConfig, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
+				field.set(yamlMap, converter.fromConfig(field.getType(), root.get(path), (field.getGenericType() instanceof ParameterizedType) ? (ParameterizedType) field.getGenericType() : null));
 				return;
 			}
 		}
@@ -103,7 +103,7 @@ public class InternalConverter {
 				return;
 		}
 
-		field.set(yamlConfig, root.get(path));
+		field.set(yamlMap, root.get(path));
 	}
 
 	public final Converter getConverter(Class<?> type) {
@@ -124,8 +124,8 @@ public class InternalConverter {
 		return Collections.unmodifiableSet(this.customConverterClasses);
 	}
 
-	public void toConfig(YamlConfig yamlConfig, Field field, ConfigSection root, String path) throws Exception {
-		Object obj = field.get(yamlConfig);
+	public void toConfig(YamlMap yamlMap, Field field, ConfigSection root, String path) throws Exception {
+		Object obj = field.get(yamlMap);
 		Converter converter;
 
 		if (obj != null) {
