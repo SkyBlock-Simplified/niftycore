@@ -21,12 +21,21 @@ public class Config extends Converter {
 			obj.addCustomConverter(clazz);
 
 		obj.loadFromMap((section instanceof Map) ? (Map<?, ?>)section : ((ConfigSection)section).getRawMap(), type);
-		return section;
+		return obj;
 	}
 
 	@Override
 	public Object toConfig(Class<?> type, Object obj, ParameterizedType genericType) throws Exception {
-		return (obj instanceof Map) ? obj : ((YamlMap)obj).saveToMap(obj.getClass());
+		if (obj instanceof Map)
+			return obj;
+		else {
+			YamlMap map = (YamlMap)obj;
+
+			for (Class<? extends Converter> clazz : this.getCustomConverters())
+				map.addCustomConverter(clazz);
+
+			return map.saveToMap(obj.getClass());
+		}
 	}
 
 	public Object newInstance(Class<?> type) throws Exception {
