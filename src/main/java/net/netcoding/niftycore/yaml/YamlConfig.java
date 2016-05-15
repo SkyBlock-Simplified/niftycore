@@ -21,11 +21,11 @@ import java.util.Arrays;
 
 public abstract class YamlConfig extends ConfigMapper implements Runnable {
 
-	private boolean skipFailedConversion = false;
-	private int taskId = -1;
-	private WatchService watchService;
-	private WatchKey watchKey;
-	private boolean reloadProcessing = false;
+	private transient boolean skipFailedConversion = false;
+	private transient int taskId = -1;
+	private transient WatchService watchService;
+	private transient WatchKey watchKey;
+	private transient boolean reloadProcessing = false;
 
 	public YamlConfig(File folder, String fileName, String... header) {
 		this(folder, fileName, false, header);
@@ -60,7 +60,7 @@ public abstract class YamlConfig extends ConfigMapper implements Runnable {
 	}
 
 	private void internalLoad(Class<?> clazz) throws InvalidConfigurationException {
-		if (!clazz.getSuperclass().equals(YamlConfig.class))
+		if (!clazz.getSuperclass().equals(YamlMap.class))
 			this.internalLoad(clazz.getSuperclass());
 
 		boolean save = false;
@@ -99,7 +99,7 @@ public abstract class YamlConfig extends ConfigMapper implements Runnable {
 	}
 
 	private void internalSave(Class<?> clazz) throws InvalidConfigurationException {
-		if (!clazz.getSuperclass().equals(YamlConfig.class))
+		if (!clazz.getSuperclass().equals(YamlMap.class))
 			this.internalSave(clazz.getSuperclass());
 
 		for (Field field : clazz.getDeclaredFields()) {
