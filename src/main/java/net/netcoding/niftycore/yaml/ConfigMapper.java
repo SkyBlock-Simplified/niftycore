@@ -26,10 +26,10 @@ import java.util.Map;
 public abstract class ConfigMapper extends YamlMap {
 
 	private final transient Yaml yaml;
-	private final Map<String, ArrayList<String>> comments = new LinkedHashMap<>();
-	private String[] header;
-	final transient NullRepresenter representer = new NullRepresenter();
-	final File configFile;
+	private final transient Map<String, ArrayList<String>> comments = new LinkedHashMap<>();
+	private transient String[] header;
+	private final transient NullRepresenter representer = new NullRepresenter();
+	transient File configFile;
 	transient ConfigSection root;
 
 	protected ConfigMapper(File folder, String fileName, String... header) {
@@ -68,16 +68,16 @@ public abstract class ConfigMapper extends YamlMap {
 		}
 	}
 
-	public final String getAbsolutePath() {
-		return this.configFile.getAbsolutePath();
-	}
-
 	public final String getFullName() {
 		return this.configFile.getName();
 	}
 
 	public final String getName() {
 		return this.getFullName().replace(".yml", "");
+	}
+
+	public final File getParentDirectory() {
+		return this.configFile.getAbsoluteFile().getParentFile();
 	}
 
 	protected void loadFromYaml() throws InvalidConfigurationException {
@@ -96,7 +96,9 @@ public abstract class ConfigMapper extends YamlMap {
 	protected void saveToYaml() throws InvalidConfigurationException {
 		try (OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(this.configFile), StandardCharsets.UTF_8)) {
 			if (ListUtil.notEmpty(this.header)) {
-				for (String line : this.header) fileWriter.write("# " + line + "\n");
+				for (String line : this.header)
+					fileWriter.write("# " + line + "\n");
+
 				fileWriter.write("\n");
 			}
 
@@ -118,8 +120,18 @@ public abstract class ConfigMapper extends YamlMap {
 					else {
 						int spaces = line.length() - line.replaceAll("^\\s+", "").length();
 
-						if (spaces == 0)
-							writeLines.append('\n');
+						if (spaces == 0) {
+							if (y > 0){// && y < yamlSplit.length - 1) {
+								String nextLine = yamlSplit[y + 1];
+								int nextSpaces = nextLine.length() - nextLine.replaceAll("^\\s+", "").length();
+
+								if (nextSpaces == 0) {
+									writeLines.append('\n');
+									System.out.println("Increase Spacing 1: " + line + ":" + depth);
+								}
+							}
+							//writeLines.append('\n');
+						}
 
 						if (spaces == 0) {
 							keyChain = new ArrayList<>();
@@ -154,8 +166,10 @@ public abstract class ConfigMapper extends YamlMap {
 					String nextLine = yamlSplit[y + 1];
 					int nextSpaces = nextLine.length() - nextLine.replaceAll("^\\s+", "").length();
 
-					if (depth == 2 && nextSpaces == 2)
+					if (depth == 2 && nextSpaces == 2) {
 						writeLines.append('\n');
+						System.out.println("Increase Spacing 2: " + line);
+					}
 				}
 
 				writeLines.append(line);
