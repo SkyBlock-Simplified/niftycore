@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 public abstract class MojangProfile {
 
 	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
-	private String id;
+	private String id = "";
 	private UUID uuid;
 	protected String name;
 	protected String ip;
