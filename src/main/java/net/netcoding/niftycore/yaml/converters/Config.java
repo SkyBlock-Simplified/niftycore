@@ -1,5 +1,6 @@
 package net.netcoding.niftycore.yaml.converters;
 
+import net.netcoding.niftycore.reflection.Reflection;
 import net.netcoding.niftycore.yaml.ConfigSection;
 import net.netcoding.niftycore.yaml.InternalConverter;
 import net.netcoding.niftycore.yaml.YamlMap;
@@ -38,11 +39,11 @@ public class Config extends Converter {
 		}
 	}
 
-	public Object newInstance(Class<?> type) throws Exception {
+	private static Object newInstance(Class<?> type) throws Exception {
 		Class<?> enclosingClass = type.getEnclosingClass();
 
 		if (enclosingClass != null)
-			return type.getConstructor(enclosingClass).newInstance(newInstance(enclosingClass));
+			return new Reflection(type).newInstance(newInstance(enclosingClass));
 
 		return type.newInstance();
 	}
