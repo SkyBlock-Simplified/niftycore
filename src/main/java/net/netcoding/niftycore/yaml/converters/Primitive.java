@@ -11,7 +11,7 @@ public class Primitive extends Converter {
 	private static final transient HashSet<String> types = new HashSet<>();
 
 	static {
-		types.addAll(Arrays.asList("boolean", "character", "byte", "short", "integer", "long", "float", "double", "String"));
+		types.addAll(Arrays.asList("boolean", "character", "byte", "short", "integer", "long", "float", "double", "string"));
 	}
 
 	public Primitive(InternalConverter converter) {
@@ -30,7 +30,7 @@ public class Primitive extends Converter {
 				return (section instanceof Float) ? section : new Double((double)section).floatValue();
 			case "character":
 				return (section instanceof Character) ? section : ((String)section).charAt(0);
-			case "String":
+			case "string":
 				return (section instanceof String) ? section : section.toString();
 			default:
 				return section;
