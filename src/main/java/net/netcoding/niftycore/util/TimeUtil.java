@@ -11,32 +11,31 @@ import java.util.Map;
 public class TimeUtil {
 
 	public static final transient SimpleDateFormat SQL_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	private static final Map<String, Integer> times = new HashMap<>();
+	private static final Map<String, Integer> TIMES = new HashMap<>();
 
 	static {
-		times.put("dawn", 22000);
-		times.put("sunrise", 23000);
-		times.put("morning", 24000);
-		times.put("day", 24000);
-		times.put("midday", 28000);
-		times.put("noon", 28000);
-		times.put("afternoon", 30000);
-		times.put("evening", 32000);
-		times.put("sunset", 37000);
-		times.put("dusk", 37500);
-		times.put("night", 38000);
-		times.put("midnight", 16000);
+		TIMES.put("dawn", 22000);
+		TIMES.put("sunrise", 23000);
+		TIMES.put("morning", 24000);
+		TIMES.put("day", 24000);
+		TIMES.put("midday", 28000);
+		TIMES.put("noon", 28000);
+		TIMES.put("afternoon", 30000);
+		TIMES.put("evening", 32000);
+		TIMES.put("sunset", 37000);
+		TIMES.put("dusk", 37500);
+		TIMES.put("night", 38000);
+		TIMES.put("midnight", 16000);
 	}
 
 	/**
 	 * Gets a minecraft tick count based on {@code time}.
-	 * 
+	 *
 	 * @param time to locate
 	 * @return ticks based on {@code time}
 	 */
 	public static long getClockTime(String time) {
-		Integer clock = times.get(time);
+		Integer clock = TIMES.get(time);
 		if (clock != null) return clock;
 		clock = NumberUtil.isInt(time) ? Integer.valueOf(time) : -1;
 		if (clock == -1) throw new NumberFormatException(StringUtil.format("The provided time value {0} is neither a clock time or number!", clock));
@@ -47,7 +46,7 @@ public class TimeUtil {
 	 * Gets the time since {@code January 1, 1970 UTC} based on {@code time}. Months is unsupported, use days.
 	 * <p>
 	 * Valid values are: {@code 1y2w3d4h5m6s - 1 year 2 weeks 3 days 4 hours 5 minutes 6 seconds}
-	 * 
+	 *
 	 * @param time to convert
 	 * @return milliseconds based on {@code time}
 	 */
