@@ -15,11 +15,11 @@ public class Map extends Converter {
 
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
-		if (genericType != null) {
-			java.util.Map<Object, Object> map;
+		java.util.Map<Object, Object> map;
 
+		if (genericType != null) {
 			try {
-				map = ((java.util.Map<Object, Object>)((Class<?>)genericType.getRawType()).newInstance());
+				map = (java.util.Map<Object, Object>)((Class<?>)genericType.getRawType()).newInstance();
 			} catch (InstantiationException e) {
 				map = new HashMap<>();
 			}
@@ -62,11 +62,30 @@ public class Map extends Converter {
 				if (converter != null) return converter.fromConfig((Class<?>)genericType.getRawType(), section, null);
 				return (section instanceof java.util.Map) ? (java.util.Map<?, ?>) section : ((ConfigSection)section).getRawMap();
 			}
+		} else {
+			try {
+				map = (java.util.Map<Object, Object>)type.newInstance();
+			} catch (InstantiationException e) {
+				map = new HashMap<>();
+			}
 
-			return map;
+			java.util.Map<?, ?> sectionMap = (section instanceof java.util.Map) ? (java.util.Map<?, ?>) section : ((ConfigSection)section).getRawMap();
+
+			for (java.util.Map.Entry<?, ?> entry : sectionMap.entrySet()) {
+				Object key = entry.getKey();
+				Object value = entry.getValue();
+
+				if (value instanceof ConfigSection)
+					value = ((ConfigSection)value).getRawMap();
+
+				if (value instanceof java.util.Map)
+					value = fromConfig(type, value, null);
+
+				map.put(key, value);
+			}
 		}
 
-		return section;
+		return map;
 	}
 
 	@Override
