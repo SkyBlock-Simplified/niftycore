@@ -78,9 +78,8 @@ public class Map extends Converter {
 				if (value instanceof ConfigSection)
 					value = ((ConfigSection)value).getRawMap();
 
-				value = this.getConverter(value.getClass()).fromConfig(value.getClass(), value, null);
-
-				map.put(key, value);
+				Converter converter = this.getConverter(value.getClass());
+				map.put(key, (converter != null ? converter.fromConfig(value.getClass(), value, null) : value));
 			}
 		}
 
