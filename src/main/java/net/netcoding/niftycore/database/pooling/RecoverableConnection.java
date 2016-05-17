@@ -325,6 +325,11 @@ public class RecoverableConnection implements Connection {
 	}
 
 	@Override
+	public String toString() {
+		return this.connection.toString();
+	}
+
+	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		return this.connection.unwrap(iface);
 	}
