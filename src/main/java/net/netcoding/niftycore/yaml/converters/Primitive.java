@@ -11,7 +11,7 @@ public class Primitive extends Converter {
 	private static final transient HashSet<String> types = new HashSet<>();
 
 	static {
-		types.addAll(Arrays.asList("boolean", "character", "byte", "short", "integer", "long", "float", "double"));
+		types.addAll(Arrays.asList("boolean", "character", "byte", "short", "integer", "long", "float", "double", "String"));
 	}
 
 	public Primitive(InternalConverter converter) {
@@ -21,17 +21,19 @@ public class Primitive extends Converter {
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		switch(type.getSimpleName().toLowerCase()) {
-		case "short":
-			return (section instanceof Short) ? section : new Integer((int)section).shortValue();
-		case "byte":
-			return (section instanceof Byte) ? section : new Integer((int)section).byteValue();
-		case "float":
-			if (section instanceof Integer) return new Double((int)section).intValue();
-			return (section instanceof Float) ? section : new Double((double)section).floatValue();
-		case "character":
-			return (section instanceof Character) ? section : ((String)section).charAt(0);
-		default:
-			return section;
+			case "short":
+				return (section instanceof Short) ? section : new Integer((int)section).shortValue();
+			case "byte":
+				return (section instanceof Byte) ? section : new Integer((int)section).byteValue();
+			case "float":
+				if (section instanceof Integer) return new Double((int)section).intValue();
+				return (section instanceof Float) ? section : new Double((double)section).floatValue();
+			case "character":
+				return (section instanceof Character) ? section : ((String)section).charAt(0);
+			case "String":
+				return (section instanceof String) ? section : section.toString();
+			default:
+				return section;
 		}
 	}
 
