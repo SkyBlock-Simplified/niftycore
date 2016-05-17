@@ -21,11 +21,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<MessagePart> {
+@SuppressWarnings("unchecked")
+public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObject, Cloneable, Iterable<MessagePart> {
 
-	private final List<MessagePart> messageParts = new ArrayList<>();
-	private String jsonString = null;
-	private boolean dirty = false;
+	protected final List<MessagePart> messageParts = new ArrayList<>();
+	protected String jsonString = null;
+	protected boolean dirty = false;
 
 	/**
 	 * Creates a JSON message without text.
@@ -53,8 +54,8 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	}
 
 	@Override
-	public JsonMessage clone() throws CloneNotSupportedException{
-		JsonMessage message = (JsonMessage)super.clone();
+	public T clone() throws CloneNotSupportedException{
+		T message = (T)super.clone();
 
 		for (MessagePart part : this.messageParts)
 			message.messageParts.add(part.clone());
@@ -70,11 +71,11 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param text The new text of the current editing component.
 	 * @return This builder instance.
 	 */
-	public JsonMessage text(String text) {
-		MessagePart latest = latest();
+	public T text(String text) {
+		MessagePart latest = this.latest();
 		latest.text = TextualComponent.rawText(text);
 		dirty = true;
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -83,11 +84,11 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param text The new text of the current editing component.
 	 * @return This builder instance.
 	 */
-	public JsonMessage text(TextualComponent text) {
-		MessagePart latest = latest();
+	public T text(TextualComponent text) {
+		MessagePart latest = this.latest();
 		latest.text = text;
 		dirty = true;
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -97,13 +98,13 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @return This builder instance.
 	 * @exception IllegalArgumentException If the specified {@code ChatColor} enumeration value is not a color (but a format value).
 	 */
-	public JsonMessage color(ChatColor color) {
+	public T color(ChatColor color) {
 		if (!color.isColor())
 			throw new IllegalArgumentException(color.name() + " is not a color");
 
-		latest().color = color;
+		this.latest().color = color;
 		dirty = true;
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -113,15 +114,15 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @return This builder instance.
 	 * @exception IllegalArgumentException If any of the enumeration values in the array do not represent formatters.
 	 */
-	public JsonMessage style(ChatColor... styles) {
+	public T style(ChatColor... styles) {
 		for (final ChatColor style : styles) {
-			if (!style.isFormat()) {
+			if (!style.isFormat())
 				throw new IllegalArgumentException(style.name() + " is not a style");
-			}
 		}
-		latest().styles.addAll(Arrays.asList(styles));
+
+		this.latest().styles.addAll(Arrays.asList(styles));
 		dirty = true;
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -132,9 +133,9 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param path The path of the file on the client filesystem.
 	 * @return This builder instance.
 	 */
-	public JsonMessage file(String path) {
+	public T file(String path) {
 		onClick(ClickEvent.Type.FILE, path);
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -145,9 +146,9 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param url The URL of the page to open when the link is clicked.
 	 * @return This builder instance.
 	 */
-	public JsonMessage link(String url) {
+	public T link(String url) {
 		onClick(ClickEvent.Type.LINK, url);
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -161,9 +162,9 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param command The text to display in the chat bar of the client.
 	 * @return This builder instance.
 	 */
-	public JsonMessage suggest(String command) {
+	public T suggest(String command) {
 		onClick(ClickEvent.Type.SUGGEST, command);
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -177,10 +178,10 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param command The text to append to the chat bar of the client.
 	 * @return This builder instance.
 	 */
-	public JsonMessage insert(String command) {
-		latest().insertionData = command;
+	public T insert(String command) {
+		this.latest().insertionData = command;
 		dirty = true;
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -194,9 +195,9 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param command The text to display in the chat bar of the client.
 	 * @return This builder instance.
 	 */
-	public JsonMessage command(String command) {
+	public T command(String command) {
 		onClick(ClickEvent.Type.COMMAND, command);
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -205,9 +206,9 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param text The text, which supports newlines, which will be displayed to the client upon hovering.
 	 * @return This builder instance.
 	 */
-	public JsonMessage tooltip(String text) {
+	public T tooltip(String text) {
 		onHover(HoverEvent.Type.TEXT, new JsonString(text));
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -221,9 +222,9 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 *              The iteration order of this object will be the order in which the lines of the tooltip are created.
 	 * @return This builder instance.
 	 */
-	public JsonMessage tooltip(Iterable<String> lines) {
+	public T tooltip(Iterable<String> lines) {
 		tooltip(ListUtil.toArray(lines, String.class));
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -236,7 +237,7 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param lines The lines of text which will be displayed to the client upon hovering.
 	 * @return This builder instance.
 	 */
-	public JsonMessage tooltip(final String... lines) {
+	public T tooltip(final String... lines) {
 		StringBuilder builder = new StringBuilder();
 
 		for (int i = 0; i < lines.length; i++) {
@@ -247,7 +248,7 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 		}
 
 		tooltip(builder.toString());
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -260,7 +261,7 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param text The formatted text which will be displayed to the client upon hovering.
 	 * @return This builder instance.
 	 */
-	public JsonMessage formattedTooltip(JsonMessage text) {
+	public T formattedTooltip(T text) {
 		for (MessagePart component : text.messageParts) {
 			if (component.clickEvent != null)
 				throw new IllegalArgumentException("The tooltip text cannot have click data.");
@@ -270,7 +271,7 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 		}
 
 		onHover(HoverEvent.Type.TEXT, text);
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -283,10 +284,10 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param lines The lines of formatted text which will be displayed to the client upon hovering.
 	 * @return This builder instance.
 	 */
-	public JsonMessage formattedTooltip(JsonMessage... lines) {
+	public T formattedTooltip(JsonMessage... lines) {
 		if (lines.length < 1) {
 			onHover(null, null); // Clear tooltip
-			return this;
+			return (T)this;
 		}
 
 		JsonMessage result = new JsonMessage();
@@ -294,7 +295,9 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 
 		for (int i = 0; i < lines.length; i++) {
 			try {
-				for (MessagePart component : lines[i]) {
+				JsonMessage<T> message = lines[i];
+
+				for (MessagePart component : message) {
 					if (component.clickEvent != null)
 						throw new IllegalArgumentException("The tooltip text cannot have click data.");
 
@@ -308,7 +311,7 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 				if (i != lines.length - 1)
 					result.messageParts.add(new MessagePart(TextualComponent.rawText("\n")));
 			} catch (CloneNotSupportedException cnsex) {
-				return this;
+				return (T)this;
 			}
 		}
 
@@ -326,7 +329,7 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 *              The iteration order of this object will be the order in which the lines of the tooltip are created.
 	 * @return This builder instance.
 	 */
-	public JsonMessage formattedTooltip(Iterable<JsonMessage> lines) {
+	public T formattedTooltip(Iterable<JsonMessage> lines) {
 		return formattedTooltip(ListUtil.toArray(lines, JsonMessage.class));
 	}
 
@@ -337,12 +340,12 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param replacements The replacements, in order, that will be used in the language-specific message.
 	 * @return This builder instance.
 	 */
-	public JsonMessage translationReplacements(String... replacements) {
+	public T translationReplacements(String... replacements) {
 		for (String str : replacements)
-			latest().translationReplacements.add(new JsonString(str));
+			this.latest().translationReplacements.add(new JsonString(str));
 
 		dirty = true;
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -352,10 +355,10 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param replacements The replacements, in order, that will be used in the language-specific message.
 	 * @return This builder instance.
 	 */
-	public JsonMessage translationReplacements(JsonMessage... replacements) {
-		Collections.addAll(latest().translationReplacements, replacements);
+	public T translationReplacements(JsonMessage... replacements) {
+		Collections.addAll(this.latest().translationReplacements, replacements);
 		dirty = true;
-		return this;
+		return (T)this;
 	}
 
 	/**
@@ -365,8 +368,21 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param replacements The replacements, in order, that will be used in the language-specific message.
 	 * @return This builder instance.
 	 */
-	public JsonMessage translationReplacements(Iterable<JsonMessage> replacements) {
+	public T translationReplacements(Iterable<JsonMessage> replacements) {
 		return translationReplacements(ListUtil.toArray(replacements, JsonMessage.class));
+	}
+
+	/**
+	 * Terminate construction of the current editing component,
+	 * and begin construction of a new message component.
+	 * <p>
+	 * After a successful call to this method, all setter methods will refer
+	 * to a new message component, created as a result of the call to this method.
+	 *
+	 * @return This builder instance.
+	 */
+	public T then() {
+		return then((TextualComponent)null);
 	}
 
 	/**
@@ -379,7 +395,7 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param text The text which will populate the new message component.
 	 * @return This builder instance.
 	 */
-	public JsonMessage then(final String text) {
+	public T then(final String text) {
 		return then(TextualComponent.rawText(text));
 	}
 
@@ -393,39 +409,22 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 	 * @param text The text which will populate the new message component.
 	 * @return This builder instance.
 	 */
-	public JsonMessage then(final TextualComponent text) {
-		if (!latest().hasText())
+	public T then(final TextualComponent text) {
+		if (!this.latest().hasText())
 			throw new IllegalStateException("Previous message part has no text");
 
 		messageParts.add(new MessagePart(text));
 		dirty = true;
-		return this;
-	}
-
-	/**
-	 * Terminate construction of the current editing component,
-	 * and begin construction of a new message component.
-	 * <p>
-	 * After a successful call to this method, all setter methods will refer
-	 * to a new message component, created as a result of the call to this method.
-	 *
-	 * @return This builder instance.
-	 */
-	public JsonMessage then() {
-		if (!latest().hasText())
-			throw new IllegalStateException("Previous message part has no text");
-
-		messageParts.add(new MessagePart());
-		dirty = true;
-		return this;
+		return (T)this;
 	}
 
 	@Override
 	public void writeJson(JsonWriter writer) throws IOException {
 		if (messageParts.size() == 1) {
-			latest().writeJson(writer);
+			this.latest().writeJson(writer);
 		} else {
 			writer.beginObject().name("text").value("").name("extra").beginArray();
+
 			for (final MessagePart part : this)
 				part.writeJson(writer);
 
@@ -488,18 +487,18 @@ public class JsonMessage implements JsonRepresentedObject, Cloneable, Iterable<M
 		return result.toString();
 	}
 
-	private MessagePart latest() {
+	protected final MessagePart latest() {
 		return messageParts.get(messageParts.size() - 1);
 	}
 
-	private void onClick(ClickEvent.Type type, String data) {
-		MessagePart latest = latest();
+	protected final void onClick(ClickEvent.Type type, String data) {
+		MessagePart latest = this.latest();
 		latest.clickEvent = new ClickEvent(type, data);
 		dirty = true;
 	}
 
-	private void onHover(HoverEvent.Type type, JsonRepresentedObject data) {
-		MessagePart latest = latest();
+	protected final void onHover(HoverEvent.Type type, JsonRepresentedObject data) {
+		MessagePart latest = this.latest();
 		latest.hoverEvent = new HoverEvent(type, data);
 		dirty = true;
 	}
