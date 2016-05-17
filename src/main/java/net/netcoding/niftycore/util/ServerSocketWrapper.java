@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.wrappers;
+package net.netcoding.niftycore.util;
 
 import java.io.IOException;
 import java.net.InetAddress;
