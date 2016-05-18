@@ -39,13 +39,13 @@ public class Config extends Converter {
 		}
 	}
 
-	private static Object newInstance(Class<?> type) throws Exception {
+	private static Object newInstance(Class<?> type) {
 		Class<?> enclosingClass = type.getEnclosingClass();
 
 		if (enclosingClass != null)
 			return new Reflection(type).newInstance(newInstance(enclosingClass));
 
-		return type.newInstance();
+		return new Reflection(type).newInstance();
 	}
 
 	@Override
