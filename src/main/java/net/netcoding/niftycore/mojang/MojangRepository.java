@@ -32,7 +32,7 @@ import java.util.UUID;
 /**
  * A collection of methods to locate player UUID and Name throughout Bungee or offline.
  */
-public abstract class MojangRepository<T extends MojangProfile> {
+public abstract class MojangRepository<T extends MojangProfile, P> {
 
 	// API: http://wiki.vg/Mojang_API
 	protected static final transient ConcurrentSet<MojangProfile> CACHE = new ConcurrentSet<>();
@@ -129,6 +129,12 @@ public abstract class MojangRepository<T extends MojangProfile> {
 	protected abstract T processOfflineUniqueId(UUID uniqueId);
 
 	protected abstract T processOnlineUniqueId(UUID uniqueId);
+
+	public abstract T searchByPlayer(P player) throws ProfileNotFoundException;
+
+	public abstract T[] searchByPlayer(P[] player) throws ProfileNotFoundException;
+
+	public abstract T[] searchByPlayer(Collection<? extends P> player) throws ProfileNotFoundException;
 
 	/**
 	 * Locates the profile associated with the given username.
