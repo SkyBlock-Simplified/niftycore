@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 public class MinecraftScheduler {
 
-	public static final Thread MAIN_THREAD = Thread.currentThread();
 	private static final Object SCHEDULER_OBJ;
 	private static final Reflection BUNGEE_TASK = new Reflection("ScheduledTask", "net.md_5.bungee.api.scheduler");
 	private static final Reflection BUKKIT_TASK = new Reflection("BukkitTask", "org.bukkit.scheduler");
