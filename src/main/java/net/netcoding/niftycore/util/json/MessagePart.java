@@ -18,7 +18,7 @@ public final class MessagePart implements Cloneable {
 
 	static final BiMap<ChatColor, String> STYLES_TO_NAMES;
 	List<ChatColor> styles = new ArrayList<>();
-	ChatColor color = ChatColor.WHITE;
+	ChatColor color = null;
 	ClickEvent clickEvent = null;
 	HoverEvent hoverEvent = null;
 	TextualComponent text = null;
@@ -102,8 +102,12 @@ public final class MessagePart implements Cloneable {
 
 	public void writeJson(JsonWriter writer) throws IOException {
 		writer.beginObject();
-		text.writeJson(writer);
-		writer.name("color").value(this.color.name().toLowerCase());
+
+		if (text != null)
+			text.writeJson(writer);
+
+		if (color != null)
+			writer.name("color").value(this.color.name().toLowerCase());
 
 		for (ChatColor style : this.styles)
 			writer.name(STYLES_TO_NAMES.get(style)).value(true);
