@@ -115,8 +115,8 @@ public abstract class TextualComponent implements Cloneable {
 		}
 
 		public void setValue(String value) {
-			if (StringUtil.isEmpty(value))
-				throw new IllegalArgumentException("The value cannot be empty!");
+			if (value == null)
+				throw new IllegalArgumentException("The value cannot be NULL!");
 
 			this.value = value;
 		}
@@ -178,7 +178,7 @@ public abstract class TextualComponent implements Cloneable {
 
 		public void setValue(Map<String, String> value) {
 			if (value == null)
-				throw new IllegalArgumentException("The value cannot be empty!");
+				throw new IllegalArgumentException("The value cannot be NULL!");
 
 			this.values = value;
 		}

@@ -21,7 +21,7 @@ public final class MessagePart implements Cloneable {
 	ChatColor color = null;
 	ClickEvent clickEvent = null;
 	HoverEvent hoverEvent = null;
-	TextualComponent text = null;
+	TextualComponent text = TextualComponent.rawText("");
 	String insertionData = null;
 	List<JsonRepresentedObject> translationReplacements = new ArrayList<>();
 
@@ -41,12 +41,13 @@ public final class MessagePart implements Cloneable {
 	MessagePart() { }
 
 	MessagePart(TextualComponent text) {
-		this.text = text;
+		this.text = text == null ? TextualComponent.rawText("") : text;
 	}
 
 	@Override
 	public MessagePart clone() throws CloneNotSupportedException {
 		MessagePart message = (MessagePart)super.clone();
+		message.text = this.text.clone();
 
 		for (ChatColor style : this.styles)
 			message.styles.add(style);
@@ -102,9 +103,7 @@ public final class MessagePart implements Cloneable {
 
 	public void writeJson(JsonWriter writer) throws IOException {
 		writer.beginObject();
-
-		if (text != null)
-			text.writeJson(writer);
+		text.writeJson(writer);
 
 		if (color != null)
 			writer.name("color").value(this.color.name().toLowerCase());
