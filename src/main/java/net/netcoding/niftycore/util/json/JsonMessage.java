@@ -7,7 +7,9 @@ import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonWriter;
 import net.netcoding.niftycore.minecraft.ChatColor;
 import net.netcoding.niftycore.util.ListUtil;
+import net.netcoding.niftycore.util.RegexUtil;
 import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.niftycore.util.concurrent.ConcurrentList;
 import net.netcoding.niftycore.util.json.events.ClickEvent;
 import net.netcoding.niftycore.util.json.events.HoverEvent;
 
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 @SuppressWarnings("unchecked")
 public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObject, Cloneable, Iterable<MessagePart> {
@@ -45,7 +48,96 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 	}
 
 	public JsonMessage(TextualComponent firstPartText) {
-		messageParts.add(new MessagePart(firstPartText));
+		this.messageParts.add(new MessagePart(firstPartText));
+	}
+
+	public JsonMessage(JsonMessage<T> firstPartText) {
+		for (MessagePart part : firstPartText)
+			this.messageParts.add(part);
+	}
+
+	/**
+	 * Converts the old formatting system that used
+	 * {@link ChatColor#COLOR_CHAR} into the new json based
+	 * system.
+	 *
+	 * @param message The text to convert.
+	 * @return The components needed to print the message to the client
+	 */
+	public static List<JsonMessage> fromLegacyText(String message) {
+		ConcurrentList<JsonMessage> components = new ConcurrentList<>();
+		StringBuilder builder = new StringBuilder();
+		JsonMessage component = new JsonMessage();
+		Matcher matcher = RegexUtil.URL_PATTERN.matcher(message);
+
+		for (int i = 0; i < message.length(); i++) {
+			char c = message.charAt(i);
+
+			if (c == ChatColor.COLOR_CHAR) {
+				c = message.charAt(++i);
+
+				if (c >= 'A' && c <= 'Z')
+					c += 32;
+
+				ChatColor format = ChatColor.getByChar(c);
+				if (format == null)
+					continue;
+
+				if (builder.length() > 0) {
+					JsonMessage old = component;
+					component = new JsonMessage(old);
+					old.text(builder.toString());
+					builder = new StringBuilder();
+					components.add(old);
+				}
+
+				if (format.isFormat())
+					component.style(format);
+				else {
+					component = new JsonMessage();
+					component.color(format);
+				}
+
+				continue;
+			}
+
+			int pos = message.indexOf(' ', i);
+			if (pos == -1)
+				pos = message.length();
+
+			if (matcher.region(i, pos).find()) { // Web link handling
+				if (builder.length() > 0) {
+					JsonMessage old = component;
+					component = new JsonMessage(old);
+					old.text(builder.toString());
+					builder = new StringBuilder();
+					components.add(old);
+				}
+
+				JsonMessage old = component;
+				component = new JsonMessage(old);
+				String urlString = message.substring( i, pos );
+				component.text(urlString);
+				component.onClick(ClickEvent.Type.LINK, (urlString.startsWith( "http" ) ? urlString : "http://" + urlString));
+				components.add(component);
+				i += pos - i - 1;
+				component = old;
+				continue;
+			}
+
+			builder.append(c);
+		}
+
+		if (builder.length() > 0) {
+			component.text(builder.toString());
+			components.add(component);
+		}
+
+		// The client will crash if the array is empty
+		if (components.isEmpty())
+			components.add(new JsonMessage());
+
+		return components;
 	}
 
 	@Override
