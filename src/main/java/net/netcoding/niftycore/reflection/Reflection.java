@@ -1,5 +1,6 @@
 package net.netcoding.niftycore.reflection;
 
+import com.google.common.primitives.Primitives;
 import net.netcoding.niftycore.reflection.exceptions.ReflectionException;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
@@ -17,25 +18,11 @@ import java.util.Arrays;
 public class Reflection {
 
 	private static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
-	private static final transient ConcurrentMap<Class<?>, Class<?>> CORRESPONDING_TYPES = new ConcurrentMap<>();
 	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], Constructor<?>>> CONSTRUCTOR_CACHE = new ConcurrentMap<>();
 	private static final transient ConcurrentMap<String, Class<?>> CLASS_CACHE = new ConcurrentMap<>();
 	private final String className;
 	private final String subPackage;
 	private final String packagePath;
-
-	static {
-		CORRESPONDING_TYPES.put(Byte.class, byte.class);
-		CORRESPONDING_TYPES.put(Short.class, short.class);
-		CORRESPONDING_TYPES.put(Integer.class, int.class);
-		CORRESPONDING_TYPES.put(Long.class, long.class);
-		CORRESPONDING_TYPES.put(Character.class, char.class);
-		CORRESPONDING_TYPES.put(Float.class, float.class);
-		CORRESPONDING_TYPES.put(Double.class, double.class);
-		CORRESPONDING_TYPES.put(Boolean.class, boolean.class);
-
-		//
-	}
 
 	public Reflection(Class<?> clazz) {
 		this.className = clazz.getSimpleName();
@@ -119,8 +106,10 @@ public class Reflection {
 	}
 
 	public Field getField(Class<?> type) throws ReflectionException {
+		Class<?> utype = (type.isPrimitive() ? Primitives.wrap(type) : Primitives.unwrap(type));
+
 		for (Field field : this.getClazz().getDeclaredFields()) {
-			if (field.getType().equals(type) || type.isAssignableFrom(field.getType())) {
+			if (field.getType().equals(type) || type.isAssignableFrom(field.getType()) || field.getType().equals(utype) || utype.isAssignableFrom(field.getType())) {
 				field.setAccessible(true);
 				return field;
 			}
@@ -151,12 +140,14 @@ public class Reflection {
 	}
 
 	public Method getMethod(Class<?> type, Class<?>... paramTypes) throws ReflectionException {
+		Class<?> utype = (type.isPrimitive() ? Primitives.wrap(type) : Primitives.unwrap(type));
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		for (Method method : this.getClazz().getDeclaredMethods()) {
 			Class<?>[] methodTypes = toPrimitiveTypeArray(method.getParameterTypes());
+			Class<?> returnType = method.getReturnType();
 
-			if ((method.getReturnType().equals(type) || type.isAssignableFrom(method.getReturnType())) && isEqualsTypeArray(methodTypes, types)) {
+			if ((returnType.equals(type) || type.isAssignableFrom(returnType) || returnType.equals(utype) || utype.isAssignableFrom(returnType)) && isEqualsTypeArray(methodTypes, types)) {
 				method.setAccessible(true);
 				return method;
 			}
@@ -188,10 +179,6 @@ public class Reflection {
 
 	public final String getPackagePath() {
 		return this.packagePath + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "");
-	}
-
-	public static Class<?> getPrimitiveType(Class<?> clazz) {
-		return (clazz != null ? (CORRESPONDING_TYPES.containsKey(clazz) ? CORRESPONDING_TYPES.get(clazz) : clazz) : null);
 	}
 
 	public final String getSubPackage() {
@@ -290,7 +277,7 @@ public class Reflection {
 		Class<?>[] types = new Class<?>[ListUtil.notEmpty(classes) ? classes.length : 0];
 
 		for (int i = 0; i < types.length; i++)
-			types[i] = getPrimitiveType(classes[i]);
+			types[i] = Primitives.unwrap(classes[i]);
 
 		return types;
 	}
@@ -299,7 +286,7 @@ public class Reflection {
 		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
 
 		for (int i = 0; i < types.length; i++)
-			types[i] = getPrimitiveType(objects[i] != null ? objects[i].getClass() : null);
+			types[i] = Primitives.unwrap(objects[i] != null ? objects[i].getClass() : null);
 
 		return types;
 	}
