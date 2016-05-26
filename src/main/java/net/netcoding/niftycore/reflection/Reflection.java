@@ -4,7 +4,6 @@ import net.netcoding.niftycore.reflection.exceptions.ReflectionException;
 import net.netcoding.niftycore.util.ListUtil;
 import net.netcoding.niftycore.util.StringUtil;
 import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
-import sun.misc.Unsafe;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -35,11 +34,19 @@ public class Reflection {
 		CORRESPONDING_TYPES.put(Double.class, double.class);
 		CORRESPONDING_TYPES.put(Boolean.class, boolean.class);
 
-		sun.reflect.Reflection.registerMethodsToFilter(Reflection.class, "getUnsafe");
+		//
 	}
 
 	public Reflection(Class<?> clazz) {
-		this(clazz.getSimpleName(), clazz.getPackage().getName());
+		this.className = clazz.getSimpleName();
+
+		if (clazz.getPackage() != null) {
+			this.subPackage = "";
+			this.packagePath = clazz.getPackage().getName();
+		} else {
+			this.subPackage = "";
+			this.packagePath = clazz.getName().replaceAll(StringUtil.format("\\.{0}$", this.className), "");
+		}
 	}
 
 	public Reflection(String className, String packagePath) {
@@ -52,20 +59,20 @@ public class Reflection {
 		this.packagePath = packagePath;
 	}
 
-	public final String getClassName() {
+	public final String getClazzName() {
 		return this.className;
 	}
 
-	public final String getClassPath() {
-		return this.getPackagePath() + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "") + "." + this.getClassName();
+	public final String getClazzPath() {
+		return StringUtil.format("{0}.{1}", this.getPackagePath(), this.getClazzName());
 	}
 
 	public Class<?> getClazz() throws ReflectionException {
 		try {
-			if (!CLASS_CACHE.containsKey(this.getClassPath()))
-				CLASS_CACHE.put(this.getClassPath(), Class.forName(this.getClassPath()));
+			if (!CLASS_CACHE.containsKey(this.getClazzPath()))
+				CLASS_CACHE.put(this.getClazzPath(), Class.forName(this.getClazzPath()));
 
-			return CLASS_CACHE.get(this.getClassPath());
+			return CLASS_CACHE.get(this.getClazzPath());
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
@@ -180,7 +187,7 @@ public class Reflection {
 	}
 
 	public final String getPackagePath() {
-		return this.packagePath;
+		return this.packagePath + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "");
 	}
 
 	public static Class<?> getPrimitiveType(Class<?> clazz) {
@@ -211,20 +218,6 @@ public class Reflection {
 
 		try {
 			return field.get(obj);
-		} catch (Exception ex) {
-			throw new ReflectionException(ex);
-		}
-	}
-
-	/**
-	 * WILL PROBABLY IMPLODE
-	 */
-	static Unsafe getUnsafe() throws ReflectionException {
-		try {
-			Class<?> unsafe = Class.forName("sun.misc.Unsafe", false, Reflection.class.getClassLoader());
-			Field theUnsafe = unsafe.getDeclaredField("theUnsafe");
-			theUnsafe.setAccessible(true);
-			return (Unsafe)theUnsafe.get(null);
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
