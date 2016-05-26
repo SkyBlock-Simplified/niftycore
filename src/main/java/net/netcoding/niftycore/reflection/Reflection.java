@@ -9,6 +9,9 @@ import sun.misc.Unsafe;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Arrays;
 
 @SuppressWarnings("AccessOfSystemProperties")
@@ -66,6 +69,19 @@ public class Reflection {
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
+	}
+
+	public final URL getClazzLocation() throws ReflectionException {
+		ProtectionDomain domain = this.getClazz().getProtectionDomain();
+
+		if (domain != null) {
+			CodeSource source = domain.getCodeSource();
+
+			if (source != null)
+				return source.getLocation();
+		}
+
+		return null;
 	}
 
 	public Constructor<?> getConstructor(Class<?>... paramTypes) throws ReflectionException {
@@ -205,8 +221,8 @@ public class Reflection {
 	 */
 	static Unsafe getUnsafe() throws ReflectionException {
 		try {
-			Class<?> c = Class.forName("sun.misc.Unsafe", false, Reflection.class.getClassLoader());
-			Field theUnsafe = c.getDeclaredField("theUnsafe");
+			Class<?> unsafe = Class.forName("sun.misc.Unsafe", false, Reflection.class.getClassLoader());
+			Field theUnsafe = unsafe.getDeclaredField("theUnsafe");
 			theUnsafe.setAccessible(true);
 			return (Unsafe)theUnsafe.get(null);
 		} catch (Exception ex) {
