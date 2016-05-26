@@ -200,7 +200,9 @@ public class Reflection {
 
 	private Reflection getSuperReflection() throws ReflectionException {
 		Class<?> superClass = this.getClazz().getSuperclass();
-		return new Reflection(superClass.getSimpleName(), superClass.getPackage().getName());
+		String className = superClass.getSimpleName();
+		String packageName = (superClass.getPackage() != null ? superClass.getPackage().getName() : superClass.getName().replaceAll(StringUtil.format("\\.{0}$", className), ""));
+		return new Reflection(className, packageName);
 	}
 
 	public Object getValue(Class<?> type, Object obj) throws ReflectionException {
@@ -237,6 +239,8 @@ public class Reflection {
 	public Object invokeMethod(Class<?> type, Object obj, Object... args) throws ReflectionException {
 		try {
 			return this.getMethod(type, toPrimitiveTypeArray(args)).invoke(obj, args);
+		} catch (ReflectionException rex) {
+			throw rex;
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
@@ -245,6 +249,8 @@ public class Reflection {
 	public Object invokeMethod(String name, Object obj, Object... args) throws ReflectionException {
 		try {
 			return this.getMethod(name, toPrimitiveTypeArray(args)).invoke(obj, args);
+		} catch (ReflectionException rex) {
+			throw rex;
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
@@ -253,6 +259,8 @@ public class Reflection {
 	public Object newInstance(Object... args) throws ReflectionException {
 		try {
 			return this.getConstructor(toPrimitiveTypeArray(args)).newInstance(args);
+		} catch (ReflectionException rex) {
+			throw rex;
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
