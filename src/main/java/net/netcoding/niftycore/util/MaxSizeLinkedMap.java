@@ -3,6 +3,7 @@ package net.netcoding.niftycore.util;
 import net.netcoding.niftycore.util.concurrent.linked.ConcurrentLinkedMap;
 
 import java.util.Map;
+import java.util.Set;
 
 public class MaxSizeLinkedMap<K, V> extends ConcurrentLinkedMap<K, V> {
 
@@ -14,6 +15,11 @@ public class MaxSizeLinkedMap<K, V> extends ConcurrentLinkedMap<K, V> {
 
 	public MaxSizeLinkedMap(int maxSize) {
 		this.maxSize = maxSize;
+	}
+
+	@Override
+	public Set<Map.Entry<K, V>> entrySet() {
+		return super.entrySet();
 	}
 
 	public boolean removeEldestEntry() {
