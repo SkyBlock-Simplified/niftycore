@@ -382,7 +382,7 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 			return (T)this;
 		}
 
-		JsonMessage result = new JsonMessage();
+		JsonMessage<T> result = new JsonMessage();
 		result.messageParts.clear(); // Remove default text component (destabilizes the object)
 
 		for (int i = 0; i < lines.length; i++) {
