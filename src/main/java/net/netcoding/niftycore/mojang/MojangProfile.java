@@ -30,7 +30,7 @@ public abstract class MojangProfile {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) return false;
-		if (!(obj instanceof MojangProfile)) return false;
+		if (!MojangProfile.class.isAssignableFrom(obj.getClass())) return false;
 		if (this == obj) return true;
 		MojangProfile profile = (MojangProfile)obj;
 		return this.getUniqueId().equals(profile.getUniqueId());
