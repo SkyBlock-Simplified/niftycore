@@ -8,10 +8,14 @@ public class NiftyCore {
 
 	private static final Logger LOGGER;
 	private static final boolean IS_BUNGEE;
+	private static final boolean IS_BUKKIT;
+	private static final boolean IS_SPONGE;
 	private static final Object PLUGIN;
 
 	static {
 		boolean isBungee = false;
+		boolean isBukkit = false;
+		boolean isSponge = false;
 		Object pluginObj = null;
 		Logger logger = Logger.getGlobal();
 
@@ -25,7 +29,7 @@ public class NiftyCore {
 			Object managerObj = proxy.invokeMethod("getPluginManager", proxyObj);
 			pluginObj = manager.invokeMethod("getPlugin", managerObj, "NiftyBungee");
 			logger = (Logger)plugin.invokeMethod("getLogger", pluginObj);
-		} catch (Exception ex) {
+		} catch (Exception bungee) {
 			try {
 				Reflection bukkit = new Reflection("Bukkit", "org.bukkit");
 				Reflection manager = new Reflection("PluginManager", "org.bukkit.plugin");
@@ -33,11 +37,20 @@ public class NiftyCore {
 				Object managerObj = bukkit.invokeMethod("getPluginManager", null);
 				pluginObj = manager.invokeMethod("getPlugin", managerObj, "NiftyBukkit");
 				logger = (Logger)plugin.invokeMethod("getLogger", pluginObj);
-			} catch (Exception ignore) { }
+				isBukkit = true;
+			} catch (Exception bukkit) {
+				try {
+					Reflection sponge = new Reflection("SpongeImpl", "common", "org.spongepowered");
+					sponge.getClazz();
+					isSponge = true;
+				} catch (Exception ignore) { }
+			}
 		}
 
 		PLUGIN = pluginObj;
 		IS_BUNGEE = isBungee;
+		IS_BUKKIT = isBukkit;
+		IS_SPONGE = isSponge;
 		LOGGER = logger;
 	}
 
@@ -54,7 +67,11 @@ public class NiftyCore {
 	}
 
 	public static boolean isBukkit() {
-		return !IS_BUNGEE;
+		return IS_BUKKIT;
+	}
+
+	public static boolean isSponge() {
+		return IS_SPONGE;
 	}
 
 }
