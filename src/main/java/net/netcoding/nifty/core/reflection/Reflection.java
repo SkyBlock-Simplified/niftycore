@@ -1,10 +1,10 @@
-package net.netcoding.niftycore.reflection;
+package net.netcoding.nifty.core.reflection;
 
 import com.google.common.primitives.Primitives;
-import net.netcoding.niftycore.reflection.exceptions.ReflectionException;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.reflection.exceptions.ReflectionException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -14,7 +14,7 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 
-@SuppressWarnings("AccessOfSystemProperties")
+@SuppressWarnings({ "AccessOfSystemProperties", "unchecked" })
 public class Reflection {
 
 	private static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
@@ -25,6 +25,7 @@ public class Reflection {
 	private final String packagePath;
 
 	public Reflection(Class<?> clazz) {
+		clazz = Primitives.wrap(clazz);
 		this.className = clazz.getSimpleName();
 
 		if (clazz.getPackage() != null) {
@@ -54,7 +55,7 @@ public class Reflection {
 		return StringUtil.format("{0}.{1}", this.getPackagePath(), this.getClazzName());
 	}
 
-	public Class<?> getClazz() throws ReflectionException {
+	public final Class<?> getClazz() throws ReflectionException {
 		try {
 			if (!CLASS_CACHE.containsKey(this.getClazzPath()))
 				CLASS_CACHE.put(this.getClazzPath(), Class.forName(this.getClazzPath()));
@@ -78,7 +79,7 @@ public class Reflection {
 		return null;
 	}
 
-	public Constructor<?> getConstructor(Class<?>... paramTypes) throws ReflectionException {
+	public final Constructor<?> getConstructor(Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		if (CONSTRUCTOR_CACHE.containsKey(this.getClazz())) {
@@ -87,7 +88,7 @@ public class Reflection {
 			if (constructors.containsKey(types))
 				return constructors.get(types);
 		} else
-			CONSTRUCTOR_CACHE.put(this.getClazz(), new ConcurrentMap<Class<?>[], Constructor<?>>());
+			CONSTRUCTOR_CACHE.put(this.getClazz(), new ConcurrentMap<>());
 
 		for (Constructor<?> constructor : this.getClazz().getDeclaredConstructors()) {
 			Class<?>[] constructorTypes = toPrimitiveTypeArray(constructor.getParameterTypes());
@@ -105,7 +106,7 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
 	}
 
-	public Field getField(Class<?> type) throws ReflectionException {
+	public final Field getField(Class<?> type) throws ReflectionException {
 		Class<?> utype = (type.isPrimitive() ? Primitives.wrap(type) : Primitives.unwrap(type));
 
 		for (Field field : this.getClazz().getDeclaredFields()) {
@@ -121,7 +122,7 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The field with type {0} was not found!", type));
 	}
 
-	public Field getField(String name) throws ReflectionException {
+	public final Field getField(String name) throws ReflectionException {
 		for (Field field : this.getClazz().getDeclaredFields()) {
 			if (field.getName().equals(name)) {
 				field.setAccessible(true);
@@ -139,7 +140,7 @@ public class Reflection {
 		return JAVA_VERSION;
 	}
 
-	public Method getMethod(Class<?> type, Class<?>... paramTypes) throws ReflectionException {
+	public final Method getMethod(Class<?> type, Class<?>... paramTypes) throws ReflectionException {
 		Class<?> utype = (type.isPrimitive() ? Primitives.wrap(type) : Primitives.unwrap(type));
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
@@ -159,7 +160,7 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The method with return type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
 	}
 
-	public Method getMethod(String name, Class<?>... paramTypes) throws ReflectionException {
+	public final Method getMethod(String name, Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		for (Method method : this.getClazz().getDeclaredMethods()) {
@@ -192,17 +193,17 @@ public class Reflection {
 		return new Reflection(className, packageName);
 	}
 
-	public Object getValue(Class<?> type, Object obj) throws ReflectionException {
+	public final <T> T getValue(Class<T> type, Object obj) throws ReflectionException {
 		Field field = this.getField(type);
 
 		try {
-			return field.get(obj);
+			return (T)field.get(obj);
 		} catch (Exception ex) {
 			throw new ReflectionException(ex);
 		}
 	}
 
-	public Object getValue(String name, Object obj) throws ReflectionException {
+	public final Object getValue(String name, Object obj) throws ReflectionException {
 		Field field = this.getField(name);
 
 		try {
@@ -223,9 +224,10 @@ public class Reflection {
 		return true;
 	}
 
-	public Object invokeMethod(Class<?> type, Object obj, Object... args) throws ReflectionException {
+	public final <T> T invokeMethod(Class<T> type, Object obj, Object... args) throws ReflectionException {
 		try {
-			return this.getMethod(type, toPrimitiveTypeArray(args)).invoke(obj, args);
+			Class<?>[] types = toPrimitiveTypeArray(args);
+			return (T)this.getMethod(type, types).invoke(obj, args);
 		} catch (ReflectionException rex) {
 			throw rex;
 		} catch (Exception ex) {
@@ -233,9 +235,10 @@ public class Reflection {
 		}
 	}
 
-	public Object invokeMethod(String name, Object obj, Object... args) throws ReflectionException {
+	public final Object invokeMethod(String name, Object obj, Object... args) throws ReflectionException {
 		try {
-			return this.getMethod(name, toPrimitiveTypeArray(args)).invoke(obj, args);
+			Class<?>[] types = toPrimitiveTypeArray(args);
+			return this.getMethod(name, types).invoke(obj, args);
 		} catch (ReflectionException rex) {
 			throw rex;
 		} catch (Exception ex) {
@@ -243,9 +246,10 @@ public class Reflection {
 		}
 	}
 
-	public Object newInstance(Object... args) throws ReflectionException {
+	public final Object newInstance(Object... args) throws ReflectionException {
 		try {
-			return this.getConstructor(toPrimitiveTypeArray(args)).newInstance(args);
+			Class<?>[] types = toPrimitiveTypeArray(args);
+			return this.getConstructor(types).newInstance(args);
 		} catch (ReflectionException rex) {
 			throw rex;
 		} catch (Exception ex) {
@@ -253,7 +257,7 @@ public class Reflection {
 		}
 	}
 
-	public void setValue(String name, Object obj, Object value) throws ReflectionException {
+	public final void setValue(String name, Object obj, Object value) throws ReflectionException {
 		Field f = this.getField(name);
 
 		try {
@@ -263,7 +267,7 @@ public class Reflection {
 		}
 	}
 
-	public void setValue(Class<?> clazz, Object obj, Object value) throws ReflectionException {
+	public final void setValue(Class<?> clazz, Object obj, Object value) throws ReflectionException {
 		Field f = this.getField(clazz);
 
 		try {
