@@ -1,11 +1,11 @@
-package net.netcoding.niftycore.minecraft.ping;
+package net.netcoding.nifty.core.api.ping;
 
 import com.google.common.io.ByteArrayDataOutput;
-import net.netcoding.niftycore.minecraft.MinecraftServer;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.mojang.BasicMojangProfile;
-import net.netcoding.niftycore.mojang.MojangProfile;
-import net.netcoding.niftycore.util.DataUtil;
+import net.netcoding.nifty.core.api.MinecraftServer;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.mojang.MojangProfile;
+import net.netcoding.nifty.core.util.DataUtil;
+import net.netcoding.nifty.core.mojang.BasicMojangProfile;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -18,19 +18,19 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-public class BukkitServer<T extends MojangProfile> extends MinecraftPingServer<T> {
+public class MinecraftPingServer<T extends MojangProfile> extends PingServer<T> {
 
 	private transient int socketTimeout = 2000;
 
-	public BukkitServer(String ip, MinecraftPingListener<T> listener) {
+	public MinecraftPingServer(String ip, MinecraftPingListener<T> listener) {
 		this(ip, 25565, listener);
 	}
 
-	public BukkitServer(String ip, int port, MinecraftPingListener<T> listener) {
+	public MinecraftPingServer(String ip, int port, MinecraftPingListener<T> listener) {
 		this(new InetSocketAddress(ip, port), listener);
 	}
 
-	public BukkitServer(InetSocketAddress address, MinecraftPingListener<T> listener) {
+	public MinecraftPingServer(InetSocketAddress address, MinecraftPingListener<T> listener) {
 		super(listener);
 		this.setAddress(address);
 	}
@@ -62,7 +62,7 @@ public class BukkitServer<T extends MojangProfile> extends MinecraftPingServer<T
 		if (this.getAddress() == null) return;
 
 		try {
-			MinecraftScheduler.runAsync(new Runnable() {
+			MinecraftScheduler.getInstance().runAsync(new Runnable() {
 				@SuppressWarnings("unchecked")
 				@Override
 				public void run() {
@@ -94,7 +94,7 @@ public class BukkitServer<T extends MojangProfile> extends MinecraftPingServer<T
 										if (getSuperClass().isAssignableFrom(BasicMojangProfileOverride.class)) {
 											for (T player : playerList) {
 												BasicMojangProfileOverride profile = (BasicMojangProfileOverride)player;
-												profile.setServer(BukkitServer.this);
+												profile.setServer(MinecraftPingServer.this);
 											}
 										}
 									}

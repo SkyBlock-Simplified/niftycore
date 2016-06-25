@@ -1,16 +1,16 @@
-package net.netcoding.niftycore.minecraft.ping;
+package net.netcoding.nifty.core.api.ping;
 
-import net.netcoding.niftycore.minecraft.MinecraftServer;
-import net.netcoding.niftycore.mojang.MojangProfile;
+import net.netcoding.nifty.core.api.MinecraftServer;
+import net.netcoding.nifty.core.mojang.MojangProfile;
 
 import com.google.gson.Gson;
 
-public abstract class MinecraftPingServer<T extends MojangProfile> extends MinecraftServer<T> {
+public abstract class PingServer<T extends MojangProfile> extends MinecraftServer<T> {
 
 	protected static final transient Gson GSON = new Gson();
 	private final transient MinecraftPingListener<T> listener;
 
-	public MinecraftPingServer(MinecraftPingListener<T> listener) {
+	public PingServer(MinecraftPingListener<T> listener) {
 		this.listener = listener;
 	}
 

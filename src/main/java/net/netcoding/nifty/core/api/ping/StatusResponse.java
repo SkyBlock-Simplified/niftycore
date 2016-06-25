@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.minecraft.ping;
+package net.netcoding.nifty.core.api.ping;
 
 import java.util.List;
 
