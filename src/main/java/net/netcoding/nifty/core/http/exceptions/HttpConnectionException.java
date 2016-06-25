@@ -1,8 +1,8 @@
-package net.netcoding.niftycore.http.exceptions;
+package net.netcoding.nifty.core.http.exceptions;
 
-import net.netcoding.niftycore.http.HttpBody;
-import net.netcoding.niftycore.http.HttpStatus;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.http.HttpBody;
+import net.netcoding.nifty.core.http.HttpStatus;
+import net.netcoding.nifty.core.util.StringUtil;
 
 public class HttpConnectionException extends Exception {
 

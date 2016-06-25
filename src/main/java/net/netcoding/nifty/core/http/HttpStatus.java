@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.http;
+package net.netcoding.nifty.core.http;
 
 public enum HttpStatus {
 

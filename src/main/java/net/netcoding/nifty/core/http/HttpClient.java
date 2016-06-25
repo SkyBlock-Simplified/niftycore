@@ -1,7 +1,7 @@
-package net.netcoding.niftycore.http;
+package net.netcoding.nifty.core.http;
 
-import net.netcoding.niftycore.http.exceptions.HttpConnectionException;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.http.exceptions.HttpConnectionException;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
