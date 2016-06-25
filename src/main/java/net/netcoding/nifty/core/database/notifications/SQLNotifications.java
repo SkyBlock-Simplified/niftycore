@@ -1,9 +1,10 @@
-package net.netcoding.niftycore.database.notifications;
+package net.netcoding.nifty.core.database.notifications;
 
-import net.netcoding.niftycore.database.pooling.SQLPooling;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.core.NiftyCore;
+import net.netcoding.nifty.core.database.pooling.SQLPooling;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -96,7 +97,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 		this.listeners.add(new DatabaseNotification(this, table, notifier, overwrite));
 
 		if (this.taskId == -1)
-			this.taskId = MinecraftScheduler.runAsync(this, 0, delay).getId();
+			this.taskId = MinecraftScheduler.getInstance().runAsync(this, 0, delay * (NiftyCore.isBungee() ? 50 : 1)).getId();
 	}
 
 	private void createLogTable() throws SQLException {
@@ -150,7 +151,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
 		if (this.listeners.isEmpty()) {
 			if (this.taskId != -1) {
-				MinecraftScheduler.cancel(this.taskId);
+				MinecraftScheduler.getInstance().cancel(this.taskId);
 				this.taskId = -1;
 			}
 		}

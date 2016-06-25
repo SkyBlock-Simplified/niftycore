@@ -1,6 +1,6 @@
-package net.netcoding.niftycore.database.notifications;
+package net.netcoding.nifty.core.database.notifications;
 
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 public enum TriggerEvent {
 

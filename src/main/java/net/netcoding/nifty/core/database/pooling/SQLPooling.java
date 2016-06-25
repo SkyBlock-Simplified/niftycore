@@ -1,8 +1,8 @@
-package net.netcoding.niftycore.database.pooling;
+package net.netcoding.nifty.core.database.pooling;
 
-import net.netcoding.niftycore.NiftyCore;
-import net.netcoding.niftycore.database.factory.SQLFactory;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.NiftyCore;
+import net.netcoding.nifty.core.database.factory.SQLFactory;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
 
 import java.io.File;
 import java.sql.Connection;
@@ -56,7 +56,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	private void initializeTimer() {
-		MinecraftScheduler.runAsync(this, 0, 200 * (NiftyCore.isBungee() ? 50 : 1));
+		MinecraftScheduler.getInstance().runAsync(this, 0, 200 * (NiftyCore.isBungee() ? 50 : 1));
 	}
 
 	/**

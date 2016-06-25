@@ -1,6 +1,6 @@
-package net.netcoding.niftycore.database;
+package net.netcoding.nifty.core.database;
 
-import net.netcoding.niftycore.database.factory.SQLWrapper;
+import net.netcoding.nifty.core.database.factory.SQLWrapper;
 
 import java.io.File;
 import java.sql.SQLException;

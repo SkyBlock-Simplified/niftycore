@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.database.pooling;
+package net.netcoding.nifty.core.database.pooling;
 
 import java.sql.Array;
 import java.sql.Blob;

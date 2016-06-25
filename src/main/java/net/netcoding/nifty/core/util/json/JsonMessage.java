@@ -1,17 +1,17 @@
-package net.netcoding.niftycore.util.json;
+package net.netcoding.nifty.core.util.json;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonWriter;
-import net.netcoding.niftycore.minecraft.ChatColor;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.RegexUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-import net.netcoding.niftycore.util.json.events.ClickEvent;
-import net.netcoding.niftycore.util.json.events.HoverEvent;
+import net.netcoding.nifty.core.api.color.ChatColor;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.RegexUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.core.util.json.events.ClickEvent;
+import net.netcoding.nifty.core.util.json.events.HoverEvent;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -54,6 +54,22 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 	public JsonMessage(JsonMessage<T> firstPartText) {
 		for (MessagePart part : firstPartText)
 			this.messageParts.add(part);
+	}
+
+	/**
+	 * Appends all parts of a legacy message.
+	 *
+	 * @param message The legacy text to append.
+	 * @return This builder instance.
+	 */
+	public T legacy(String message) {
+		List<JsonMessage> converted = fromLegacyText(message);
+
+		for (JsonMessage<T> json : converted)
+			this.messageParts.addAll(json.messageParts);
+
+		this.dirty = true;
+		return (T)this;
 	}
 
 	/**
@@ -564,15 +580,12 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 	 * Color and formatting can be removed from the returned string by using {@link ChatColor#stripColor(String)}.</p>
 	 * @return A human-readable string representing limited formatting in addition to the core text of this message.
 	 */
-	public String toOldMessageFormat() {
+	public String toLegacyText() {
 		StringBuilder result = new StringBuilder();
 
 		for (MessagePart part : this) {
 			result.append(part.color == null ? "" : part.color);
-
-			for (ChatColor formatSpecifier : part.styles)
-				result.append(formatSpecifier);
-
+			part.styles.forEach(result::append);
 			result.append(part.text);
 		}
 

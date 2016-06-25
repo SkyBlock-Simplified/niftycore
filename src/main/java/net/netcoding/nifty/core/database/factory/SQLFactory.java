@@ -1,9 +1,9 @@
-package net.netcoding.niftycore.database.factory;
+package net.netcoding.nifty.core.database.factory;
 
-import net.netcoding.niftycore.database.factory.callbacks.ResultCallback;
-import net.netcoding.niftycore.database.factory.callbacks.VoidResultCallback;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.database.factory.callbacks.ResultCallback;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.database.factory.callbacks.VoidResultCallback;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
 
 import java.io.File;
 import java.io.IOException;
@@ -214,7 +214,7 @@ public abstract class SQLFactory {
 	 * @param sql       Table fields and constraints.
 	 */
 	public void createTableAsync(final String tableName, final String sql) {
-		MinecraftScheduler.runAsync(new Runnable() {
+		MinecraftScheduler.getInstance().runAsync(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -421,7 +421,7 @@ public abstract class SQLFactory {
 	 * @param args     Arguments to pass to the query.
 	 */
 	public void queryAsync(final String sql, final VoidResultCallback callback, final Object... args) {
-		MinecraftScheduler.runAsync(new Runnable() {
+		MinecraftScheduler.getInstance().runAsync(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -479,7 +479,7 @@ public abstract class SQLFactory {
 	 * @param args Arguments to pass to the query.
 	 */
 	public void updateAsync(final String sql, final Object... args) {
-		MinecraftScheduler.runAsync(new Runnable() {
+		MinecraftScheduler.getInstance().runAsync(new Runnable() {
 			@Override
 			public void run() {
 				try (Connection connection = getConnection()) {

@@ -1,6 +1,6 @@
-package net.netcoding.niftycore.database.factory;
+package net.netcoding.nifty.core.database.factory;
 
-import net.netcoding.niftycore.database.notifications.SQLNotifications;
+import net.netcoding.nifty.core.database.notifications.SQLNotifications;
 
 import java.io.File;
 import java.sql.SQLException;

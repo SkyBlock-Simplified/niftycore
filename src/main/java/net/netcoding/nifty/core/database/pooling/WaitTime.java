@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.database.pooling;
+package net.netcoding.nifty.core.database.pooling;
 
 /**
  * Represents time to wait for a connection. Ensures unified waiting intervals.

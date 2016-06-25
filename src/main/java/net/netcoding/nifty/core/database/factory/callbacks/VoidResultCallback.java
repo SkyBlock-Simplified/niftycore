@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.database.factory.callbacks;
+package net.netcoding.nifty.core.database.factory.callbacks;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
