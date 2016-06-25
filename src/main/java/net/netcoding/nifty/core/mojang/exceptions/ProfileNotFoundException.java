@@ -1,8 +1,8 @@
-package net.netcoding.niftycore.mojang.exceptions;
+package net.netcoding.nifty.core.mojang.exceptions;
 
-import net.netcoding.niftycore.minecraft.ChatColor;
-import net.netcoding.niftycore.mojang.MojangProfile;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.api.color.ChatColor;
+import net.netcoding.nifty.core.mojang.MojangProfile;
+import net.netcoding.nifty.core.util.StringUtil;
 
 /**
  * Custom exception for use by the MojangRepository

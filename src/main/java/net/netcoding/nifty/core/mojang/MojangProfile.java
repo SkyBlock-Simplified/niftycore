@@ -1,8 +1,7 @@
-package net.netcoding.niftycore.mojang;
+package net.netcoding.nifty.core.mojang;
 
-import net.netcoding.niftycore.minecraft.MinecraftServer;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.json.JsonMessage;
+import net.netcoding.nifty.core.api.MinecraftServer;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
@@ -11,51 +10,43 @@ import java.util.regex.Pattern;
 /**
  * Container for a players unique id and name.
  */
-public abstract class MojangProfile {
+public abstract class MojangProfile implements OnlineProfile {
 
 	private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 	private String id = "";
 	private UUID uuid;
 	protected String name;
-	protected String ip;
-	protected int port;
+	private String ip = "";
+	private int port = 0;
+	private InetSocketAddress ipAddress;
 	private boolean legacy = false;
 	private boolean demo = false;
-	private InetSocketAddress ipAddress;
 	private long updated = System.currentTimeMillis();
 	// http://skins.minecraft.net/MinecraftSkins/<username>.png
 
 	protected MojangProfile() { }
 
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (obj == null) return false;
-		if (!MojangProfile.class.isAssignableFrom(obj.getClass())) return false;
 		if (this == obj) return true;
-		MojangProfile profile = (MojangProfile)obj;
+		if (!Profile.class.isAssignableFrom(obj.getClass())) return false;
+		Profile profile = (Profile)obj;
 		return this.getUniqueId().equals(profile.getUniqueId());
 	}
 
-	/**
-	 * Gets the ip address of the player if they are online.
-	 *
-	 * @return Socket address of the player if online, otherwise null.
-	 */
-	public InetSocketAddress getAddress() {
-		if (this.isOnlineAnywhere()) {
-			if (StringUtil.notEmpty(this.ip) && this.ipAddress == null)
-				this.ipAddress = new InetSocketAddress(this.ip, this.port);
-		}
+	@Override
+	public final InetSocketAddress getAddress() {
+		if (StringUtil.notEmpty(this.ip) && this.ipAddress == null && this.isOnline())
+			this.ipAddress = new InetSocketAddress(this.ip, this.port);
 
 		return this.ipAddress;
 	}
 
-	/**
-	 * Gets the players name associated to this UUID.
-	 *
-	 * @return Current player name.
-	 */
-	public abstract String getName();
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
 	/**
 	 * Gets the server this profile belongs to.
@@ -69,7 +60,8 @@ public abstract class MojangProfile {
 	 *
 	 * @return Player UUID.
 	 */
-	public UUID getUniqueId() {
+	@Override
+	public final UUID getUniqueId() {
 		if (this.uuid == null)
 			this.uuid = UUID.fromString(UUID_FIX.matcher(this.id.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
 
@@ -81,7 +73,7 @@ public abstract class MojangProfile {
 	 *
 	 * @return True if address exists, otherwise false.
 	 */
-	public boolean hasAddress() {
+	public final boolean hasAddress() {
 		return this.getAddress() != null;
 	}
 
@@ -90,12 +82,12 @@ public abstract class MojangProfile {
 	 *
 	 * @return True if expired, otherwise false.
 	 */
-	public boolean hasExpired() {
+	public final boolean hasExpired() {
 		return System.currentTimeMillis() - this.updated >= 1800000;
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return this.getUniqueId().hashCode();
 	}
 
@@ -104,7 +96,7 @@ public abstract class MojangProfile {
 	 *
 	 * @return True if unpaid, otherwise false.
 	 */
-	public boolean isDemo() {
+	public final boolean isDemo() {
 		return this.demo;
 	}
 
@@ -113,30 +105,16 @@ public abstract class MojangProfile {
 	 *
 	 * @return True if not migrated, otherwise false.
 	 */
-	public boolean isLegacy() {
+	public final boolean isLegacy() {
 		return this.legacy;
 	}
 
 	/**
-	 * Checks if this profile is found anywhere on BungeeCord.
+	 * Checks if this profile is online anywhere on BungeeCord.
 	 *
 	 * @return True if online, otherwise false.
 	 */
-	public abstract boolean isOnlineAnywhere();
-
-	/**
-	 * Send a json message to the profile.
-	 *
-	 * @param message Json message to send.
-	 */
-	public abstract void sendMessage(JsonMessage message) throws Exception;
-
-	/**
-	 * Send a message to the profile.
-	 *
-	 * @param message Message to send.
-	 */
-	public abstract void sendMessage(String message);
+	public abstract boolean isOnline();
 
 	@Override
 	public String toString() {

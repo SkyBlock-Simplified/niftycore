@@ -1,23 +1,18 @@
-package net.netcoding.niftycore.mojang;
+package net.netcoding.nifty.core.mojang;
 
-import net.netcoding.niftycore.minecraft.MinecraftServer;
-import net.netcoding.niftycore.util.json.JsonMessage;
+import net.netcoding.nifty.core.api.MinecraftServer;
+import net.netcoding.nifty.core.util.json.JsonMessage;
 
 public class BasicMojangProfile extends MojangProfile {
 
 	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
 	public MinecraftServer<? extends MojangProfile> getServer() {
-		return null;
+		throw new UnsupportedOperationException("Improperly defined repository resulted in basic profiles!");
 	}
 
 	@Override
-	public boolean isOnlineAnywhere() {
-		return false;
+	public boolean isOnline() {
+		throw new UnsupportedOperationException("Improperly defined repository resulted in basic profiles!");
 	}
 
 	@Override

@@ -1,22 +1,22 @@
-package net.netcoding.niftycore.mojang;
+package net.netcoding.nifty.core.mojang;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.netcoding.niftycore.NiftyCore;
-import net.netcoding.niftycore.http.HttpBody;
-import net.netcoding.niftycore.http.HttpClient;
-import net.netcoding.niftycore.http.HttpHeader;
-import net.netcoding.niftycore.http.HttpResponse;
-import net.netcoding.niftycore.http.HttpStatus;
-import net.netcoding.niftycore.http.exceptions.HttpConnectionException;
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.mojang.exceptions.ProfileNotFoundException;
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
-import net.netcoding.niftycore.util.concurrent.ConcurrentSet;
+import net.netcoding.nifty.core.NiftyCore;
+import net.netcoding.nifty.core.http.HttpClient;
+import net.netcoding.nifty.core.http.HttpHeader;
+import net.netcoding.nifty.core.http.HttpResponse;
+import net.netcoding.nifty.core.mojang.exceptions.ProfileNotFoundException;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.http.HttpBody;
+import net.netcoding.nifty.core.http.HttpStatus;
+import net.netcoding.nifty.core.http.exceptions.HttpConnectionException;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("unchecked")
 /**
  * A collection of methods to locate player UUID and Name throughout Bungee or offline.
  */
@@ -65,25 +66,22 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	public static final String AUTH_INVALIDATE_MOJANG = "https://authserver.mojang.com/invalidate";*/
 
 	static {
-		MinecraftScheduler.runAsync(new Runnable() {
-			@Override
-			public void run() {
-				boolean available = false;
+		MinecraftScheduler.getInstance().runAsync(() -> {
+			boolean available = false;
 
-				try {
-					HttpResponse response = HttpClient.get(getStatusUrl());
-					JsonArray services = new JsonParser().parse(response.getBody().toString()).getAsJsonArray();
+			try {
+				HttpResponse response = HttpClient.get(getStatusUrl());
+				JsonArray services = new JsonParser().parse(response.getBody().toString()).getAsJsonArray();
 
-					for (int i = 0; i < services.size(); i++) {
-						JsonObject status = services.get(i).getAsJsonObject();
+				for (int i = 0; i < services.size(); i++) {
+					JsonObject status = services.get(i).getAsJsonObject();
 
-						if (status.get(SERVICE_API) != null)
-							available = !"red".equals(status.get(SERVICE_API).getAsString());
-					}
-				} catch (Exception ignore) { }
+					if (status.get(SERVICE_API) != null)
+						available = !"red".equals(status.get(SERVICE_API).getAsString());
+				}
+			} catch (Exception ignore) { }
 
-				API_AVAILABLE = available;
-			}
+			API_AVAILABLE = available;
 		}, 0, 5 * (NiftyCore.isBungee() ? 60000 : 1200));
 	}
 
@@ -109,13 +107,11 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 		return new URL("https://status.mojang.com/check");
 	}
 
-	@SuppressWarnings("unchecked")
 	protected final Class<T> getSuperClass() {
 		ParameterizedType superClass = (ParameterizedType)this.getClass().getGenericSuperclass();
 		return (Class<T>)(superClass.getActualTypeArguments().length == 0 ? BasicMojangProfile.class : superClass.getActualTypeArguments()[0]);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected final Class<T[]> getSuperClassArray() {
 		return (Class<T[]>)Array.newInstance(this.getSuperClass(), 0).getClass();
 	}
@@ -182,10 +178,7 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 			this.processOnlineUsernames(profiles, userList);
 
 			// Remove Expired Cache Profiles
-			for (MojangProfile profile : CACHE) {
-				if (profile.hasExpired())
-					CACHE.remove(profile);
-			}
+			CACHE.stream().filter(MojangProfile::hasExpired).forEach(CACHE::remove);
 
 			// Check Cache Profiles
 			if (!CACHE.isEmpty()) {
@@ -341,10 +334,7 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 			found = this.processOnlineUniqueId(uniqueId);
 
 			// Remove Expired Cache Profiles
-			for (MojangProfile profile : CACHE) {
-				if (profile.hasExpired())
-					CACHE.remove(profile);
-			}
+			CACHE.stream().filter(MojangProfile::hasExpired).forEach(CACHE::remove);
 
 			// Check Cache Profiles
 			if (found == null) {
@@ -401,6 +391,7 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 		return found;
 	}
 
+	@SuppressWarnings("unused")
 	protected static class UUIDSearchResult {
 
 		private String name;
