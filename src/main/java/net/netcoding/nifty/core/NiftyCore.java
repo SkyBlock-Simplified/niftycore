@@ -1,9 +1,11 @@
-package net.netcoding.niftycore;
+package net.netcoding.nifty.core;
 
-import net.netcoding.niftycore.reflection.Reflection;
+import net.netcoding.nifty.core.reflection.Reflection;
 
+import java.util.Optional;
 import java.util.logging.Logger;
 
+@SuppressWarnings("unchecked")
 public class NiftyCore {
 
 	private static final Logger LOGGER;
@@ -21,27 +23,32 @@ public class NiftyCore {
 
 		try {
 			Reflection proxy = new Reflection("ProxyServer", "net.md_5.bungee.api");
-			Reflection manager = new Reflection("PluginManager", "net.md_5.bungee.api.plugin");
-			Reflection plugin = new Reflection("Plugin", "net.md_5.bungee.api.plugin");
+			Reflection manager = new Reflection("PluginManager", "plugin", "net.md_5.bungee.api");
+			Reflection plugin = new Reflection("Plugin", "plugin", "net.md_5.bungee.api");
 			proxy.getClazz();
-			isBungee = true;
 			Object proxyObj = proxy.invokeMethod("getInstance", null);
 			Object managerObj = proxy.invokeMethod("getPluginManager", proxyObj);
 			pluginObj = manager.invokeMethod("getPlugin", managerObj, "NiftyBungee");
 			logger = (Logger)plugin.invokeMethod("getLogger", pluginObj);
+			isBungee = true;
 		} catch (Exception bungee) {
 			try {
 				Reflection bukkit = new Reflection("Bukkit", "org.bukkit");
-				Reflection manager = new Reflection("PluginManager", "org.bukkit.plugin");
-				Reflection plugin = new Reflection("Plugin", "org.bukkit.plugin");
+				Reflection manager = new Reflection("PluginManager", "plugin", "org.bukkit");
+				Reflection plugin = new Reflection("Plugin", "plugin", "org.bukkit");
+				bukkit.getClazz();
 				Object managerObj = bukkit.invokeMethod("getPluginManager", null);
 				pluginObj = manager.invokeMethod("getPlugin", managerObj, "NiftyBukkit");
 				logger = (Logger)plugin.invokeMethod("getLogger", pluginObj);
 				isBukkit = true;
 			} catch (Exception bukkit) {
 				try {
-					Reflection sponge = new Reflection("SpongeImpl", "common", "org.spongepowered");
+					Reflection sponge = new Reflection("Sponge", "api", "org.spongepowered");
+					Reflection manager = new Reflection("PluginManager", "plugin", "org.spongepowered.api");
 					sponge.getClazz();
+					Object managerObj = sponge.invokeMethod("getPluginManager", null);
+					Optional<Object> opPlugin = (Optional<Object>)manager.invokeMethod("getPlugin", managerObj, "NiftyBukkit");
+					if (opPlugin.isPresent()) pluginObj = opPlugin.get();
 					isSponge = true;
 				} catch (Exception ignore) { }
 			}
