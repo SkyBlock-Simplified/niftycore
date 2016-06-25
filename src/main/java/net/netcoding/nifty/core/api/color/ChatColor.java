@@ -1,7 +1,7 @@
-package net.netcoding.niftycore.minecraft;
+package net.netcoding.nifty.core.api.color;
 
-import net.netcoding.niftycore.util.RegexUtil;
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.util.RegexUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.util.regex.Pattern;
 
@@ -66,19 +66,19 @@ public enum ChatColor {
 		return null;
 	}
 
-	public final char getCode() {
+	public char getCode() {
 		return this.code;
 	}
 
-	public final String getJsonName() {
+	public String getJsonName() {
 		return StringUtil.isEmpty(this.jsonName) ? this.name().toLowerCase() : this.jsonName;
 	}
 
-	public final boolean isColor() {
+	public boolean isColor() {
 		return !this.isFormat() && this != RESET;
 	}
 
-	public final boolean isFormat() {
+	public boolean isFormat() {
 		return this.isFormat;
 	}
 
