@@ -1,12 +1,12 @@
-package net.netcoding.niftycore.yaml.converters;
+package net.netcoding.nifty.core.yaml.converters;
 
-import net.netcoding.niftycore.yaml.InternalConverter;
+import net.netcoding.nifty.core.yaml.InternalConverter;
 
 import java.lang.reflect.ParameterizedType;
 
-public class Enum extends Converter {
+public class EnumConverter extends Converter {
 
-	public Enum(InternalConverter converter) {
+	public EnumConverter(InternalConverter converter) {
 		super(converter);
 	}
 

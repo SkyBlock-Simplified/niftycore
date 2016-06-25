@@ -1,9 +1,9 @@
-package net.netcoding.niftycore.yaml;
+package net.netcoding.nifty.core.yaml;
 
-import net.netcoding.niftycore.yaml.annotations.ConfigMode;
-import net.netcoding.niftycore.yaml.annotations.Path;
-import net.netcoding.niftycore.yaml.annotations.PreserveStatic;
-import net.netcoding.niftycore.yaml.converters.Converter;
+import net.netcoding.nifty.core.yaml.annotations.Path;
+import net.netcoding.nifty.core.yaml.annotations.ConfigMode;
+import net.netcoding.nifty.core.yaml.annotations.PreserveStatic;
+import net.netcoding.nifty.core.yaml.converters.Converter;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -26,13 +26,8 @@ public abstract class YamlMap {
 	}
 
 	static boolean doSkip(Field field) {
-		if (Modifier.isTransient(field.getModifiers()) || Modifier.isFinal(field.getModifiers()))
-			return true;
-
-		if (Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(PreserveStatic.class))
-			return !field.getAnnotation(PreserveStatic.class).value();
-
-		return false;
+		return Modifier.isTransient(field.getModifiers()) || Modifier.isFinal(field.getModifiers()) ||
+				Modifier.isStatic(field.getModifiers()) && field.isAnnotationPresent(PreserveStatic.class) && !field.getAnnotation(PreserveStatic.class).value();
 	}
 
 	public final Set<Class<? extends Converter>> getCustomConverters() {

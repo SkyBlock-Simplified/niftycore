@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.yaml.exceptions;
+package net.netcoding.nifty.core.yaml.exceptions;
 
 @SuppressWarnings("serial")
 public class InvalidConfigurationException extends RuntimeException {

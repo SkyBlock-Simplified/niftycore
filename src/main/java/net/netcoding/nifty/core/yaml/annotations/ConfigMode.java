@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.yaml.annotations;
+package net.netcoding.nifty.core.yaml.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

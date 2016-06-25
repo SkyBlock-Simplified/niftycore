@@ -1,10 +1,11 @@
-package net.netcoding.niftycore.yaml;
+package net.netcoding.nifty.core.yaml;
 
-import net.netcoding.niftycore.minecraft.scheduler.MinecraftScheduler;
-import net.netcoding.niftycore.yaml.annotations.Comment;
-import net.netcoding.niftycore.yaml.annotations.Comments;
-import net.netcoding.niftycore.yaml.annotations.Path;
-import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
+import net.netcoding.nifty.core.NiftyCore;
+import net.netcoding.nifty.core.yaml.annotations.Comment;
+import net.netcoding.nifty.core.yaml.annotations.Comments;
+import net.netcoding.nifty.core.yaml.annotations.Path;
+import net.netcoding.nifty.core.yaml.exceptions.InvalidConfigurationException;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
 
 import java.io.File;
 import java.io.IOException;
@@ -211,7 +212,7 @@ public abstract class YamlConfig extends ConfigMapper implements Runnable {
 			try {
 				this.watchService = FileSystems.getDefault().newWatchService();
 				this.watchKey = this.configFile.toPath().getParent().register(this.watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
-				this.taskId = MinecraftScheduler.runAsync(this, 0L, 5L).getId();
+				this.taskId = MinecraftScheduler.getInstance().runAsync(this, 0L, 5L * (NiftyCore.isBungee() ? 50 : 1)).getId();
 			} catch (Exception ex) {
 				throw new RuntimeException("Unable to start watch service!", ex);
 			}
@@ -220,7 +221,7 @@ public abstract class YamlConfig extends ConfigMapper implements Runnable {
 
 	public void stopWatcher() {
 		if (this.taskId != -1) {
-			MinecraftScheduler.cancel(this.taskId);
+			MinecraftScheduler.getInstance().cancel(this.taskId);
 			this.taskId = -1;
 			this.watchKey.cancel();
 

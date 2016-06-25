@@ -1,16 +1,16 @@
-package net.netcoding.niftycore.yaml.converters;
+package net.netcoding.nifty.core.yaml.converters;
 
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.yaml.ConfigSection;
-import net.netcoding.niftycore.yaml.InternalConverter;
-import net.netcoding.niftycore.yaml.YamlMap;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.yaml.InternalConverter;
+import net.netcoding.nifty.core.yaml.YamlMap;
+import net.netcoding.nifty.core.yaml.ConfigSection;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 
-public class Config extends Converter {
+public class ConfigConverter extends Converter {
 
-	public Config(InternalConverter converter) {
+	public ConfigConverter(InternalConverter converter) {
 		super(converter);
 	}
 

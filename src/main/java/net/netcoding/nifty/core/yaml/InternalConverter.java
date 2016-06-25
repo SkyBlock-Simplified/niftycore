@@ -1,8 +1,8 @@
-package net.netcoding.niftycore.yaml;
+package net.netcoding.nifty.core.yaml;
 
-import net.netcoding.niftycore.yaml.annotations.PreserveStatic;
-import net.netcoding.niftycore.yaml.converters.Converter;
-import net.netcoding.niftycore.yaml.exceptions.InvalidConverterException;
+import net.netcoding.nifty.core.yaml.converters.*;
+import net.netcoding.nifty.core.yaml.annotations.PreserveStatic;
+import net.netcoding.nifty.core.yaml.exceptions.InvalidConverterException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -21,13 +21,13 @@ public class InternalConverter {
 
 	public InternalConverter() {
 		try {
-			this.addConverter(net.netcoding.niftycore.yaml.converters.Primitive.class);
-			this.addConverter(net.netcoding.niftycore.yaml.converters.Config.class);
-			this.addConverter(net.netcoding.niftycore.yaml.converters.Array.class);
-			this.addConverter(net.netcoding.niftycore.yaml.converters.List.class);
-			this.addConverter(net.netcoding.niftycore.yaml.converters.Enum.class);
-			this.addConverter(net.netcoding.niftycore.yaml.converters.Map.class);
-			this.addConverter(net.netcoding.niftycore.yaml.converters.Set.class);
+			this.addConverter(PrimitiveConverter.class);
+			this.addConverter(ConfigConverter.class);
+			this.addConverter(ArrayConverter.class);
+			this.addConverter(ListConverter.class);
+			this.addConverter(EnumConverter.class);
+			this.addConverter(MapConverter.class);
+			this.addConverter(SetConverter.class);
 		} catch (InvalidConverterException icex) {
 			throw new IllegalStateException(icex);
 		}

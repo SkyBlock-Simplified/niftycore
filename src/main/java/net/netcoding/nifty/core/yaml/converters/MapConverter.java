@@ -1,15 +1,15 @@
-package net.netcoding.niftycore.yaml.converters;
+package net.netcoding.nifty.core.yaml.converters;
 
-import net.netcoding.niftycore.yaml.ConfigSection;
-import net.netcoding.niftycore.yaml.InternalConverter;
+import net.netcoding.nifty.core.yaml.InternalConverter;
+import net.netcoding.nifty.core.yaml.ConfigSection;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
 @SuppressWarnings("unchecked")
-public class Map extends Converter {
+public class MapConverter extends Converter {
 
-	public Map(InternalConverter converter) {
+	public MapConverter(InternalConverter converter) {
 		super(converter);
 	}
 

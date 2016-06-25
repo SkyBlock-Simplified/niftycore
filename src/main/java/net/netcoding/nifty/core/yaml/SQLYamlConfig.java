@@ -1,16 +1,16 @@
-package net.netcoding.niftycore.yaml;
+package net.netcoding.nifty.core.yaml;
 
-import net.netcoding.niftycore.database.MySQL;
-import net.netcoding.niftycore.database.OracleSQL;
-import net.netcoding.niftycore.database.PostgreSQL;
-import net.netcoding.niftycore.database.SQLServer;
-import net.netcoding.niftycore.database.SQLite;
-import net.netcoding.niftycore.database.factory.SQLWrapper;
-import net.netcoding.niftycore.reflection.Reflection;
-import net.netcoding.niftycore.yaml.annotations.Comment;
-import net.netcoding.niftycore.yaml.annotations.Comments;
-import net.netcoding.niftycore.yaml.annotations.Path;
-import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
+import net.netcoding.nifty.core.database.MySQL;
+import net.netcoding.nifty.core.database.SQLite;
+import net.netcoding.nifty.core.yaml.annotations.Path;
+import net.netcoding.nifty.core.database.OracleSQL;
+import net.netcoding.nifty.core.database.PostgreSQL;
+import net.netcoding.nifty.core.database.SQLServer;
+import net.netcoding.nifty.core.database.factory.SQLWrapper;
+import net.netcoding.nifty.core.reflection.Reflection;
+import net.netcoding.nifty.core.yaml.annotations.Comment;
+import net.netcoding.nifty.core.yaml.annotations.Comments;
+import net.netcoding.nifty.core.yaml.exceptions.InvalidConfigurationException;
 
 import java.io.File;
 import java.lang.reflect.Field;

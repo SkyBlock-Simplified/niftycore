@@ -1,6 +1,6 @@
-package net.netcoding.niftycore.yaml;
+package net.netcoding.nifty.core.yaml;
 
-import net.netcoding.niftycore.util.StringUtil;
+import net.netcoding.nifty.core.util.StringUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -1,15 +1,15 @@
-package net.netcoding.niftycore.yaml.converters;
+package net.netcoding.nifty.core.yaml.converters;
 
-import net.netcoding.niftycore.yaml.InternalConverter;
+import net.netcoding.nifty.core.yaml.InternalConverter;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collections;
 
 @SuppressWarnings("unchecked")
-public class Array extends Converter {
+public class ArrayConverter extends Converter {
 
-	public Array(InternalConverter converter) {
+	public ArrayConverter(InternalConverter converter) {
 		super(converter);
 	}
 

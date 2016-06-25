@@ -1,8 +1,8 @@
-package net.netcoding.niftycore.yaml;
+package net.netcoding.nifty.core.yaml;
 
-import net.netcoding.niftycore.util.ListUtil;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.yaml.exceptions.InvalidConfigurationException;
+import net.netcoding.nifty.core.util.ListUtil;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.yaml.exceptions.InvalidConfigurationException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;

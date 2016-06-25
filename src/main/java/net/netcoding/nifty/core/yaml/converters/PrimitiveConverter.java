@@ -1,12 +1,12 @@
-package net.netcoding.niftycore.yaml.converters;
+package net.netcoding.nifty.core.yaml.converters;
 
-import net.netcoding.niftycore.yaml.InternalConverter;
+import net.netcoding.nifty.core.yaml.InternalConverter;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class Primitive extends Converter {
+public class PrimitiveConverter extends Converter {
 
 	private static final transient HashSet<String> types = new HashSet<>();
 
@@ -14,7 +14,7 @@ public class Primitive extends Converter {
 		types.addAll(Arrays.asList("boolean", "character", "byte", "short", "integer", "long", "float", "double", "string"));
 	}
 
-	public Primitive(InternalConverter converter) {
+	public PrimitiveConverter(InternalConverter converter) {
 		super(converter);
 	}
 

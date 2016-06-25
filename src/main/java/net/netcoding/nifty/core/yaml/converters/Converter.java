@@ -1,6 +1,6 @@
-package net.netcoding.niftycore.yaml.converters;
+package net.netcoding.nifty.core.yaml.converters;
 
-import net.netcoding.niftycore.yaml.InternalConverter;
+import net.netcoding.nifty.core.yaml.InternalConverter;
 
 import java.lang.reflect.ParameterizedType;
 
@@ -8,7 +8,7 @@ public abstract class Converter {
 
 	protected final transient InternalConverter converter;
 
-	public Converter(InternalConverter converter) {
+	protected Converter(InternalConverter converter) {
 		this.converter = converter;
 	}
 
