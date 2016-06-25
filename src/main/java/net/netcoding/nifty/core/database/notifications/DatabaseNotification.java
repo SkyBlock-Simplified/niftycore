@@ -1,14 +1,10 @@
-package net.netcoding.niftycore.database.notifications;
+package net.netcoding.nifty.core.database.notifications;
 
-import net.netcoding.niftycore.NiftyCore;
-import net.netcoding.niftycore.database.factory.SQLFactory;
-import net.netcoding.niftycore.database.factory.callbacks.ResultCallback;
-import net.netcoding.niftycore.database.factory.callbacks.VoidResultCallback;
-import net.netcoding.niftycore.minecraft.ConsoleLogger;
-import net.netcoding.niftycore.util.StringUtil;
-import net.netcoding.niftycore.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.core.database.factory.SQLFactory;
+import net.netcoding.nifty.core.database.factory.callbacks.VoidResultCallback;
+import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +13,7 @@ import java.util.List;
 /**
  * An sql listener used to check for updates to its associated table and notify plugins.
  */
-public class DatabaseNotification extends ConsoleLogger {
+public class DatabaseNotification {
 
 	private TriggerEvent event;
 	private final transient DatabaseListener listener;
@@ -28,7 +24,6 @@ public class DatabaseNotification extends ConsoleLogger {
 	private final String table;
 
 	DatabaseNotification(SQLFactory sql, String table, DatabaseListener listener, boolean overwrite) throws SQLException {
-		super(NiftyCore.getLogger());
 		if (listener == null) throw new IllegalArgumentException("DatabaseListener cannot be null!");
 		this.sql = sql;
 		this.table = table;
@@ -87,14 +82,11 @@ public class DatabaseNotification extends ConsoleLogger {
 		if (this.getEvent() == TriggerEvent.INSERT) throw new SQLException("Cannot retrieve an inserted record!");
 		final HashMap<String, Object> deleted = new HashMap<>();
 
-		this.sql.query(StringUtil.format("SELECT old_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), new VoidResultCallback() {
-			@Override
-			public void handle(ResultSet result) throws SQLException {
-				if (result.next()) {
-					String[] _old = result.getString("old_data").split(",");
-					int keyCount = primaryColumnNames.size();
-					for (int i = 0; i < keyCount; i++) deleted.put(primaryColumnNames.get(i), _old[i]);
-				}
+		this.sql.query(StringUtil.format("SELECT old_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), result -> {
+			if (result.next()) {
+				String[] _old = result.getString("old_data").split(",");
+				int keyCount = primaryColumnNames.size();
+				for (int i = 0; i < keyCount; i++) deleted.put(primaryColumnNames.get(i), _old[i]);
 			}
 		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.previousId);
 
@@ -141,18 +133,15 @@ public class DatabaseNotification extends ConsoleLogger {
 	public void getUpdatedRow(final VoidResultCallback callback) throws SQLException {
 		if (this.getEvent() == TriggerEvent.DELETE) throw new SQLException("Cannot retrieve a deleted record!");
 
-		this.sql.query(StringUtil.format("SELECT new_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), new VoidResultCallback() {
-			@Override
-			public void handle(ResultSet result) throws SQLException {
-				if (result.next()) {
-					List<String> whereClause = new ArrayList<>();
-					int keyCount = primaryColumnNames.size();
-					String[] _new = result.getString("new_data").split(",");
+		this.sql.query(StringUtil.format("SELECT new_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), result -> {
+			if (result.next()) {
+				List<String> whereClause = new ArrayList<>();
+				int keyCount = primaryColumnNames.size();
+				String[] _new = result.getString("new_data").split(",");
 
-					if (keyCount > 0) {
-						for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX({0}{1}{0}, '','', {2}), '','', -1) = ?", sql.getIdentifierQuoteString(), primaryColumnNames.get(i), (i + 1)));
-						sql.query(StringUtil.format("SELECT * FROM {0} WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
-					}
+				if (keyCount > 0) {
+					for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX({0}{1}{0}, '','', {2}), '','', -1) = ?", sql.getIdentifierQuoteString(), primaryColumnNames.get(i), (i + 1)));
+					sql.query(StringUtil.format("SELECT * FROM {0} WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
 				}
 			}
 		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.previousId);
@@ -169,13 +158,10 @@ public class DatabaseNotification extends ConsoleLogger {
 
 	private void loadPrimaryKeys() throws SQLException {
 		this.primaryColumnNames.clear();
-		this.primaryColumnNames.addAll(this.sql.query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_KEY = ?;", new ResultCallback<ConcurrentList<String>>() {
-			@Override
-			public ConcurrentList<String> handle(ResultSet result) throws SQLException {
-				ConcurrentList<String> keyNames = new ConcurrentList<>();
-				while (result.next()) keyNames.add(result.getString("COLUMN_NAME"));
-				return keyNames;
-			}
+		this.primaryColumnNames.addAll(this.sql.query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_KEY = ?;", result -> {
+			ConcurrentList<String> keyNames = new ConcurrentList<>();
+			while (result.next()) keyNames.add(result.getString("COLUMN_NAME"));
+			return keyNames;
 		}, this.getSchema(), this.getTable(), "PRI"));
 	}
 
@@ -183,24 +169,21 @@ public class DatabaseNotification extends ConsoleLogger {
 		if (this.isStopped()) return false;
 
 		try {
-			return this.sql.query(StringUtil.format("SELECT id, sql_action FROM {0} WHERE table_name = ? AND id > ? AND sql_action IN (?, ?, ?) ORDER BY id {1}SC LIMIT 1;", SQLNotifications.ACTIVITY_TABLE, (this.previousId == 0 ? "DE" : "A")), new ResultCallback<Boolean>() {
-				@Override
-				public Boolean handle(ResultSet result) throws SQLException {
-					if (result.next()) {
-						int last = result.getInt("id");
+			return this.sql.query(StringUtil.format("SELECT id, sql_action FROM {0} WHERE table_name = ? AND id > ? AND sql_action IN (?, ?, ?) ORDER BY id {1}SC LIMIT 1;", SQLNotifications.ACTIVITY_TABLE, (this.previousId == 0 ? "DE" : "A")), result -> {
+				if (result.next()) {
+					int last = result.getInt("id");
 
-						if (last > previousId) {
-							previousId = last;
-							event = TriggerEvent.fromString(result.getString("sql_action"));
-							return true;
-						}
+					if (last > previousId) {
+						previousId = last;
+						event = TriggerEvent.fromString(result.getString("sql_action"));
+						return true;
 					}
-
-					return false;
 				}
+
+				return false;
 			}, this.getTable(), this.previousId, "INSERT", "UPDATE", "DELETE");
 		} catch (SQLException ex) {
-			this.console(ex);
+			ex.printStackTrace();
 			this.stop();
 		}
 
@@ -211,7 +194,7 @@ public class DatabaseNotification extends ConsoleLogger {
 		try {
 			this.listener.onDatabaseNotification(this);
 		} catch (SQLException ex) {
-			this.console(ex);
+			ex.printStackTrace();
 		}
 	}
 
@@ -239,16 +222,13 @@ public class DatabaseNotification extends ConsoleLogger {
 	private boolean triggersExist() {
 		try {
 			// SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA LIKE '%nifty' AND TRIGGER_NAME LIKE '%onnifty';
-			return this.sql.query("SELECT TRIGGER_NAME FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA = ? AND TRIGGER_NAME IN (?, ?, ?);", new ResultCallback<Boolean>() {
-				@Override
-				public Boolean handle(ResultSet result) throws SQLException {
-					int count = 0;
-					while (result.next()) count++;
-					return count == 3;
-				}
+			return this.sql.query("SELECT TRIGGER_NAME FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA = ? AND TRIGGER_NAME IN (?, ?, ?);", result -> {
+				int count = 0;
+				while (result.next()) count++;
+				return count == 3;
 			}, this.getSchema(), this.getName(TriggerEvent.INSERT), this.getName(TriggerEvent.UPDATE), this.getName(TriggerEvent.DELETE));
 		} catch (Exception ex) {
-			this.console(ex);
+			ex.printStackTrace();
 		}
 
 		return false;

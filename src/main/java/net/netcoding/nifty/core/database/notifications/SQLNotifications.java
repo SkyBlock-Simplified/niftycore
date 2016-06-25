@@ -144,10 +144,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param dropTriggers True to drop triggers, otherwise false.
 	 */
 	public void removeListener(String table, boolean dropTriggers) {
-		for (DatabaseNotification listener : this.listeners) {
-			if (StringUtil.isEmpty(table) || listener.getTable().equals(table))
-				listener.stop(dropTriggers);
-		}
+		this.listeners.stream().filter(listener -> StringUtil.isEmpty(table) || listener.getTable().equals(table)).forEach(listener -> listener.stop(dropTriggers));
 
 		if (this.listeners.isEmpty()) {
 			if (this.taskId != -1) {

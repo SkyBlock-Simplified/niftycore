@@ -107,14 +107,21 @@ public class RecoverableConnection implements Connection {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		RecoverableConnection that = (RecoverableConnection) o;
-		if (this.connection != null ? !this.connection.equals(that.connection) : that.connection != null) return false;
-		if (this.pool != null ? !this.pool.equals(that.pool) : that.pool != null) return false;
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return false;
+		else if (obj == null || !RecoverableConnection.class.isAssignableFrom(obj.getClass()))
+			return false;
+		else {
+			RecoverableConnection that = (RecoverableConnection)obj;
 
-		return true;
+			if (this.connection != null ? !this.connection.equals(that.connection) : that.connection != null)
+				return false;
+			else if (this.pool != null ? !this.pool.equals(that.pool) : that.pool != null)
+				return false;
+
+			return true;
+		}
 	}
 
 	@Override

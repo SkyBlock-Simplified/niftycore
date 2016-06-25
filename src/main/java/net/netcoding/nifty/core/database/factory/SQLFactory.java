@@ -214,13 +214,10 @@ public abstract class SQLFactory {
 	 * @param sql       Table fields and constraints.
 	 */
 	public void createTableAsync(final String tableName, final String sql) {
-		MinecraftScheduler.getInstance().runAsync(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					createTable(tableName, sql);
-				} catch (SQLException ignore) { }
-			}
+		MinecraftScheduler.getInstance().runAsync(() -> {
+			try {
+				createTable(tableName, sql);
+			} catch (SQLException ignore) { }
 		});
 	}
 
@@ -421,13 +418,10 @@ public abstract class SQLFactory {
 	 * @param args     Arguments to pass to the query.
 	 */
 	public void queryAsync(final String sql, final VoidResultCallback callback, final Object... args) {
-		MinecraftScheduler.getInstance().runAsync(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					query(sql, callback, args);
-				} catch (SQLException ignore) { }
-			}
+		MinecraftScheduler.getInstance().runAsync(() -> {
+			try {
+				query(sql, callback, args);
+			} catch (SQLException ignore) { }
 		});
 	}
 
@@ -479,16 +473,13 @@ public abstract class SQLFactory {
 	 * @param args Arguments to pass to the query.
 	 */
 	public void updateAsync(final String sql, final Object... args) {
-		MinecraftScheduler.getInstance().runAsync(new Runnable() {
-			@Override
-			public void run() {
-				try (Connection connection = getConnection()) {
-					try (PreparedStatement statement = connection.prepareStatement(sql)) {
-						assignArgs(statement, args);
-						statement.executeUpdate();
-					}
-				} catch (SQLException ignore) { }
-			}
+		MinecraftScheduler.getInstance().runAsync(() -> {
+			try (Connection connection = getConnection()) {
+				try (PreparedStatement statement = connection.prepareStatement(sql)) {
+					assignArgs(statement, args);
+					statement.executeUpdate();
+				}
+			} catch (SQLException ignore) { }
 		});
 	}
 
