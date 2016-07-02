@@ -1,10 +1,11 @@
 package net.netcoding.nifty.core.reflection;
 
 import com.google.common.primitives.Primitives;
+import net.netcoding.nifty.core.reflection.exceptions.ReflectionException;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
-import net.netcoding.nifty.core.reflection.exceptions.ReflectionException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -18,8 +19,8 @@ import java.util.Arrays;
 public class Reflection {
 
 	private static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
-	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], Constructor<?>>> CONSTRUCTOR_CACHE = new ConcurrentMap<>();
-	private static final transient ConcurrentMap<String, Class<?>> CLASS_CACHE = new ConcurrentMap<>();
+	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], Constructor<?>>> CONSTRUCTOR_CACHE = Concurrent.newMap();
+	private static final transient ConcurrentMap<String, Class<?>> CLASS_CACHE = Concurrent.newMap();
 	private final String className;
 	private final String subPackage;
 	private final String packagePath;
@@ -88,7 +89,7 @@ public class Reflection {
 			if (constructors.containsKey(types))
 				return constructors.get(types);
 		} else
-			CONSTRUCTOR_CACHE.put(this.getClazz(), new ConcurrentMap<>());
+			CONSTRUCTOR_CACHE.put(this.getClazz(), Concurrent.newMap());
 
 		for (Constructor<?> constructor : this.getClazz().getDeclaredConstructors()) {
 			Class<?>[] constructorTypes = toPrimitiveTypeArray(constructor.getParameterTypes());
@@ -123,8 +124,12 @@ public class Reflection {
 	}
 
 	public final Field getField(String name) throws ReflectionException {
+		return this.getField(name, true);
+	}
+
+	public final Field getField(String name, boolean isCaseSensitive) throws ReflectionException {
 		for (Field field : this.getClazz().getDeclaredFields()) {
-			if (field.getName().equals(name)) {
+			if (isCaseSensitive ? field.getName().equals(name) : field.getName().equalsIgnoreCase(name)) {
 				field.setAccessible(true);
 				return field;
 			}
@@ -161,12 +166,16 @@ public class Reflection {
 	}
 
 	public final Method getMethod(String name, Class<?>... paramTypes) throws ReflectionException {
+		return this.getMethod(name, true, paramTypes);
+	}
+
+	public final Method getMethod(String name, boolean isCaseSensitive, Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		for (Method method : this.getClazz().getDeclaredMethods()) {
 			Class<?>[] methodTypes = toPrimitiveTypeArray(method.getParameterTypes());
 
-			if (method.getName().equals(name) && isEqualsTypeArray(methodTypes, types)) {
+			if ((isCaseSensitive ? method.getName().equals(name) : method.getName().equalsIgnoreCase(name)) && isEqualsTypeArray(methodTypes, types)) {
 				method.setAccessible(true);
 				return method;
 			}
@@ -204,7 +213,11 @@ public class Reflection {
 	}
 
 	public final Object getValue(String name, Object obj) throws ReflectionException {
-		Field field = this.getField(name);
+		return this.getValue(name, true, obj);
+	}
+
+	public final Object getValue(String name, boolean isCaseSensitive, Object obj) throws ReflectionException {
+		Field field = this.getField(name, isCaseSensitive);
 
 		try {
 			return field.get(obj);
@@ -236,9 +249,13 @@ public class Reflection {
 	}
 
 	public final Object invokeMethod(String name, Object obj, Object... args) throws ReflectionException {
+		return this.invokeMethod(name, true, obj, args);
+	}
+
+	public final Object invokeMethod(String name, boolean isCaseSensitive, Object obj, Object... args) throws ReflectionException {
 		try {
 			Class<?>[] types = toPrimitiveTypeArray(args);
-			return this.getMethod(name, types).invoke(obj, args);
+			return this.getMethod(name, isCaseSensitive, types).invoke(obj, args);
 		} catch (ReflectionException rex) {
 			throw rex;
 		} catch (Exception ex) {
@@ -257,8 +274,8 @@ public class Reflection {
 		}
 	}
 
-	public final void setValue(String name, Object obj, Object value) throws ReflectionException {
-		Field f = this.getField(name);
+	public final void setValue(Class<?> clazz, Object obj, Object value) throws ReflectionException {
+		Field f = this.getField(clazz);
 
 		try {
 			f.set(obj, value);
@@ -267,8 +284,12 @@ public class Reflection {
 		}
 	}
 
-	public final void setValue(Class<?> clazz, Object obj, Object value) throws ReflectionException {
-		Field f = this.getField(clazz);
+	public final void setValue(String name, Object obj, Object value) throws ReflectionException {
+		this.setValue(name, true, obj, value);
+	}
+
+	public final void setValue(String name, boolean isCaseSensitive, Object obj, Object value) throws ReflectionException {
+		Field f = this.getField(name, isCaseSensitive);
 
 		try {
 			f.set(obj, value);
