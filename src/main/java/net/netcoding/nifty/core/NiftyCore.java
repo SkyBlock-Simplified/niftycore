@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 public class NiftyCore {
 
 	private static final Logger LOGGER;
+	private static final Logger NIFTY_LOGGER;
 	private static final boolean IS_BUNGEE;
 	private static final boolean IS_BUKKIT;
 	private static final boolean IS_SPONGE;
@@ -18,7 +19,7 @@ public class NiftyCore {
 		boolean isBungee = false;
 		boolean isBukkit = false;
 		boolean isSponge = false;
-		Object pluginObj = null;
+		Object pluginObj;
 		Logger logger = Logger.getGlobal();
 
 		try {
@@ -32,13 +33,14 @@ public class NiftyCore {
 			logger = (Logger)plugin.invokeMethod("getLogger", pluginObj);
 			isBungee = true;
 		} catch (Exception bungee) {
+			bungee.printStackTrace();
 			try {
 				Reflection bukkit = new Reflection("Bukkit", "org.bukkit");
 				Reflection manager = new Reflection("PluginManager", "plugin", "org.bukkit");
 				Reflection plugin = new Reflection("Plugin", "plugin", "org.bukkit");
 				bukkit.getClazz();
 				Object managerObj = bukkit.invokeMethod("getPluginManager", null);
-				pluginObj = manager.invokeMethod("getPlugin", managerObj, "NiftyBukkit");
+				pluginObj = manager.invokeMethod("getPlugin", managerObj, "NiftyLibrary");
 				logger = (Logger)plugin.invokeMethod("getLogger", pluginObj);
 				isBukkit = true;
 			} catch (Exception bukkit) {
@@ -47,10 +49,12 @@ public class NiftyCore {
 					Reflection manager = new Reflection("PluginManager", "plugin", "org.spongepowered.api");
 					sponge.getClazz();
 					Object managerObj = sponge.invokeMethod("getPluginManager", null);
-					Optional<Object> opPlugin = (Optional<Object>)manager.invokeMethod("getPlugin", managerObj, "NiftyBukkit");
-					if (opPlugin.isPresent()) pluginObj = opPlugin.get();
+					Optional<Object> opPlugin = (Optional<Object>)manager.invokeMethod("getPlugin", managerObj, "NiftyLibrary");
+					pluginObj = opPlugin.orElse(null);
 					isSponge = true;
-				} catch (Exception ignore) { }
+				} catch (Exception ignore) {
+					throw new IllegalStateException("Unable to determine bungee, bukkit or sponge status!");
+				}
 			}
 		}
 
@@ -58,11 +62,16 @@ public class NiftyCore {
 		IS_BUNGEE = isBungee;
 		IS_BUKKIT = isBukkit;
 		IS_SPONGE = isSponge;
-		LOGGER = logger;
+		LOGGER = Logger.getLogger(isBungee ? "BungeeCord" : "Minecraft");
+		NIFTY_LOGGER = logger;
 	}
 
 	public static Logger getLogger() {
 		return LOGGER;
+	}
+
+	public static Logger getNiftyLogger() {
+		return NIFTY_LOGGER;
 	}
 
 	public static Object getPlugin() {
