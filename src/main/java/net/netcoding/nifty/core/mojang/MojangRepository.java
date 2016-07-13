@@ -5,16 +5,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.netcoding.nifty.core.NiftyCore;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.http.HttpBody;
 import net.netcoding.nifty.core.http.HttpClient;
 import net.netcoding.nifty.core.http.HttpHeader;
 import net.netcoding.nifty.core.http.HttpResponse;
+import net.netcoding.nifty.core.http.HttpStatus;
+import net.netcoding.nifty.core.http.exceptions.HttpConnectionException;
 import net.netcoding.nifty.core.mojang.exceptions.ProfileNotFoundException;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;
-import net.netcoding.nifty.core.http.HttpBody;
-import net.netcoding.nifty.core.http.HttpStatus;
-import net.netcoding.nifty.core.http.exceptions.HttpConnectionException;
-import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
@@ -22,21 +23,20 @@ import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("unchecked")
 /**
  * A collection of methods to locate player UUID and Name throughout Bungee or offline.
  */
+@SuppressWarnings("unchecked")
 public abstract class MojangRepository<T extends MojangProfile, P> {
 
 	// API: http://wiki.vg/Mojang_API
-	protected static final transient ConcurrentSet<MojangProfile> CACHE = new ConcurrentSet<>();
+	protected static final transient ConcurrentSet<MojangProfile> CACHE = Concurrent.newSet();
 	protected static final transient Gson GSON = new Gson();
 	protected static final String SERVICE_API = "api.mojang.com";
 	protected static final int PROFILES_PER_REQUEST = 100;
@@ -84,8 +84,6 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 			API_AVAILABLE = available;
 		}, 0, 5 * (NiftyCore.isBungee() ? 60000 : 1200));
 	}
-
-	protected MojangRepository() { }
 
 	protected static URL getProfilesUrl() throws MalformedURLException {
 		return new URL("https://api.mojang.com/profiles/minecraft");
@@ -168,11 +166,11 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	@SuppressWarnings("unchecked")
 	public T[] searchByUsername(Collection<String> usernames) throws ProfileNotFoundException {
 		final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.USERNAMES;
-		List<T> profiles = new ArrayList<>();
+		ConcurrentList<T> profiles = Concurrent.newList();
 		HttpStatus status = HttpStatus.OK;
 
 		try {
-			ConcurrentList<String> userList = new ConcurrentList<>(usernames);
+			ConcurrentList<String> userList = Concurrent.newList(usernames);
 
 			// Check Online Servers
 			this.processOnlineUsernames(profiles, userList);

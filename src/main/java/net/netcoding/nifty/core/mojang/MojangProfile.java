@@ -24,8 +24,6 @@ public abstract class MojangProfile implements OnlineProfile {
 	private long updated = System.currentTimeMillis();
 	// http://skins.minecraft.net/MinecraftSkins/<username>.png
 
-	protected MojangProfile() { }
-
 	@Override
 	public final boolean equals(Object obj) {
 		if (obj == null) return false;
@@ -114,6 +112,7 @@ public abstract class MojangProfile implements OnlineProfile {
 	 *
 	 * @return True if online, otherwise false.
 	 */
+	@Override
 	public abstract boolean isOnline();
 
 	@Override
