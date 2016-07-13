@@ -1,4 +1,4 @@
-package net.netcoding.niftycore.minecraft.scheduler;
+package net.netcoding.nifty.core.api.scheduler;
 
 public class ScheduledTask<T> {
 
@@ -16,7 +16,7 @@ public class ScheduledTask<T> {
      * Will attempt to cancel this task if running.
      */
 	public final void cancel() throws Exception {
-		MinecraftScheduler.cancel(this);
+		MinecraftScheduler.getInstance().cancel(this);
 	}
 
     /**
