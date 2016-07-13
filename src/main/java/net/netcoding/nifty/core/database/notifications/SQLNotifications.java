@@ -1,9 +1,10 @@
 package net.netcoding.nifty.core.database.notifications;
 
 import net.netcoding.nifty.core.NiftyCore;
+import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
 import net.netcoding.nifty.core.database.pooling.SQLPooling;
 import net.netcoding.nifty.core.util.StringUtil;
-import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.io.File;
@@ -15,9 +16,9 @@ import java.util.Properties;
  */
 public abstract class SQLNotifications extends SQLPooling implements Runnable {
 
-	static final String ACTIVITY_TABLE = "niftybukkit_notifications";
+	static final String ACTIVITY_TABLE = "nifty_notifications";
 	private static final int DEFAULT_DELAY = 10;
-	private final transient ConcurrentSet<DatabaseNotification> listeners = new ConcurrentSet<>();
+	private final transient ConcurrentSet<DatabaseNotification> listeners = Concurrent.newSet();
 	private int taskId = -1;
 
 	/**
@@ -26,7 +27,6 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param url  Database connection url.
 	 * @param user Username of the database connection.
 	 * @param pass Password of the database connection.
-	 * @throws SQLException
 	 */
 	public SQLNotifications(String driver, String url, String user, String pass) throws SQLException {
 		super(driver, url, user, pass);
@@ -37,7 +37,6 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 *
 	 * @param url        Database connection url.
 	 * @param properties Properties of the database connection.
-	 * @throws SQLException
 	 */
 	public SQLNotifications(String driver, String url, Properties properties) throws SQLException {
 		super(driver, url, properties);
@@ -52,7 +51,6 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 *
 	 * @param table    Table name to listen to.
 	 * @param notifier Listener to send notifications to.
-	 * @throws SQLException
 	 */
 	public void addListener(String table, DatabaseListener notifier) throws SQLException {
 		this.addListener(table, notifier, DEFAULT_DELAY, false);
@@ -64,7 +62,6 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param table     Table name to listen to.
 	 * @param notifier  Listener to send notifications to.
 	 * @param overwrite True to overwrite the triggers in the database, otherwise false.
-	 * @throws SQLException
 	 */
 	public void addListener(String table, DatabaseListener notifier, boolean overwrite) throws SQLException {
 		this.addListener(table, notifier, DEFAULT_DELAY, overwrite);
@@ -76,7 +73,6 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param table    Table name to listen to.
 	 * @param notifier Listener to send notifications to.
 	 * @param delay    How long in ticks to wait before checking.
-	 * @throws SQLException
 	 */
 	public void addListener(String table, DatabaseListener notifier, long delay) throws SQLException {
 		this.addListener(table, notifier, delay, false);
@@ -89,7 +85,6 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param notifier  Listener to send notifications to.
 	 * @param delay     How long in ticks to wait before checking.
 	 * @param overwrite True to overwrite the triggers in the database, otherwise false.
-	 * @throws SQLException
 	 */
 	public void addListener(String table, DatabaseListener notifier, long delay, boolean overwrite) throws SQLException {
 		this.createLogTable();

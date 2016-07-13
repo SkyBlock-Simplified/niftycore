@@ -15,10 +15,11 @@ import java.util.Vector;
  */
 public abstract class SQLPooling extends SQLFactory implements Runnable {
 
-	private final static int DEFAULT_MIN_CONNECTIONS = 2;
-	private final static int DEFAULT_MAX_CONNECTIONS = 10;
+	private static final int DEFAULT_MIN_CONNECTIONS = 2;
+	private static final int DEFAULT_MAX_CONNECTIONS = 10;
 	private final transient Vector<Connection> availableConnections = new Vector<>();
 	private final transient Vector<Connection> usedConnections = new Vector<>();
+	private final Object lock = new Object();
 	private String validationQuery = "SELECT 1;";
 	private int minimumConnections = DEFAULT_MIN_CONNECTIONS;
 	private int maximumConnections = DEFAULT_MAX_CONNECTIONS;
@@ -28,10 +29,9 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	/**
 	 * Create a new pooling instance.
 	 *
-	 * @param url  Database connection url.
+	 * @param url Database connection url.
 	 * @param user Username of the database connection.
 	 * @param pass Password of the database connection.
-	 * @throws SQLException
 	 */
 	public SQLPooling(String driver, String url, String user, String pass) throws SQLException {
 		super(driver, url, user, pass);
@@ -41,15 +41,23 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	/**
 	 * Create a new pooling instance.
 	 *
-	 * @param url        Database connection url.
+	 * @param url Database connection url.
 	 * @param properties Properties of the database connection.
-	 * @throws SQLException
 	 */
 	public SQLPooling(String driver, String url, Properties properties) throws SQLException {
 		super(driver, url, properties);
 		this.initializeTimer();
 	}
 
+	/**
+	 * Create a new pooling instance.
+	 *
+	 * @param driver Database driver.
+	 * @param url Database connection url.
+	 * @param directory Directory of local database file.
+	 * @param schema Name of database.
+	 * @param properties Properties of the database connection.
+	 */
 	public SQLPooling(String driver, String url, File directory, String schema, Properties properties) throws SQLException {
 		super(driver, url, directory, schema, properties);
 		this.initializeTimer();
@@ -85,13 +93,13 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 * @return Connection to the database.
 	 * @throws SQLException When connection is not available within given wait time.
 	 */
-	protected Connection getConnection(WaitTime waitTime) throws SQLException {
+	protected final Connection getConnection(WaitTime waitTime) throws SQLException {
 		Connection connection;
 
 		if (this.availableConnections != null) {
 			this.initializeConnections();
 
-			synchronized (SQLPooling.class) {
+			synchronized (this.lock) {
 				if (this.availableConnections.isEmpty()) {
 					if (this.usedConnections.size() < this.getMaximumConnections())
 						this.usedConnections.addElement(connection = new RecoverableConnection(super.getConnection(), this));

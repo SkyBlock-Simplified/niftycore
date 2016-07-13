@@ -41,10 +41,9 @@ public abstract class SQLFactory {
 	 * Create a new factory instance.
 	 *
 	 * @param driver Connection driver.
-	 * @param url    Database connection url.
-	 * @param user   Username of the database connection.
-	 * @param pass   Password of the database connection.
-	 * @throws SQLException
+	 * @param url Database connection url.
+	 * @param user Username of the database connection.
+	 * @param pass Password of the database connection.
 	 */
 	public SQLFactory(String driver, String url, final String user, final String pass) throws SQLException {
 		this(driver, url, new Properties() {{ setProperty("user", user); setProperty("password", pass); }});
@@ -53,10 +52,9 @@ public abstract class SQLFactory {
 	/**
 	 * Create a new factory instance.
 	 *
-	 * @param driver     Connection driver.
-	 * @param url        Database connection url.
+	 * @param driver Connection driver.
+	 * @param url Database connection url.
 	 * @param properties Properties of the database connection.
-	 * @throws SQLException
 	 */
 	public SQLFactory(String driver, String url, Properties properties) throws SQLException {
 		try {
@@ -76,12 +74,11 @@ public abstract class SQLFactory {
 	/**
 	 * Create a new factory instance.
 	 *
-	 * @param driver     Connection driver.
-	 * @param url        Database connection url.
-	 * @param directory  Directory of local database file.
-	 * @param schema     Name of database.
+	 * @param driver Connection driver.
+	 * @param url Database connection url.
+	 * @param directory Directory of local database file.
+	 * @param schema Name of database.
 	 * @param properties Properties of the database connection.
-	 * @throws SQLException
 	 */
 	public SQLFactory(String driver, String url, File directory, String schema, Properties properties) throws SQLException {
 		try {
@@ -197,7 +194,6 @@ public abstract class SQLFactory {
 	 * @param tableName Name of the table.
 	 * @param sql       Fields and constrains of the table
 	 * @return True if the table was created, otherwise false.
-	 * @throws SQLException
 	 */
 	public boolean createTable(String tableName, String sql) throws SQLException {
 		try (Connection connection = this.getConnection()) {
@@ -368,7 +364,6 @@ public abstract class SQLFactory {
 	 * @param callback Callback to process results with.
 	 * @param args     Arguments to pass to the query.
 	 * @return Whatever you decide to return in the callback.
-	 * @throws SQLException
 	 */
 	public <T> T query(String sql, ResultCallback<T> callback, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {
@@ -382,7 +377,6 @@ public abstract class SQLFactory {
 	 * @param sql      Query to run.
 	 * @param callback Callback t process results with.
 	 * @param args     Arguments to pass to the query.
-	 * @throws SQLException
 	 */
 	public void query(String sql, VoidResultCallback callback, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {
@@ -430,7 +424,6 @@ public abstract class SQLFactory {
 	 *
 	 * @param schema database name
 	 * @return True if correctly set.
-	 * @throws SQLException
 	 */
 	public boolean setSchema(String schema) throws SQLException {
 		if (this.fileStorage)
@@ -455,7 +448,6 @@ public abstract class SQLFactory {
 	 * @param sql  Query to run.
 	 * @param args Arguments to pass to the query.
 	 * @return True if query was successful, otherwise false.
-	 * @throws SQLException
 	 */
 	public boolean update(String sql, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {

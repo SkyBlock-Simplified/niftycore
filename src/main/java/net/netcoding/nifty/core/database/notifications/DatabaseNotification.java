@@ -3,6 +3,7 @@ package net.netcoding.nifty.core.database.notifications;
 import net.netcoding.nifty.core.database.factory.SQLFactory;
 import net.netcoding.nifty.core.database.factory.callbacks.VoidResultCallback;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 
 import java.sql.SQLException;
@@ -15,12 +16,12 @@ import java.util.List;
  */
 public class DatabaseNotification {
 
-	private TriggerEvent event;
+	private final ConcurrentList<String> primaryColumnNames = Concurrent.newList();
 	private final transient DatabaseListener listener;
-	private final ConcurrentList<String> primaryColumnNames = new ConcurrentList<>();
-	private int previousId = 0;
 	private final transient SQLFactory sql;
 	private volatile boolean stopped = false;
+	private TriggerEvent event;
+	private int previousId = 0;
 	private final String table;
 
 	DatabaseNotification(SQLFactory sql, String table, DatabaseListener listener, boolean overwrite) throws SQLException {
@@ -159,7 +160,7 @@ public class DatabaseNotification {
 	private void loadPrimaryKeys() throws SQLException {
 		this.primaryColumnNames.clear();
 		this.primaryColumnNames.addAll(this.sql.query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_KEY = ?;", result -> {
-			ConcurrentList<String> keyNames = new ConcurrentList<>();
+			ConcurrentList<String> keyNames = Concurrent.newList();
 			while (result.next()) keyNames.add(result.getString("COLUMN_NAME"));
 			return keyNames;
 		}, this.getSchema(), this.getTable(), "PRI"));
