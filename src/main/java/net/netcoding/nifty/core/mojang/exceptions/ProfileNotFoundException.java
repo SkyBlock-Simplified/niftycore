@@ -83,13 +83,13 @@ public class ProfileNotFoundException extends RuntimeException {
 	private static String getCustomMessage(LookupType type, Object obj) {
 		switch (type) {
 			case OFFLINE_PLAYERS:
-				String players = "";
+				StringBuilder players = new StringBuilder();
 				MojangProfile[] profiles = (MojangProfile[])obj;
 
 				for (MojangProfile profile : profiles)
-					players += StringUtil.format("'{'{{0}},{{1}}'}'", profile.getUniqueId(), profile.getName());
+					players.append(StringUtil.format("'{'{{0}},{{1}}'}'", profile.getUniqueId(), profile.getName()));
 
-				return StringUtil.format("The profile data for offline players '{'{0}'}' could not be found!", players);
+				return StringUtil.format("The profile data for offline players '{'{0}'}' could not be found!", players.toString());
 			case OFFLINE_PLAYER:
 				MojangProfile profile = (MojangProfile)obj;
 				return StringUtil.format("The profile data for offline player '{'{{0}},{{1}}'}' could not be found!", profile.getUniqueId(), profile.getName());
