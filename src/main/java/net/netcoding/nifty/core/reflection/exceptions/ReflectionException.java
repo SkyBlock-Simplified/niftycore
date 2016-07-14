@@ -1,5 +1,11 @@
 package net.netcoding.nifty.core.reflection.exceptions;
 
+import net.netcoding.nifty.core.reflection.Reflection;
+
+/**
+ * {@link ReflectionException ReflectionExceptions} are thrown when the {@link Reflection} class is unable<br>
+ * to perform a specific action.
+ */
 public final class ReflectionException extends RuntimeException {
 
 	public ReflectionException(String message) {

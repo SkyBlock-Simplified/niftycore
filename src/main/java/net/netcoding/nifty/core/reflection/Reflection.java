@@ -1,6 +1,9 @@
 package net.netcoding.nifty.core.reflection;
 
 import com.google.common.primitives.Primitives;
+import net.netcoding.nifty.core.reflection.accessor.ConstructorAccessor;
+import net.netcoding.nifty.core.reflection.accessor.FieldAccessor;
+import net.netcoding.nifty.core.reflection.accessor.MethodAccessor;
 import net.netcoding.nifty.core.reflection.exceptions.ReflectionException;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;
@@ -15,16 +18,24 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
 
+/**
+ * Allows for access to hidden fields, methods and classes inside classes.
+ */
 @SuppressWarnings({ "AccessOfSystemProperties", "unchecked" })
 public class Reflection {
 
 	private static final double JAVA_VERSION = Double.parseDouble(System.getProperty("java.specification.version"));
-	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], Constructor<?>>> CONSTRUCTOR_CACHE = Concurrent.newMap();
+	private static final transient ConcurrentMap<Class<?>, ConcurrentMap<Class<?>[], ConstructorAccessor>> CONSTRUCTOR_CACHE = Concurrent.newMap();
 	private static final transient ConcurrentMap<String, Class<?>> CLASS_CACHE = Concurrent.newMap();
 	private final String className;
 	private final String subPackage;
 	private final String packagePath;
 
+	/**
+	 * Creates a new reflection instance of {@literal clazz}.
+	 *
+	 * @param clazz The class to reflect.
+	 */
 	public Reflection(Class<?> clazz) {
 		clazz = Primitives.wrap(clazz);
 		this.className = clazz.getSimpleName();
@@ -38,24 +49,55 @@ public class Reflection {
 		}
 	}
 
+	/**
+	 * Creates a new reflection instance of {@literal packagePath}.{@literal className}.
+	 *
+	 * @param className The class name to reflect.
+	 * @param packagePath The package the {@literal className} belongs to.
+	 */
 	public Reflection(String className, String packagePath) {
 		this(className, "", packagePath);
 	}
 
+	/**
+	 * Creates a new reflection instance of {@literal packagePath}.{@literal subPackage}.{@literal className}.
+	 *
+	 * @param className The class name to reflect.
+	 * @param subPackage The sub package the {@literal className} belongs to.
+	 * @param packagePath The package the {@literal className} belongs to.
+	 */
 	public Reflection(String className, String subPackage, String packagePath) {
 		this.className = className;
 		this.subPackage = StringUtil.stripNull(subPackage).replaceAll("\\.$", "").replaceAll("^\\.", "");
 		this.packagePath = packagePath;
 	}
 
+	/**
+	 * Gets the class name.
+	 *
+	 * @return The class name.
+	 */
 	public final String getClazzName() {
 		return this.className;
 	}
 
+	/**
+	 * Gets the fully-qualified class path (includes package path and class name).
+	 *
+	 * @return The fully-qualified class path.
+	 */
 	public final String getClazzPath() {
 		return StringUtil.format("{0}.{1}", this.getPackagePath(), this.getClazzName());
 	}
 
+	/**
+	 * Gets the class object associated with this reflection object.
+	 * <p>
+	 * This object is cached after the first call.
+	 *
+	 * @return The class object.
+	 * @throws ReflectionException When the class cannot be located.
+	 */
 	public final Class<?> getClazz() throws ReflectionException {
 		try {
 			if (!CLASS_CACHE.containsKey(this.getClazzPath()))
@@ -67,8 +109,19 @@ public class Reflection {
 		}
 	}
 
+	/**
+	 * Attempts to get the physical file location of a class file.
+	 * <p>
+	 * In cases where the file a class belongs to cannot be found,<br>
+	 * or the your class is valid but the original file is obfuscated,<br>
+	 * use this to locate the file location and class file name.
+	 *
+	 * @return The class' file location and class file name.
+	 * @throws ReflectionException When the class or file cannot be located.
+	 */
 	public final URL getClazzLocation() throws ReflectionException {
-		ProtectionDomain domain = this.getClazz().getProtectionDomain();
+		Class<?> clazz = this.getClazz();
+		ProtectionDomain domain = clazz.getProtectionDomain();
 
 		if (domain != null) {
 			CodeSource source = domain.getCodeSource();
@@ -77,14 +130,25 @@ public class Reflection {
 				return source.getLocation();
 		}
 
-		return null;
+		throw new ReflectionException(StringUtil.format("Unable to locate the file location of ''{0}''!", clazz.getName()));
 	}
 
-	public final Constructor<?> getConstructor(Class<?>... paramTypes) throws ReflectionException {
+	/**
+	 * Gets a constructor with the matching parameter types.
+	 * <p>
+	 * The parameter types are automatically checked against assignable types and primitives.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param paramTypes The types of parameters to look for.
+	 * @return The constructor with matching parameter types.
+	 * @throws ReflectionException When the class or constructor cannot be located.
+	 */
+	public final ConstructorAccessor getConstructor(Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		if (CONSTRUCTOR_CACHE.containsKey(this.getClazz())) {
-			ConcurrentMap<Class<?>[], Constructor<?>> constructors = CONSTRUCTOR_CACHE.get(this.getClazz());
+			ConcurrentMap<Class<?>[], ConstructorAccessor> constructors = CONSTRUCTOR_CACHE.get(this.getClazz());
 
 			if (constructors.containsKey(types))
 				return constructors.get(types);
@@ -96,8 +160,9 @@ public class Reflection {
 
 			if (isEqualsTypeArray(constructorTypes, types)) {
 				constructor.setAccessible(true);
-				CONSTRUCTOR_CACHE.get(this.getClazz()).put(types, constructor);
-				return constructor;
+				ConstructorAccessor constructorAccessor = new ConstructorAccessor(this, constructor);
+				CONSTRUCTOR_CACHE.get(this.getClazz()).put(types, constructorAccessor);
+				return constructorAccessor;
 			}
 		}
 
@@ -107,13 +172,24 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The constructor {0} was not found!", Arrays.asList(types)));
 	}
 
-	public final Field getField(Class<?> type) throws ReflectionException {
+	/**
+	 * Gets a field with matching type.
+	 * <p>
+	 * The type is automatically checked against assignable types and primitives.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param type The type to look for.
+	 * @return The field with matching type.
+	 * @throws ReflectionException When the class or field cannot be located.
+	 */
+	public final FieldAccessor getField(Class<?> type) throws ReflectionException {
 		Class<?> utype = (type.isPrimitive() ? Primitives.wrap(type) : Primitives.unwrap(type));
 
 		for (Field field : this.getClazz().getDeclaredFields()) {
 			if (field.getType().equals(type) || type.isAssignableFrom(field.getType()) || field.getType().equals(utype) || utype.isAssignableFrom(field.getType())) {
 				field.setAccessible(true);
-				return field;
+				return new FieldAccessor(this, field);
 			}
 		}
 
@@ -123,15 +199,36 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The field with type {0} was not found!", type));
 	}
 
-	public final Field getField(String name) throws ReflectionException {
+	/**
+	 * Gets a field with identically matching name.
+	 * <p>
+	 * This is the same as calling {@link #getField(String, boolean) getField(name, true)}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The field name to look for.
+	 * @return The field with identically matching name.
+	 * @throws ReflectionException When the class or field cannot be located.
+	 */
+	public final FieldAccessor getField(String name) throws ReflectionException {
 		return this.getField(name, true);
 	}
 
-	public final Field getField(String name, boolean isCaseSensitive) throws ReflectionException {
+	/**
+	 * Gets a field with matching name.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The field name to look for.
+	 * @param isCaseSensitive Whether or not to check case-sensitively.
+	 * @return The field with matching name.
+	 * @throws ReflectionException When the class or field cannot be located.
+	 */
+	public final FieldAccessor getField(String name, boolean isCaseSensitive) throws ReflectionException {
 		for (Field field : this.getClazz().getDeclaredFields()) {
 			if (isCaseSensitive ? field.getName().equals(name) : field.getName().equalsIgnoreCase(name)) {
 				field.setAccessible(true);
-				return field;
+				return new FieldAccessor(this, field);
 			}
 		}
 
@@ -141,11 +238,28 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The field {0} was not found!", name));
 	}
 
+	/**
+	 * Gets the current Java version as {@literal major}.{@literal minor}.
+	 *
+	 * @return The current Java version.
+	 */
 	public static double getJavaVersion() {
 		return JAVA_VERSION;
 	}
 
-	public final Method getMethod(Class<?> type, Class<?>... paramTypes) throws ReflectionException {
+	/**
+	 * Gets a method with matching return type and parameter types.
+	 * <p>
+	 * The return type and parameter types are automatically checked against assignable types and primitives.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param type The return type to look for.
+	 * @param paramTypes The types of parameters to look for.
+	 * @return The field with matching return type and parameter types.
+	 * @throws ReflectionException When the class or method cannot be located.
+	 */
+	public final MethodAccessor getMethod(Class<?> type, Class<?>... paramTypes) throws ReflectionException {
 		Class<?> utype = (type.isPrimitive() ? Primitives.wrap(type) : Primitives.unwrap(type));
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
@@ -155,7 +269,7 @@ public class Reflection {
 
 			if ((returnType.equals(type) || type.isAssignableFrom(returnType) || returnType.equals(utype) || utype.isAssignableFrom(returnType)) && isEqualsTypeArray(methodTypes, types)) {
 				method.setAccessible(true);
-				return method;
+				return new MethodAccessor(this, method);
 			}
 		}
 
@@ -165,11 +279,38 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The method with return type {0} was not found with parameters {1}!", type, Arrays.asList(types)));
 	}
 
-	public final Method getMethod(String name, Class<?>... paramTypes) throws ReflectionException {
+	/**
+	 * Gets a field with identically matching name and parameter types.
+	 * <p>
+	 * The parameter types are automatically checked against assignable types and primitives.
+	 * <p>
+	 * This is the same as calling {@link #getMethod(String, boolean, Class...) getMethod(name, true, paramTypes)}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The method name to look for.
+	 * @param paramTypes The types of parameters to look for.
+	 * @return The method with matching name and parameter types.
+	 * @throws ReflectionException When the class or method cannot be located.
+	 */
+	public final MethodAccessor getMethod(String name, Class<?>... paramTypes) throws ReflectionException {
 		return this.getMethod(name, true, paramTypes);
 	}
 
-	public final Method getMethod(String name, boolean isCaseSensitive, Class<?>... paramTypes) throws ReflectionException {
+	/**
+	 * Gets a field with matching name and parameter types.
+	 * <p>
+	 * The parameter types are automatically checked against assignable types and primitives.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The method name to look for.
+	 * @param isCaseSensitive Whether or not to check case-sensitively.
+	 * @param paramTypes The types of parameters to look for.
+	 * @return The method with matching name and parameter types.
+	 * @throws ReflectionException When the class or method cannot be located.
+	 */
+	public final MethodAccessor getMethod(String name, boolean isCaseSensitive, Class<?>... paramTypes) throws ReflectionException {
 		Class<?>[] types = toPrimitiveTypeArray(paramTypes);
 
 		for (Method method : this.getClazz().getDeclaredMethods()) {
@@ -177,7 +318,7 @@ public class Reflection {
 
 			if ((isCaseSensitive ? method.getName().equals(name) : method.getName().equalsIgnoreCase(name)) && isEqualsTypeArray(methodTypes, types)) {
 				method.setAccessible(true);
-				return method;
+				return new MethodAccessor(this, method);
 			}
 		}
 
@@ -187,14 +328,32 @@ public class Reflection {
 		throw new ReflectionException(StringUtil.format("The method {0} was not found with parameters {1}!", name, Arrays.asList(types)));
 	}
 
+	/**
+	 * Gets the package path.
+	 *
+	 * @return The package path.
+	 */
 	public final String getPackagePath() {
 		return this.packagePath + (StringUtil.notEmpty(this.subPackage) ? "." + this.subPackage : "");
 	}
 
+	/**
+	 * Gets the subpackage path.
+	 *
+	 * @return The subpackage path.
+	 */
 	public final String getSubPackage() {
 		return this.subPackage;
 	}
 
+	/**
+	 * Gets a new reflection object of the superclass.
+	 * <p>
+	 * This does not check if the superclass is just a {@link Class}.
+	 *
+	 * @return The reflected superclass.
+	 * @throws ReflectionException When the class or superclass cannot be located.
+	 */
 	private Reflection getSuperReflection() throws ReflectionException {
 		Class<?> superClass = this.getClazz().getSuperclass();
 		String className = superClass.getSimpleName();
@@ -202,28 +361,69 @@ public class Reflection {
 		return new Reflection(className, packageName);
 	}
 
-	public final <T> T getValue(Class<T> type, Object obj) throws ReflectionException {
-		Field field = this.getField(type);
-
-		try {
-			return (T)field.get(obj);
-		} catch (Exception ex) {
-			throw new ReflectionException(ex);
-		}
+	/**
+	 * Gets the value of a field with matching {@link #getClazz() class type}.
+	 * <p>
+	 * The field type is automatically checked against assignable types and primitives.
+	 * <p>
+	 * This is the same as calling {@link #getValue(Class, Object) getValue(reflection.getClazz(), obj)}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param reflection The reflection object housing the field's class type to look for.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @return The field value with matching type.
+	 * @throws ReflectionException When the class or field cannot be located.
+	 */
+	public final Object getValue(Reflection reflection, Object obj) throws ReflectionException {
+		return this.getValue(reflection.getClazz(), obj);
 	}
 
+	/**
+	 * Gets the value of a field with matching {@link #getClazz() class type}.
+	 * <p>
+	 * The field type is automatically checked against assignable types and primitives.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param type The field type to look for.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @return The field value with matching type.
+	 * @throws ReflectionException When the class or field cannot be located.
+	 */
+	public final <T> T getValue(Class<T> type, Object obj) throws ReflectionException {
+		return (T)this.getField(type).get(obj);
+	}
+
+	/**
+	 * Gets the value of a field with matching {@link #getClazz() class type}.
+	 * <p>
+	 * This is the same as calling {@link #getValue(String, boolean, Object) getValue(name, true, obj)}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The field name to look for.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @return The field value with identically matching name.
+	 * @throws ReflectionException When the class or field cannot be located.
+	 */
 	public final Object getValue(String name, Object obj) throws ReflectionException {
 		return this.getValue(name, true, obj);
 	}
 
+	/**
+	 * Gets the value of a field with matching {@link #getClazz() class type}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The field name to look for.
+	 * @param isCaseSensitive Whether or not to check case-sensitively.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @return The field value with matching name.
+	 * @throws ReflectionException When the class or field cannot be located.
+	 */
 	public final Object getValue(String name, boolean isCaseSensitive, Object obj) throws ReflectionException {
-		Field field = this.getField(name, isCaseSensitive);
-
-		try {
-			return field.get(obj);
-		} catch (Exception ex) {
-			throw new ReflectionException(ex);
-		}
+		return this.getField(name, isCaseSensitive).get(obj);
 	}
 
 	private static boolean isEqualsTypeArray(Class<?>[] a, Class<?>[] o) {
@@ -237,32 +437,85 @@ public class Reflection {
 		return true;
 	}
 
-	public final <T> T invokeMethod(Class<T> type, Object obj, Object... args) throws ReflectionException {
-		try {
-			Class<?>[] types = toPrimitiveTypeArray(args);
-			return (T)this.getMethod(type, types).invoke(obj, args);
-		} catch (ReflectionException rex) {
-			throw rex;
-		} catch (Exception ex) {
-			throw new ReflectionException(ex);
-		}
+	/**
+	 * Gets the value of an invoked method with matching {@link #getClazz() class type}.
+	 * <p>
+	 * The method's return type is automatically checked against assignable types and primitives.
+	 * <p>
+	 * This is the same as calling {@link #invokeMethod(Class, Object, Object...) invokeMethod(reflection.getClazz(), obj, args)}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param reflection The reflection object housing the field's class type.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @param args The arguments with matching types to pass to the method.
+	 * @return The invoked method value with matching return type.
+	 * @throws ReflectionException When the class or method with matching arguments cannot be located.
+	 */
+	public final Object invokeMethod(Reflection reflection, Object obj, Object... args) throws ReflectionException {
+		return this.invokeMethod(reflection.getClazz(), obj, args);
 	}
 
+	/**
+	 * Gets the value of an invoked method with matching {@link #getClazz() class type}.
+	 * <p>
+	 * The method's return type is automatically checked against assignable types and primitives.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param type The return type to look for.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @param args The arguments with matching types to pass to the method.
+	 * @return The invoked method value with matching return type.
+	 * @throws ReflectionException When the class or method with matching arguments cannot be located.
+	 */
+	public final <T> T invokeMethod(Class<T> type, Object obj, Object... args) throws ReflectionException {
+		Class<?>[] types = toPrimitiveTypeArray(args);
+		return (T)this.getMethod(type, types).invoke(obj, args);
+	}
+
+	/**
+	 * Gets the value of an invoked method with identically matching name.
+	 * <p>
+	 * This is the same as calling {@link #invokeMethod(String, boolean, Object, Object...) getValue(name, true, obj, args)}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The field name to look for.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @param args The arguments with matching types to pass to the method.
+	 * @return The invoked method value with identically matching name.
+	 * @throws ReflectionException When the class or method with matching arguments cannot be located.
+	 */
 	public final Object invokeMethod(String name, Object obj, Object... args) throws ReflectionException {
 		return this.invokeMethod(name, true, obj, args);
 	}
 
+	/**
+	 * Gets the value of an invoked method with identically matching name.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The field name to look for.
+	 * @param isCaseSensitive Whether or not to check case-sensitively.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @param args The arguments with matching types to pass to the method.
+	 * @return The invoked method value with identically matching name.
+	 * @throws ReflectionException When the class or method with matching arguments cannot be located.
+	 */
 	public final Object invokeMethod(String name, boolean isCaseSensitive, Object obj, Object... args) throws ReflectionException {
-		try {
-			Class<?>[] types = toPrimitiveTypeArray(args);
-			return this.getMethod(name, isCaseSensitive, types).invoke(obj, args);
-		} catch (ReflectionException rex) {
-			throw rex;
-		} catch (Exception ex) {
-			throw new ReflectionException(ex);
-		}
+		Class<?>[] types = toPrimitiveTypeArray(args);
+		return this.getMethod(name, isCaseSensitive, types).invoke(obj, args);
 	}
 
+	/**
+	 * Creates a new instance of the current {@link #getClazz() class type} with given parameters.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param args The arguments with matching types to pass to the constructor.
+	 * @throws ReflectionException When the class or constructor with matching arguments cannot be located.
+	 */
 	public final Object newInstance(Object... args) throws ReflectionException {
 		try {
 			Class<?>[] types = toPrimitiveTypeArray(args);
@@ -274,39 +527,92 @@ public class Reflection {
 		}
 	}
 
-	public final void setValue(Class<?> clazz, Object obj, Object value) throws ReflectionException {
-		Field f = this.getField(clazz);
-
-		try {
-			f.set(obj, value);
-		} catch (Exception ex) {
-			throw new ReflectionException(ex);
-		}
+	/**
+	 * Sets the value of a field with matching {@link #getClazz() class type}.
+	 * <p>
+	 * The field type is automatically checked against assignable types and primitives.
+	 * <p>
+	 * This is the same as calling {@link #setValue(Class, Object, Object) setValue(reflection.getClazz(), obj, value)}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param reflection The reflection object housing the field's class type to look for.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @param value The new value of the field.
+	 * @throws ReflectionException When the class or field cannot be located.
+	 */
+	public final void setValue(Reflection reflection, Object obj, Object value) throws ReflectionException {
+		this.setValue(reflection.getClazz(), obj, value);
 	}
 
+	/**
+	 * Sets the value of a field with matching {@link #getClazz() class type}.
+	 * <p>
+	 * The field type is automatically checked against assignable types and primitives.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param type The field type to look for.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @param value The new value of the field.
+	 * @throws ReflectionException When the class or field cannot be located or the value does match the field type.
+	 */
+	public final void setValue(Class<?> type, Object obj, Object value) throws ReflectionException {
+		this.getField(type).set(obj, value);
+	}
+
+	/**
+	 * Sets the value of a field with identically matching name.
+	 * <p>
+	 * This is the same as calling {@link #setValue(String, boolean, Object, Object) setValue(name, true, obj, value)}.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The field name to look for.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @param value The new value of the field.
+	 * @throws ReflectionException When the class or field cannot be located or the value does match the field type.
+	 */
 	public final void setValue(String name, Object obj, Object value) throws ReflectionException {
 		this.setValue(name, true, obj, value);
 	}
 
+	/**
+	 * Sets the value of a field with matching name.
+	 * <p>
+	 * Super classes are automatically checked.
+	 *
+	 * @param name The field name to look for.
+	 * @param isCaseSensitive Whether or not to check case-sensitively.
+	 * @param obj Instance of the current class object, null if static field.
+	 * @param value The new value of the field.
+	 * @throws ReflectionException When the class or field cannot be located or the value does match the field type.
+	 */
 	public final void setValue(String name, boolean isCaseSensitive, Object obj, Object value) throws ReflectionException {
-		Field f = this.getField(name, isCaseSensitive);
-
-		try {
-			f.set(obj, value);
-		} catch (Exception ex) {
-			throw new ReflectionException(ex);
-		}
+		this.getField(name, isCaseSensitive).set(obj, value);
 	}
 
-	public static Class<?>[] toPrimitiveTypeArray(Class<?>[] classes) {
-		Class<?>[] types = new Class<?>[ListUtil.notEmpty(classes) ? classes.length : 0];
+	/**
+	 * Converts any primitive classes in the given classes to their primitive types.
+	 *
+	 * @param types The classes to convert.
+	 * @return Converted class types.
+	 */
+	public static Class<?>[] toPrimitiveTypeArray(Class<?>[] types) {
+		Class<?>[] newTypes = new Class<?>[ListUtil.notEmpty(types) ? types.length : 0];
 
-		for (int i = 0; i < types.length; i++)
-			types[i] = Primitives.unwrap(classes[i]);
+		for (int i = 0; i < newTypes.length; i++)
+			newTypes[i] = Primitives.unwrap(types[i]);
 
-		return types;
+		return newTypes;
 	}
 
+	/**
+	 * Converts any primitive classes in the given objects to their primitive types.
+	 *
+	 * @param objects The objects to convert.
+	 * @return Converted class types.
+	 */
 	public static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
 		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
 
