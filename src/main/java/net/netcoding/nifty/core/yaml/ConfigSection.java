@@ -4,6 +4,7 @@ import net.netcoding.nifty.core.util.StringUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 public class ConfigSection {
@@ -31,7 +32,7 @@ public class ConfigSection {
 		}
 
 		String key = path.substring(i2);
-		if (section == this) {
+		if (Objects.equals(section, this)) {
 			ConfigSection result = new ConfigSection(this, key);
 			map.put(key, result);
 			return result;
@@ -62,7 +63,7 @@ public class ConfigSection {
 		}
 
 		String key = path.substring(i2);
-		if (section == this) {
+		if (Objects.equals(section, this)) {
 			if (value == null)
 				map.remove(key);
 			else
@@ -107,7 +108,7 @@ public class ConfigSection {
 		}
 
 		String key = path.substring(i2);
-		return (section == this ? map.containsKey(key) : section.has(key));
+		return (Objects.equals(section, this) ? map.containsKey(key) : section.has(key));
 	}
 
 	public <T> T get(String path) {
@@ -122,7 +123,7 @@ public class ConfigSection {
 		}
 
 		String key = path.substring(i2);
-		return (T)(section == this ? map.get(key) : section.get(key));
+		return (T)(Objects.equals(section, this) ? map.get(key) : section.get(key));
 	}
 
 	public Map<?, ?> getRawMap() {

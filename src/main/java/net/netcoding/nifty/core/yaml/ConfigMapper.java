@@ -2,6 +2,9 @@ package net.netcoding.nifty.core.yaml;
 
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 import net.netcoding.nifty.core.yaml.exceptions.InvalidConfigurationException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -20,13 +23,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public abstract class ConfigMapper extends YamlMap {
 
 	private final transient Yaml yaml;
-	private final transient Map<String, ArrayList<String>> comments = new LinkedHashMap<>();
+	private final transient ConcurrentLinkedMap<String, ConcurrentList<String>> comments = Concurrent.newLinkedMap();
 	private transient String[] header;
 	private final transient NullRepresenter representer = new NullRepresenter();
 	transient File configFile;
@@ -45,7 +47,7 @@ public abstract class ConfigMapper extends YamlMap {
 
 	public void addComment(String key, String value) {
 		if (!this.comments.containsKey(key))
-			this.comments.put(key, new ArrayList<String>());
+			this.comments.put(key, Concurrent.newList());
 
 		this.comments.get(key).add(value);
 	}
@@ -178,6 +180,7 @@ public abstract class ConfigMapper extends YamlMap {
 
 		private class RepresentNull implements Represent {
 
+			@Override
 			public Node representData(Object data) {
 				return representScalar(Tag.NULL, "");
 			}
