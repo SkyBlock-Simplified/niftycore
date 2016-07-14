@@ -2,6 +2,7 @@ package net.netcoding.nifty.core.api.logger;
 
 import net.netcoding.nifty.core.api.color.ChatColor;
 import net.netcoding.nifty.core.api.plugin.Plugin;
+import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.RegexUtil;
 import net.netcoding.nifty.core.util.StringUtil;
 
@@ -60,8 +61,14 @@ public abstract class ConsoleLogger {
 		public JavaLogger(Plugin plugin) {
 			super(plugin.getName(), null);
 			this.pluginName = StringUtil.format("[{0}] ", plugin.getName());
-			this.setParent(Logger.getLogger("Minecraft"));
 			this.setLevel(Level.ALL);
+
+			try {
+				new Reflection("ProxyServer", "net.md_5.bungee.api").getClazz();
+				this.setParent(Logger.getLogger("BungeeCord"));
+			} catch (Exception ex) {
+				this.setParent(Logger.getLogger("Minecraft"));
+			}
 		}
 
 		@Override
