@@ -1,12 +1,13 @@
 package net.netcoding.nifty.core.util.comparator;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.util.Comparator;
 
 public class LastCharCompare implements Comparator<String> {
 
-	private final ConcurrentSet<Character> ignoreCharacters = new ConcurrentSet<>();
+	private final ConcurrentSet<Character> ignoreCharacters = Concurrent.newSet();
 
 	public void addIgnoreCharacter(char c) {
 		this.ignoreCharacters.add(c);
