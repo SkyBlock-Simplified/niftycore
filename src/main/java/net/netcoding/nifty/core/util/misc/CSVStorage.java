@@ -2,6 +2,7 @@ package net.netcoding.nifty.core.util.misc;
 
 import com.google.common.base.Preconditions;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 
 import java.io.BufferedReader;
@@ -33,7 +34,7 @@ public abstract class CSVStorage {
 	public final List<String> getLines() throws IOException {
 		try (InputStreamReader inputStream = (this.getLocalFile().exists() ? new FileReader(this.getLocalFile()) : new InputStreamReader(this.getResource()))) {
 			try (BufferedReader reader = new BufferedReader(inputStream)) {
-				ConcurrentList<String> lines = new ConcurrentList<>();
+				ConcurrentList<String> lines = Concurrent.newList();
 
 				do {
 					String line = reader.readLine();
@@ -47,7 +48,7 @@ public abstract class CSVStorage {
 	}
 
 	protected final InputStream getResource() {
-		URL url = this.getClassLoader().getResource(this.file.getName());
+		URL url = this.getClassLoader().getResource(this.getLocalFile().getName());
 
 		if (url != null) {
 			try {
@@ -79,18 +80,23 @@ public abstract class CSVStorage {
 
 			if (!parent.exists()) {
 				if (!parent.mkdirs())
-					throw new IllegalStateException(StringUtil.format("Unable to create parent directories for ''{0}''!", this.file));
+					throw new IllegalStateException(StringUtil.format("Unable to create parent directories for ''{0}''!", this.getLocalFile()));
 			}
 
-			try (FileOutputStream outputStream = new FileOutputStream(this.file)) {
+			if (this.getLocalFile().exists() && !replace)
+				throw new IllegalStateException("File already exists!");
+
+			this.getLocalFile().delete();
+
+			try (FileOutputStream outputStream = new FileOutputStream(this.getLocalFile())) {
 				byte[] buffer = new byte[1024];
 				int length;
 
 				while ((length = inputStream.read(buffer)) > 0)
 					outputStream.write(buffer, 0, length);
 			}
-		} catch (Exception ignore) {
-			throw new IllegalStateException(StringUtil.format("Unable to save resource ''{0}'' to ''{1}''!", this.file.getName(), this.file));
+		} catch (Exception ex) {
+			throw new IllegalStateException(StringUtil.format("Unable to save resource ''{0}'' to ''{1}''!", ex, this.getLocalFile().getName(), this.getLocalFile()));
 		}
 	}
 

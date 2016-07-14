@@ -2,6 +2,7 @@ package net.netcoding.nifty.core.util.misc;
 
 import net.netcoding.nifty.core.util.NumberUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 
 import java.util.Map;
@@ -15,60 +16,58 @@ public class Vector implements Cloneable, Serializable {
 	protected double z;
 
 	public Vector() {
-		this.x = 0.0D;
-		this.y = 0.0D;
-		this.z = 0.0D;
+		this(0, 0, 0);
 	}
 
 	public Vector(int x, int y, int z) {
-		this.x = (double)x;
-		this.y = (double)y;
-		this.z = (double)z;
-	}
-
-	public Vector(double x, double y, double z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this((double)x, y, z);
 	}
 
 	public Vector(float x, float y, float z) {
-		this.x = (double)x;
-		this.y = (double)y;
-		this.z = (double)z;
+		this((double)x, y, z);
 	}
 
-	public Vector add(Vector vec) {
-		this.x += vec.x;
-		this.y += vec.y;
-		this.z += vec.z;
+	public Vector(double x, double y, double z) {
+		this.setX(x);
+		this.setY(y);
+		this.setZ(z);
+	}
+
+	public final Vector add(Vector vector) {
+		this.setX(this.getX() + vector.getX());
+		this.setY(this.getY() + vector.getY());
+		this.setZ(this.getZ() + vector.getZ());
 		return this;
 	}
 
-	public float angle(Vector other) {
+	public final float angle(Vector other) {
 		double dot = this.dot(other) / (this.length() * other.length());
 		return (float) Math.acos(dot);
 	}
 
-	@SuppressWarnings("CloneDoesntCallSuperClone")
+	@Override
 	public Vector clone() {
-		return new Vector(this.x, this.y, this.z);
+		try {
+			return (Vector)super.clone();
+		} catch (CloneNotSupportedException cnsex) {
+			return new Vector(this.getX(), this.getY(), this.getZ());
+		}
 	}
 
-	public Vector copy(Vector vec) {
-		this.x = vec.x;
-		this.y = vec.y;
-		this.z = vec.z;
+	public final Vector copy(Vector vector) {
+		this.setX(vector.getX());
+		this.setY(vector.getY());
+		this.setZ(vector.getZ());
 		return this;
 	}
 
-	public Vector crossProduct(Vector o) {
-		double newX = this.y * o.z - o.y * this.z;
-		double newY = this.z * o.x - o.z * this.x;
-		double newZ = this.x * o.y - o.x * this.y;
-		this.x = newX;
-		this.y = newY;
-		this.z = newZ;
+	public final Vector crossProduct(Vector vector) {
+		double newX = this.getX() * vector.getZ() - vector.getY() * this.getZ();
+		double newY = this.getZ() * vector.getX() - vector.getZ() * this.getX();
+		double newZ = this.getX() * vector.getY() - vector.getX() * this.getY();
+		this.setX(newX);
+		this.setY(newY);
+		this.setZ(newZ);
 		return this;
 	}
 
@@ -89,59 +88,59 @@ public class Vector implements Cloneable, Serializable {
 		return new Vector(x, y, z);
 	}
 
-	public double distance(Vector o) {
-		return Math.sqrt(NumberUtil.square(this.x - o.x) + NumberUtil.square(this.y - o.y) + NumberUtil.square(this.z - o.z));
+	public final double distance(Vector vector) {
+		return Math.sqrt(NumberUtil.square(this.getX() - vector.getX()) + NumberUtil.square(this.getY() - vector.getY()) + NumberUtil.square(this.getZ() - vector.getZ()));
 	}
 
-	public double distanceSquared(Vector o) {
-		return NumberUtil.square(this.x - o.x) + NumberUtil.square(this.y - o.y) + NumberUtil.square(this.z - o.z);
+	public final double distanceSquared(Vector vector) {
+		return NumberUtil.square(this.getX() - vector.getX()) + NumberUtil.square(this.getY() - vector.getY()) + NumberUtil.square(this.getZ() - vector.getZ());
 	}
 
-	public Vector divide(Vector vec) {
-		this.x /= vec.x;
-		this.y /= vec.y;
-		this.z /= vec.z;
+	public final Vector divide(Vector vector) {
+		this.setX(this.getX() / vector.getX());
+		this.setY(this.getY() / vector.getY());
+		this.setZ(this.getZ() / vector.getZ());
 		return this;
 	}
 
-	public double dot(Vector other) {
-		return this.x * other.x + this.y * other.y + this.z * other.z;
+	public final double dot(Vector vector) {
+		return this.getX() * vector.getX() + this.getY() * vector.getY() + this.getZ() * vector.getZ();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (!(obj instanceof Vector))
 			return false;
 		else {
 			Vector other = (Vector) obj;
-			return Math.abs(this.x - other.x) < 1.0E-6D && Math.abs(this.y - other.y) < 1.0E-6D && Math.abs(this.z - other.z) < 1.0E-6D && this.getClass().equals(obj.getClass());
+			return Math.abs(this.getX() - other.getX()) < 1.0E-6D && Math.abs(this.getY() - other.getY()) < 1.0E-6D && Math.abs(this.getZ() - other.getZ()) < 1.0E-6D;
 		}
 	}
 
-	public Vector getCrossProduct(Vector o) {
-		double x = this.y * o.z - o.y * this.z;
-		double y = this.z * o.x - o.z * this.x;
-		double z = this.x * o.y - o.x * this.y;
+	public final Vector getCrossProduct(Vector vector) {
+		double x = this.getY() * vector.getZ() - vector.getY() * this.getZ();
+		double y = this.getZ() * vector.getX() - vector.getZ() * this.getX();
+		double z = this.getX() * vector.getY() - vector.getX() * this.getY();
 		return new Vector(x, y, z);
 	}
 
-	public Vector getMidpoint(Vector other) {
-		double x = (this.x + other.x) / 2.0D;
-		double y = (this.y + other.y) / 2.0D;
-		double z = (this.z + other.z) / 2.0D;
+	public final Vector getMidpoint(Vector vector) {
+		double x = (this.getX() + vector.getX()) / 2.0D;
+		double y = (this.getY() + vector.getY()) / 2.0D;
+		double z = (this.getZ() + vector.getZ()) / 2.0D;
 		return new Vector(x, y, z);
 	}
 
-	public int getBlockX() {
-		return NumberUtil.floor(this.x);
+	public final int getBlockX() {
+		return NumberUtil.floor(this.getX());
 	}
 
-	public int getBlockY() {
-		return NumberUtil.floor(this.y);
+	public final int getBlockY() {
+		return NumberUtil.floor(this.getY());
 	}
 
-	public int getBlockZ() {
-		return NumberUtil.floor(this.z);
+	public final int getBlockZ() {
+		return NumberUtil.floor(this.getZ());
 	}
 
 	public static double getEpsilon() {
@@ -173,92 +172,88 @@ public class Vector implements Cloneable, Serializable {
 	}
 
 	@Override
-	public int hashCode() {
-		byte hash = 7;
-		int hash1 = 79 * hash + (int) (Double.doubleToLongBits(this.x) ^ Double.doubleToLongBits(this.x) >>> 32);
-		hash1 = 79 * hash1 + (int) (Double.doubleToLongBits(this.y) ^ Double.doubleToLongBits(this.y) >>> 32);
-		hash1 = 79 * hash1 + (int) (Double.doubleToLongBits(this.z) ^ Double.doubleToLongBits(this.z) >>> 32);
-		return hash1;
+	public final int hashCode() {
+		int result = 79 * 7 + (int) (Double.doubleToLongBits(this.getX()) ^ Double.doubleToLongBits(this.getX()) >>> 32);
+		result = 79 * result + (int) (Double.doubleToLongBits(this.getY()) ^ Double.doubleToLongBits(this.getY()) >>> 32);
+		result = 79 * result + (int) (Double.doubleToLongBits(this.getZ()) ^ Double.doubleToLongBits(this.getZ()) >>> 32);
+		return result;
 	}
 
-	public boolean isInAABB(Vector min, Vector max) {
-		return this.x >= min.x && this.x <= max.x && this.y >= min.y && this.y <= max.y && this.z >= min.z && this.z <= max.z;
+	public final boolean isInAABB(Vector min, Vector max) {
+		return this.getX() >= min.getX() && this.getX() <= max.getX() && this.getY() >= min.getY() && this.getY() <= max.getY() && this.getZ() >= min.getZ() && this.getZ() <= max.getZ();
 	}
 
-	public boolean isInSphere(Vector origin, double radius) {
-		return NumberUtil.square(origin.x - this.x) + NumberUtil.square(origin.y - this.y) + NumberUtil.square(origin.z - this.z) <= NumberUtil.square(radius);
+	public final boolean isInSphere(Vector origin, double radius) {
+		return NumberUtil.square(origin.getX() - this.getX()) + NumberUtil.square(origin.getY() - this.getY()) + NumberUtil.square(origin.getZ() - this.getZ()) <= NumberUtil.square(radius);
 	}
 
-	public double length() {
-		return Math.sqrt(NumberUtil.square(this.x) + NumberUtil.square(this.y) + NumberUtil.square(this.z));
+	public final double length() {
+		return Math.sqrt(NumberUtil.square(this.getX()) + NumberUtil.square(this.getY()) + NumberUtil.square(this.getZ()));
 	}
 
-	public double lengthSquared() {
-		return NumberUtil.square(this.x) + NumberUtil.square(this.y) + NumberUtil.square(this.z);
+	public final double lengthSquared() {
+		return NumberUtil.square(this.getX()) + NumberUtil.square(this.getY()) + NumberUtil.square(this.getZ());
 	}
 
 	public Vector midpoint(Vector other) {
-		this.x = (this.x + other.x) / 2.0D;
-		this.y = (this.y + other.y) / 2.0D;
-		this.z = (this.z + other.z) / 2.0D;
+		this.setX((this.getX() + other.getX()) / 2.0D);
+		this.setY((this.getY() + other.getY()) / 2.0D);
+		this.setZ((this.getZ() + other.getZ()) / 2.0D);
 		return this;
 	}
 
-	public Vector multiply(int m) {
-		this.x *= (double)m;
-		this.y *= (double)m;
-		this.z *= (double)m;
+	public final Vector multiply(int m) {
+		return this.multiply((double)m);
+	}
+
+	public final Vector multiply(float m) {
+		return this.multiply((double)m);
+	}
+
+	public final Vector multiply(double m) {
+		this.setX(this.getX() * m);
+		this.setY(this.getY() * m);
+		this.setZ(this.getZ() * m);
 		return this;
 	}
 
-	public Vector multiply(double m) {
-		this.x *= m;
-		this.y *= m;
-		this.z *= m;
+	public final Vector multiply(Vector vector) {
+		this.setX(this.getX() * vector.getX());
+		this.setY(this.getY() * vector.getY());
+		this.setZ(this.getZ() * vector.getZ());
 		return this;
 	}
 
-	public Vector multiply(float m) {
-		this.x *= (double)m;
-		this.y *= (double)m;
-		this.z *= (double)m;
+	public final Vector subtract(Vector vector) {
+		this.setX(this.getX() - vector.getX());
+		this.setY(this.getY() - vector.getY());
+		this.setZ(this.getZ() - vector.getZ());
 		return this;
 	}
 
-	public Vector multiply(Vector vec) {
-		this.x *= vec.x;
-		this.y *= vec.y;
-		this.z *= vec.z;
-		return this;
-	}
-
-	public Vector subtract(Vector vec) {
-		this.x -= vec.x;
-		this.y -= vec.y;
-		this.z -= vec.z;
-		return this;
-	}
-
-	public Vector normalize() {
+	public final Vector normalize() {
 		double length = this.length();
-		this.x /= length;
-		this.y /= length;
-		this.z /= length;
+		this.setX(this.getX() / length);
+		this.setY(this.getY() / length);
+		this.setZ(this.getZ() / length);
 		return this;
 	}
 
 	@Override
-	public Map<String, Object> serialize() {
-		ConcurrentLinkedMap<String, Object> result = new ConcurrentLinkedMap<>();
+	public final Map<String, Object> serialize() {
+		ConcurrentLinkedMap<String, Object> result = Concurrent.newLinkedMap();
 		result.put("x", this.getX());
 		result.put("y", this.getY());
 		result.put("z", this.getZ());
 		return result;
 	}
 
-	public Vector setX(int x) {
-		this.x = (double) x;
-		return this;
+	public final Vector setX(int x) {
+		return this.setX((double)x);
+	}
+
+	public final Vector setX(float x) {
+		return this.setX((double)x);
 	}
 
 	public Vector setX(double x) {
@@ -266,14 +261,12 @@ public class Vector implements Cloneable, Serializable {
 		return this;
 	}
 
-	public Vector setX(float x) {
-		this.x = (double) x;
-		return this;
+	public final Vector setY(int y) {
+		return this.setY((double)y);
 	}
 
-	public Vector setY(int y) {
-		this.y = (double) y;
-		return this;
+	public final Vector setY(float y) {
+		return this.setY((double)y);
 	}
 
 	public Vector setY(double y) {
@@ -281,14 +274,12 @@ public class Vector implements Cloneable, Serializable {
 		return this;
 	}
 
-	public Vector setY(float y) {
-		this.y = (double) y;
-		return this;
+	public final Vector setZ(int z) {
+		return this.setZ((double)z);
 	}
 
-	public Vector setZ(int z) {
-		this.z = (double) z;
-		return this;
+	public final Vector setZ(float z) {
+		return this.setZ((double)z);
 	}
 
 	public Vector setZ(double z) {
@@ -296,19 +287,14 @@ public class Vector implements Cloneable, Serializable {
 		return this;
 	}
 
-	public Vector setZ(float z) {
-		this.z = (double) z;
-		return this;
+	public final String toString() {
+		return StringUtil.format("'{'{0},{1},{2}'}'", this.getX(), this.getY(), this.getZ());
 	}
 
-	public String toString() {
-		return StringUtil.format("'{'{0},{1},{2}'}'", this.x, this.y, this.z);
-	}
-
-	public Vector zero() {
-		this.x = 0.0D;
-		this.y = 0.0D;
-		this.z = 0.0D;
+	public final Vector zero() {
+		this.setX(0);
+		this.setY(0);
+		this.setZ(0);
 		return this;
 	}
 
