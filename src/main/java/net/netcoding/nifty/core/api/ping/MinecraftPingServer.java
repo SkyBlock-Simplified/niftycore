@@ -18,6 +18,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+@SuppressWarnings("unchecked")
 public class MinecraftPingServer<T extends MojangProfile> extends PingServer<T> {
 
 	private transient int socketTimeout = 2000;
@@ -62,51 +63,47 @@ public class MinecraftPingServer<T extends MojangProfile> extends PingServer<T> 
 		if (this.getAddress() == null) return;
 
 		try {
-			MinecraftScheduler.getInstance().runAsync(new Runnable() {
-				@SuppressWarnings("unchecked")
-				@Override
-				public void run() {
-					try (Socket socket = new Socket()) {
-						socket.setSoTimeout(getSocketTimeout());
-						socket.connect(getAddress(), getSocketTimeout());
+			MinecraftScheduler.getInstance().runAsync(() -> {
+				try (Socket socket = new Socket()) {
+					socket.setSoTimeout(getSocketTimeout());
+					socket.connect(getAddress(), getSocketTimeout());
 
-						try (OutputStream outputStream = socket.getOutputStream()) {
-							try (DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
-								DataUtil.writeByteArray(dataOutputStream, prepareHandshake());
-								DataUtil.writeByteArray(dataOutputStream, preparePing());
+					try (OutputStream outputStream = socket.getOutputStream()) {
+						try (DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
+							DataUtil.writeByteArray(dataOutputStream, prepareHandshake());
+							DataUtil.writeByteArray(dataOutputStream, preparePing());
 
-								try (InputStream inputStream = socket.getInputStream()) {
-									try (DataInputStream dataInputStream = new DataInputStream(inputStream)) {
-										StatusResponse response = processResponse(dataInputStream);
+							try (InputStream inputStream = socket.getInputStream()) {
+								try (DataInputStream dataInputStream = new DataInputStream(inputStream)) {
+									StatusResponse response = processResponse(dataInputStream);
 
-										setVersion(response.getVersion().getName(), response.getVersion().getProtocol());
-										setMotd(response.getMotd());
-										setMaxPlayers(response.getPlayers().getMax());
-										setOnline(true);
-										playerList.clear();
-										StatusResponse.Players players = response.getPlayers();
+									setVersion(response.getVersion().getName(), response.getVersion().getProtocol());
+									setMotd(response.getMotd());
+									setMaxPlayers(response.getPlayers().getMax());
+									setOnline(true);
+									playerList.clear();
+									StatusResponse.Players players = response.getPlayers();
 
-										if (players != null) {
-											if (players.getSample() != null)
-												playerList.addAll(Arrays.asList(GSON.fromJson(GSON.toJson(players.getSample()), getSuperClassArray())));
-										}
+									if (players != null) {
+										if (players.getSample() != null)
+											playerList.addAll(Arrays.asList(GSON.fromJson(GSON.toJson(players.getSample()), getSuperClassArray())));
+									}
 
-										if (getSuperClass().isAssignableFrom(BasicMojangProfileOverride.class)) {
-											for (T player : playerList) {
-												BasicMojangProfileOverride profile = (BasicMojangProfileOverride)player;
-												profile.setServer(MinecraftPingServer.this);
-											}
+									if (getSuperClass().isAssignableFrom(BasicMojangProfileOverride.class)) {
+										for (T player : playerList) {
+											BasicMojangProfileOverride profile = (BasicMojangProfileOverride)player;
+											profile.setServer(MinecraftPingServer.this);
 										}
 									}
 								}
 							}
 						}
-					} catch (Exception ex) {
-						setOnline(false);
-						reset();
-					} finally {
-						onPing();
 					}
+				} catch (Exception ex) {
+					setOnline(false);
+					reset();
+				} finally {
+					onPing();
 				}
 			});
 		} catch (Exception ex) {

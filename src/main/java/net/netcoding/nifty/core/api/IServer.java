@@ -1,10 +1,12 @@
 package net.netcoding.nifty.core.api;
 
+import net.netcoding.nifty.core.util.ListUtil;
+
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.UUID;
 
-public interface Server<P> {
+public interface IServer<P> {
 
 	InetSocketAddress getAddress();
 
@@ -18,13 +20,15 @@ public interface Server<P> {
 
 	P getPlayer(UUID uniqueId);
 
-	int getPlayerCount();
+	default int getPlayerCount() {
+		return ListUtil.sizeOf(this.getPlayerList());
+	}
 
 	Collection<? extends P> getPlayerList();
 
 	Version getVersion();
 
-	boolean isOnlineMode();
+	boolean isOnline();
 
 	class Version {
 
