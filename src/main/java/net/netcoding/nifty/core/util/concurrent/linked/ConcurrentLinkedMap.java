@@ -1,10 +1,10 @@
 package net.netcoding.nifty.core.util.concurrent.linked;
 
-import java.util.Collection;
+import net.netcoding.nifty.core.util.concurrent.atomic.AtomicMap;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -18,111 +18,69 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <K> type of keys
  * @param <V> type of values
  */
-public class ConcurrentLinkedMap<K, V> extends LinkedHashMap<K, V> implements Map<K, V> {
-
-	private final AtomicReference<LinkedHashMap<K, V>> ref;
+public class ConcurrentLinkedMap<K, V> extends AtomicMap<K, V, ConcurrentLinkedMap.MaxSizeLinkedMap<K, V>> {
 
 	/**
 	 * Create a new concurrent map.
 	 */
 	public ConcurrentLinkedMap() {
+		super(new MaxSizeLinkedMap<>());
+	}
 
-		this.ref = new AtomicReference<>(new LinkedHashMap<K, V>());
+	/**
+	 * Create a new concurrent map.
+	 *
+	 * @param maxSize The maximum number of entries allowed in the map.
+	 */
+	public ConcurrentLinkedMap(int maxSize) {
+		super(new MaxSizeLinkedMap<>(maxSize));
 	}
 
 	/**
 	 * Create a new concurrent map and fill it with the given map.
+	 *
+	 * @param map Map to fill the new map with.
 	 */
 	public ConcurrentLinkedMap(Map<? extends K, ? extends V> map) {
-		this.ref = new AtomicReference<>(new LinkedHashMap<>(map));
+		super(new MaxSizeLinkedMap<>(map));
 	}
 
-	@Override
-	public void clear() {
-		this.ref.get().clear();
+	/**
+	 * Create a new concurrent map and fill it with the given map.
+	 *
+	 * @param map Map to fill the new map with.
+	 * @param maxSize The maximum number of entries allowed in the map.
+	 */
+	public ConcurrentLinkedMap(Map<? extends K, ? extends V> map, int maxSize) {
+		super(new MaxSizeLinkedMap<>(map, maxSize));
 	}
 
-	@Override
-	public Set<K> keySet() {
-		return this.ref.get().keySet();
-	}
+	protected static final class MaxSizeLinkedMap<K, V> extends LinkedHashMap<K, V> {
 
-	@Override
-	public Collection<V> values() {
-		return this.ref.get().values();
-	}
+		private final int maxSize;
 
-	@Override
-	public Set<Entry<K, V>> entrySet() {
-		return this.ref.get().entrySet();
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return this.ref.get().isEmpty();
-	}
-
-	@Override
-	public boolean containsKey(Object key) {
-		return this.ref.get().containsKey(key);
-	}
-
-	@Override
-	public boolean containsValue(Object value) {
-		return this.ref.get().containsValue(value);
-	}
-
-	@Override
-	public V get(Object key) {
-		return this.ref.get().get(key);
-	}
-
-	@Override
-	public V put(K key, V value) {
-		while (true) {
-			LinkedHashMap<K, V> current = this.ref.get();
-			LinkedHashMap<K, V> modified = new LinkedHashMap<>(current);
-			modified.put(key, value);
-
-			if (this.ref.compareAndSet(current, modified))
-				return value;
+		public MaxSizeLinkedMap() {
+			this(-1);
 		}
-	}
 
-	@SuppressWarnings("SuspiciousMethodCalls")
-	@Override
-	public V remove(Object key) {
-		while (true) {
-			LinkedHashMap<K, V> current = this.ref.get();
-
-			if (!current.containsKey(key))
-				return null;
-
-			LinkedHashMap<K, V> modified = new LinkedHashMap<>(current);
-			V value = modified.remove(key);
-
-			if (this.ref.compareAndSet(current, modified))
-				return value;
+		public MaxSizeLinkedMap(int maxSize) {
+			this.maxSize = -1;
 		}
-	}
 
-	@Override
-	public void putAll(Map<? extends K, ? extends V> m) {
-		while (true) {
-			LinkedHashMap<K, V> current = this.ref.get();
-			LinkedHashMap<K, V> modified = new LinkedHashMap<>(current);
-
-			for (Entry<? extends K, ? extends V> entry : m.entrySet())
-				modified.put(entry.getKey(), entry.getValue());
-
-			if (this.ref.compareAndSet(current, modified))
-				return;
+		public MaxSizeLinkedMap(Map<? extends K, ? extends V> map) {
+			this(map, -1);
 		}
-	}
 
-	@Override
-	public int size() {
-		return this.ref.get().size();
+		public MaxSizeLinkedMap(Map<? extends K, ? extends V> map, int maxSize) {
+			super(map);
+			this.maxSize = -1;
+		}
+
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+			return this.maxSize != -1 && this.size() > this.maxSize;
+		}
+
 	}
 
 }
