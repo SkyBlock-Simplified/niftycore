@@ -12,7 +12,24 @@ import java.util.UUID;
  */
 public class ByteUtil {
 
-	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
+	private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+	/**
+	 * Gets human readable ascii of a hexadecimal string.
+	 *
+	 * @param hex to convert
+	 * @return converted hexadecimal string into ascii
+	 */
+	public static String toAsciiString(String hex) {
+		StringBuilder output = new StringBuilder();
+
+		for (int i = 0; i < hex.length(); i += 2) {
+			String str = hex.substring(i, i + 2);
+			output.append((char)Integer.parseInt(str, 16));
+		}
+
+		return output.toString();
+	}
 
 	/**
 	 * Gets a byte array of converted objects.
@@ -72,28 +89,11 @@ public class ByteUtil {
 
 		for (int i = 0; i < bytes.length; i++) {
 			int v = bytes[i] & 0xFF;
-			hexChars[i * 2] = hexArray[v >>> 4];
-			hexChars[i * 2 + 1] = hexArray[v & 0x0F];
+			hexChars[i * 2] = HEX_ARRAY[v >>> 4];
+			hexChars[i * 2 + 1] = HEX_ARRAY[v & 0x0F];
 		}
 
 		return new String(hexChars);
-	}
-
-	/**
-	 * Gets human readable ascii of a hexadecimal string.
-	 *
-	 * @param hex to convert
-	 * @return converted hexadecimal string into ascii
-	 */
-	public static String toAsciiString(String hex) {
-		StringBuilder output = new StringBuilder();
-
-		for (int i = 0; i < hex.length(); i += 2) {
-			String str = hex.substring(i, i + 2);
-			output.append((char)Integer.parseInt(str, 16));
-		}
-
-		return output.toString();
 	}
 
 }

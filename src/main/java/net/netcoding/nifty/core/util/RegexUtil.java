@@ -1,7 +1,8 @@
 package net.netcoding.nifty.core.util;
 
-import net.netcoding.nifty.core.util.misc.MaxSizeLinkedMap;
 import net.netcoding.nifty.core.util.comparator.LastCharCompare;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 
 import java.util.Arrays;
 import java.util.regex.Matcher;
@@ -9,20 +10,22 @@ import java.util.regex.Pattern;
 
 public class RegexUtil {
 
-	private static final transient MaxSizeLinkedMap<String, String> ORDERED_MESSAGES = new MaxSizeLinkedMap<>(50);
+	private static final transient ConcurrentLinkedMap<String, String> ORDERED_MESSAGES = Concurrent.newLinkedMap(100);
 	private static final transient LastCharCompare CODE_COMPARE = new LastCharCompare();
 	private static final transient String ALL_PATTERN = "[0-9A-FK-ORa-fk-or]";
+	private static final transient Pattern REPLACE_PATTERN = Pattern.compile("&&(?=" + ALL_PATTERN + ")");
+
 	public static final transient String SECTOR_SYMBOL = "\u00a7";
-	public static final transient Pattern VANILLA_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+(" + ALL_PATTERN + ")");
-	public static final transient Pattern VANILLA_COLOR_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+([0-9A-Fa-f])");
-	public static final transient Pattern VANILLA_MAGIC_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+([Kk])");
-	public static final transient Pattern VANILLA_FORMAT_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+([L-ORl-or])");
 
 	public static final transient Pattern REPLACE_ALL_PATTERN = Pattern.compile("(?<!&)&(" + ALL_PATTERN + ")");
 	public static final transient Pattern REPLACE_COLOR_PATTERN = Pattern.compile("(?<!&)&([0-9a-fA-F])");
 	public static final transient Pattern REPLACE_MAGIC_PATTERN = Pattern.compile("(?<!&)&([Kk])");
 	public static final transient Pattern REPLACE_FORMAT_PATTERN = Pattern.compile("(?<!&)&([l-orL-OR])");
-	private static final transient Pattern REPLACE_PATTERN = Pattern.compile("&&(?=" + ALL_PATTERN + ")");
+
+	public static final transient Pattern VANILLA_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+(" + ALL_PATTERN + ")");
+	public static final transient Pattern VANILLA_COLOR_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+([0-9A-Fa-f])");
+	public static final transient Pattern VANILLA_MAGIC_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+([Kk])");
+	public static final transient Pattern VANILLA_FORMAT_PATTERN = Pattern.compile(SECTOR_SYMBOL + "+([L-ORl-or])");
 
 	public static final transient Pattern LOG_PATTERN = Pattern.compile("\\{(\\{[\\d]+(?:,[^,\\}]+)*\\})\\}");
 	public static final transient Pattern URL_PATTERN = Pattern.compile("((?:(?:https?)://)?[\\w\\._-]{2,})\\.([a-z]{2,6}(?:/\\S+)?)");

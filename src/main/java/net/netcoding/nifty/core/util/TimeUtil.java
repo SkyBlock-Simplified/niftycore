@@ -36,9 +36,15 @@ public class TimeUtil {
 	 */
 	public static long getClockTime(String time) {
 		Integer clock = TIMES.get(time);
-		if (clock != null) return clock;
+
+		if (clock != null)
+			return clock;
+
 		clock = NumberUtil.isNumber(time) ? Integer.valueOf(time) : -1;
-		if (clock == -1) throw new NumberFormatException(StringUtil.format("The provided time value {0} is neither a clock time or number!", clock));
+
+		if (clock == -1)
+			throw new NumberFormatException(StringUtil.format("The provided time value {0} is neither a clock time or number!", clock));
+
 		return Math.abs(clock);
 	}
 
@@ -62,18 +68,18 @@ public class TimeUtil {
 				component += chr - '0';
 			} else {
 				switch (Character.toLowerCase(chr)) {
-				case 'y':
-					component *= 52;
-				case 'w':
-					component *= 7;
-				case 'd':
-					component *= 24;
-				case 'h':
-					component *= 60;
-				case 'm':
-					component *= 60;
-				case 's':
-					component *= 1000;
+					case 'y':
+						component *= 52;
+					case 'w':
+						component *= 7;
+					case 'd':
+						component *= 24;
+					case 'h':
+						component *= 60;
+					case 'm':
+						component *= 60;
+					case 's':
+						component *= 1000;
 				}
 
 				duration += component;

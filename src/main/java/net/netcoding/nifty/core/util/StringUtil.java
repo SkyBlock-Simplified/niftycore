@@ -2,7 +2,8 @@ package net.netcoding.nifty.core.util;
 
 import com.google.common.base.Joiner;
 import net.netcoding.nifty.core.api.color.ChatColor;
-import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.linked.ConcurrentLinkedMap;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 public class StringUtil {
 
-	private static final transient ConcurrentMap<String, MessageFormat> MESSAGE_CACHE = new ConcurrentMap<>();
+	private static final transient ConcurrentLinkedMap<String, MessageFormat> MESSAGE_CACHE = Concurrent.newLinkedMap(100);
 
 	/**
 	 * Encodes unicode characters in a string.

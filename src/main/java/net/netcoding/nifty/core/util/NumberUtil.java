@@ -115,4 +115,24 @@ public class NumberUtil {
 		return clazz.cast(number.newInstance(isNumber(numValue) ? numValue : String.valueOf(0)));
 	}
 
+	/**
+	 * Gets the hexadecimal string of an integer.
+	 *
+	 * @param number to convert
+	 * @return converted byte array as hexadecimal string
+	 */
+	public static String toHexString(long number) {
+		return Long.valueOf(String.valueOf(number), 16).toString();
+	}
+
+	/**
+	 * Gets the base 10 representation of the specified hexadecimal string.
+	 *
+	 * @param hexString Hexadecimal string to convert.
+	 * @return Base 10 version.
+	 */
+	public static Long toLong(String hexString) {
+		return Long.parseLong(hexString, 16);
+	}
+
 }
