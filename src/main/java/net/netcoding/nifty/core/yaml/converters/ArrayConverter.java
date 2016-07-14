@@ -13,6 +13,7 @@ public class ArrayConverter extends Converter {
 		super(converter);
 	}
 
+	@SuppressWarnings("SuspiciousToArrayCall")
 	private static <T> T[] getArray(Class<T> type, java.util.List<Object> list) {
 		T[] array = (T[])java.lang.reflect.Array.newInstance(type, list.size());
 		return list.toArray(array);

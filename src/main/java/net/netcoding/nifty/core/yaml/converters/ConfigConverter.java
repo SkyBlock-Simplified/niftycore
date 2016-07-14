@@ -17,10 +17,7 @@ public class ConfigConverter extends Converter {
 	@Override
 	public Object fromConfig(Class<?> type, Object section, ParameterizedType genericType) throws Exception {
 		YamlMap obj = (YamlMap)newInstance(type);
-
-		for (Class<? extends Converter> clazz : this.getCustomConverters())
-			obj.addCustomConverter(clazz);
-
+		this.getCustomConverters().forEach(obj::addCustomConverter);
 		obj.loadFromMap((section instanceof Map) ? (Map<?, ?>)section : ((ConfigSection)section).getRawMap(), type);
 		return obj;
 	}
@@ -31,10 +28,7 @@ public class ConfigConverter extends Converter {
 			return obj;
 		else {
 			YamlMap map = (YamlMap)obj;
-
-			for (Class<? extends Converter> clazz : this.getCustomConverters())
-				map.addCustomConverter(clazz);
-
+			this.getCustomConverters().forEach(map::addCustomConverter);
 			return map.saveToMap(obj.getClass());
 		}
 	}
