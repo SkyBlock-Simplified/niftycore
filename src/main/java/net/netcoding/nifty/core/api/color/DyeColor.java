@@ -1,5 +1,6 @@
 package net.netcoding.nifty.core.api.color;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 /**
@@ -76,10 +77,10 @@ public enum DyeColor {
 	private final byte dyeData;
 	private final Color color;
 	private final Color firework;
-	private final static DyeColor[] BY_WOOL_DATA = values();
-	private final static DyeColor[] BY_DYE_DATA = values();
-	private final static ConcurrentMap<Color, DyeColor> BY_COLOR = new ConcurrentMap<>();
-	private final static ConcurrentMap<Color, DyeColor> BY_FIREWORK = new ConcurrentMap<>();
+	private static final DyeColor[] BY_WOOL_DATA = values();
+	private static final DyeColor[] BY_DYE_DATA = values();
+	private static final ConcurrentMap<Color, DyeColor> BY_COLOR = Concurrent.newMap();
+	private static final ConcurrentMap<Color, DyeColor> BY_FIREWORK = Concurrent.newMap();
 
 	static {
 		for (DyeColor color : values()) {
@@ -105,7 +106,6 @@ public enum DyeColor {
 	 * @see #getWoolData()
 	 * @see #getDyeData()
 	 */
-	@Deprecated
 	public byte getData() {
 		return this.getWoolData();
 	}
@@ -115,9 +115,7 @@ public enum DyeColor {
 	 *
 	 * @return A byte containing the wool data value of this color
 	 * @see #getDyeData()
-	 * @deprecated Magic value
 	 */
-	@Deprecated
 	public byte getWoolData() {
 		return this.woolData;
 	}
@@ -127,9 +125,7 @@ public enum DyeColor {
 	 *
 	 * @return A byte containing the dye data value of this color
 	 * @see #getWoolData()
-	 * @deprecated Magic value
 	 */
-	@Deprecated
 	public byte getDyeData() {
 		return this.dyeData;
 	}
@@ -156,14 +152,10 @@ public enum DyeColor {
 	 * Gets the DyeColor with the given (wool) data value.
 	 *
 	 * @param data (wool) data value to fetch
-	 * @return The {@link DyeColor} representing the given value, or null if
-	 *     it doesn't exist
-	 * @deprecated The name is misleading. It would imply {@link
-	 *     Material#INK_SACK} but uses {@link Material#WOOL}
+	 * @return The {@link DyeColor} representing the given value, or null if it doesn't exist
 	 * @see #getByDyeData(byte)
 	 * @see #getByWoolData(byte)
 	 */
-	@Deprecated
 	public static DyeColor getByData(byte data) {
 		return getByWoolData(data);
 	}
@@ -175,14 +167,13 @@ public enum DyeColor {
 	 * @return The {@link DyeColor} representing the given value, or null if
 	 *     it doesn't exist
 	 * @see #getByDyeData(byte)
-	 * @deprecated Magic value
 	 */
-	@Deprecated
 	public static DyeColor getByWoolData(byte data) {
 		int i = 0xff & data;
-		if (i >= BY_WOOL_DATA.length) {
+
+		if (i >= BY_WOOL_DATA.length)
 			return null;
-		}
+
 		return BY_WOOL_DATA[i];
 	}
 
@@ -193,14 +184,13 @@ public enum DyeColor {
 	 * @return The {@link DyeColor} representing the given value, or null if
 	 *     it doesn't exist
 	 * @see #getByWoolData(byte)
-	 * @deprecated Magic value
 	 */
-	@Deprecated
 	public static DyeColor getByDyeData(byte data) {
 		int i = 0xff & data;
-		if (i >= BY_DYE_DATA.length) {
+
+		if (i >= BY_DYE_DATA.length)
 			return null;
-		}
+
 		return BY_DYE_DATA[i];
 	}
 
