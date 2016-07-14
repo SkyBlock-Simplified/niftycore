@@ -9,13 +9,13 @@ import net.netcoding.nifty.core.api.color.ChatColor;
 import net.netcoding.nifty.core.util.ListUtil;
 import net.netcoding.nifty.core.util.RegexUtil;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.core.util.json.events.ClickEvent;
 import net.netcoding.nifty.core.util.json.events.HoverEvent;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 @SuppressWarnings("unchecked")
 public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObject, Cloneable, Iterable<MessagePart> {
 
-	protected final List<MessagePart> messageParts = new ArrayList<>();
+	protected final ConcurrentList<MessagePart> messageParts = Concurrent.newList();
 	protected String jsonString = null;
 	protected boolean dirty = false;
 
@@ -52,8 +52,7 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 	}
 
 	public JsonMessage(JsonMessage<T> firstPartText) {
-		for (MessagePart part : firstPartText)
-			this.messageParts.add(part);
+		this.messageParts.addAll(firstPartText.messageParts);
 	}
 
 	/**
@@ -64,10 +63,7 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 	 */
 	public T legacy(String message) {
 		List<JsonMessage> converted = fromLegacyText(message);
-
-		for (JsonMessage<T> json : converted)
-			this.messageParts.addAll(json.messageParts);
-
+		converted.forEach(json -> this.messageParts.addAll(json.messageParts));
 		this.dirty = true;
 		return (T)this;
 	}
@@ -81,7 +77,7 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 	 * @return The components needed to print the message to the client
 	 */
 	public static List<JsonMessage> fromLegacyText(String message) {
-		ConcurrentList<JsonMessage> components = new ConcurrentList<>();
+		ConcurrentList<JsonMessage> components = Concurrent.newList();
 		StringBuilder builder = new StringBuilder();
 		JsonMessage component = new JsonMessage();
 		Matcher matcher = RegexUtil.URL_PATTERN.matcher(message);

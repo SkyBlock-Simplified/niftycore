@@ -48,9 +48,7 @@ public final class MessagePart implements Cloneable {
 	public MessagePart clone() throws CloneNotSupportedException {
 		MessagePart message = (MessagePart)super.clone();
 		message.text = this.text.clone();
-
-		for (ChatColor style : this.styles)
-			message.styles.add(style);
+		message.styles.addAll(this.styles);
 
 		if (this.clickEvent != null)
 			message.clickEvent = new ClickEvent(ClickEvent.Type.getFromAction(this.clickEvent.getName()), this.clickEvent.getValue());
@@ -67,9 +65,7 @@ public final class MessagePart implements Cloneable {
 			message.hoverEvent = new HoverEvent(type, jsonRep);
 		}
 
-		for (JsonRepresentedObject replacement : this.translationReplacements)
-			message.translationReplacements.add(replacement);
-
+		message.translationReplacements.addAll(this.translationReplacements);
 		return message;
 	}
 
