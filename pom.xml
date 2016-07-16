@@ -5,7 +5,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<name>Core</name>
 	<version>1.0.1</version>
 	<url>https://netcoding.net/</url>
-	<description>Core API and class files for NiftyBukkit and NiftyBungee.</description>
+	<description>Core Java API.</description>
 
 	<parent>
 		<groupId>net.netcoding.nifty</groupId>
