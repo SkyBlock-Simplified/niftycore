@@ -1,6 +1,7 @@
 package net.netcoding.nifty.core.api;
 
 import net.netcoding.nifty.core.mojang.MojangProfile;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentSet;
 
 import java.net.InetSocketAddress;
@@ -8,17 +9,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 
-public abstract class MinecraftServer<T extends MojangProfile> implements Server<T> {
+public abstract class MinecraftServer<T extends MojangProfile> implements IServer<T> {
 
 	protected InetSocketAddress address;
 	protected int maxPlayers = 0;
 	protected String motd = "";
 	protected boolean online = false;
-	protected final ConcurrentSet<T> playerList = new ConcurrentSet<>();
+	protected final ConcurrentSet<T> playerList = Concurrent.newSet();
 	protected String serverName = "";
 	protected Version version = Version.DEFAULT;
-
-	protected MinecraftServer() { }
 
 	@Override
 	public final boolean equals(Object obj) {
@@ -79,11 +78,6 @@ public abstract class MinecraftServer<T extends MojangProfile> implements Server
 	}
 
 	@Override
-	public final int getPlayerCount() {
-		return this.playerList.size();
-	}
-
-	@Override
 	public Collection<T> getPlayerList() {
 		return Collections.unmodifiableCollection(this.playerList);
 	}
@@ -99,7 +93,7 @@ public abstract class MinecraftServer<T extends MojangProfile> implements Server
 	}
 
 	@Override
-	public final boolean isOnlineMode() {
+	public final boolean isOnline() {
 		return this.online;
 	}
 
