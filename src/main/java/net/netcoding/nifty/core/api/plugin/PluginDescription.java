@@ -7,23 +7,29 @@ public final class PluginDescription {
 	private final String name;
 	private final File file;
 	private final File dataFolder;
+	private final String version;
 
-	public PluginDescription(String name, File file, File dataFolder) {
+	public PluginDescription(String name, File file, File dataFolder, String version) {
 		this.name = name;
 		this.file = file;
 		this.dataFolder = dataFolder;
+		this.version = version;
 	}
 
-	public final String getName() {
-		return this.name;
+	public File getDataFolder() {
+		return this.dataFolder;
 	}
 
-	public final File getFile() {
+	public File getFile() {
 		return this.file;
 	}
 
-	public final File getDataFolder() {
-		return this.dataFolder;
+	public String getName() {
+		return this.name;
+	}
+
+	public String getVersion() {
+		return this.version;
 	}
 
 }

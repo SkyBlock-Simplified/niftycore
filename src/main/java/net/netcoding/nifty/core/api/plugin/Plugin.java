@@ -2,7 +2,7 @@ package net.netcoding.nifty.core.api.plugin;
 
 import com.google.common.base.Preconditions;
 import net.netcoding.nifty.core.util.StringUtil;
-import net.netcoding.nifty.core.api.logger.BroadcasttLogger;
+import net.netcoding.nifty.core.api.logger.BroadcastLogger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,14 +11,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-public interface Plugin<T extends BroadcasttLogger> extends PluginHelper<T> {
-
-	default String getName() {
-		return this.getPluginDescription().getName();
-	}
+public interface Plugin<T extends BroadcastLogger> extends PluginHelper<T> {
 
 	default File getDataFolder() {
-		return this.getPluginDescription().getDataFolder();
+		return this.getDesc().getDataFolder();
+	}
+
+	default String getName() {
+		return this.getDesc().getName();
 	}
 
 	default InputStream getResource(String resourcePath) {

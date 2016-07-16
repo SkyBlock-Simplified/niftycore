@@ -1,10 +1,10 @@
 package net.netcoding.nifty.core.api.plugin;
 
-import net.netcoding.nifty.core.api.logger.BroadcasttLogger;
+import net.netcoding.nifty.core.api.logger.BroadcastLogger;
 
-public interface PluginHelper<T extends BroadcasttLogger> {
+public interface PluginHelper<T extends BroadcastLogger> {
 
-	PluginDescription getPluginDescription();
+	PluginDescription getDesc();
 
 	T getLog();
 

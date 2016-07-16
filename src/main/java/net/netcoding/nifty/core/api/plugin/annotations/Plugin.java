@@ -9,11 +9,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Plugin {
 
-	String id();
-
 	String name();
 
-	String version() default "1.0.0";
+	String version();
 
 	Dependency[] dependencies() default {};
 
