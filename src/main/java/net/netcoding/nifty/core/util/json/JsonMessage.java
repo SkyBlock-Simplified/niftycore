@@ -11,17 +11,13 @@ import net.netcoding.nifty.core.util.RegexUtil;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.util.json.events.ClickEvent;
 import net.netcoding.nifty.core.util.json.events.HoverEvent;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 
 @SuppressWarnings("unchecked")
@@ -605,7 +601,7 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 	}
 
 	public Map<String, Object> serialize() {
-		HashMap<String, Object> map = new HashMap<>();
+		ConcurrentMap<String, Object> map = Concurrent.newMap();
 		map.put("messageParts", this.messageParts);
 		return map;
 	}
@@ -649,7 +645,7 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 
 			for (Map.Entry<String, JsonElement> entry : messagePart.entrySet()) {
 				if (TextualComponent.isTextKey(entry.getKey())) {
-					Map<String, Object> serializedMapForm = new HashMap<>(); // Must be object due to Bukkit serializer API compliance
+					ConcurrentMap<String, Object> serializedMapForm = Concurrent.newMap(); // Must be object due to Bukkit serializer API compliance
 					serializedMapForm.put("key", entry.getKey());
 
 					if (entry.getValue().isJsonPrimitive())

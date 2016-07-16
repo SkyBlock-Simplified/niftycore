@@ -127,7 +127,7 @@ public final class Concurrent {
 		BiConsumer<M, T> accumulator = (map, element) -> map.merge(keyMapper.apply(element), valueMapper.apply(element), mergeFunction);
 
 		return new ConcurrentCollector<>(mapSupplier, accumulator, (m1, m2) -> {
-			m2.entrySet().stream().forEach(entry -> m1.merge(entry.getKey(), entry.getValue(), mergeFunction));
+			m2.entrySet().forEach(entry -> m1.merge(entry.getKey(), entry.getValue(), mergeFunction));
 			return m1;
 		}, UN_CHARACTERISTICS);
 	}

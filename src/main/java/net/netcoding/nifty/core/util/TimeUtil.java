@@ -1,8 +1,9 @@
 package net.netcoding.nifty.core.util;
 
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
+
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A collection of time-based utilities to assist with converting words
@@ -11,7 +12,7 @@ import java.util.Map;
 public class TimeUtil {
 
 	public static final transient SimpleDateFormat SQL_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private static final Map<String, Integer> TIMES = new HashMap<>();
+	private static final ConcurrentMap<String, Integer> TIMES = Concurrent.newMap();
 
 	static {
 		TIMES.put("dawn", 22000);

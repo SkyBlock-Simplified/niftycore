@@ -5,11 +5,12 @@ import net.netcoding.nifty.core.database.factory.callbacks.VoidResultCallback;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An sql listener used to check for updates to its associated table and notify plugins.
@@ -79,9 +80,9 @@ public class DatabaseNotification {
 	 * @return Map of primary keys and associated deleted data.
 	 * @throws SQLException If you attempt to retrieve deleted data when inserting a record.
 	 */
-	public HashMap<String, Object> getDeletedData() throws SQLException {
+	public Map<String, Object> getDeletedData() throws SQLException {
 		if (this.getEvent() == TriggerEvent.INSERT) throw new SQLException("Cannot retrieve an inserted record!");
-		final HashMap<String, Object> deleted = new HashMap<>();
+		final ConcurrentMap<String, Object> deleted = Concurrent.newMap();
 
 		this.sql.query(StringUtil.format("SELECT old_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), result -> {
 			if (result.next()) {

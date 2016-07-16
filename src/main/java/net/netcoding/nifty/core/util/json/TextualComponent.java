@@ -3,6 +3,8 @@ package net.netcoding.nifty.core.util.json;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.stream.JsonWriter;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -196,7 +198,7 @@ public abstract class TextualComponent implements Cloneable {
 
 		public static ComplexTextTypeComponent deserialize(Map<String, Object> map) {
 			String key = null;
-			Map<String, String> value = new HashMap<>();
+			ConcurrentMap<String, String> value = Concurrent.newMap();
 
 			for (Map.Entry<String, Object> entry : map.entrySet()) {
 				if (entry.getKey().equals("key"))
@@ -236,7 +238,7 @@ public abstract class TextualComponent implements Cloneable {
 		return new ArbitraryTextTypeComponent("translate", translateKey);
 	}
 
-	private static void throwUnsupportedSnapshot(){
+	private static void throwUnsupportedSnapshot() {
 		throw new UnsupportedOperationException("This feature is only supported in snapshot releases.");
 	}
 

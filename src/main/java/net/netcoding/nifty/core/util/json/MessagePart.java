@@ -5,12 +5,13 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.stream.JsonWriter;
 import net.netcoding.nifty.core.api.color.ChatColor;
 import net.netcoding.nifty.core.util.StringUtil;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.util.json.events.ClickEvent;
 import net.netcoding.nifty.core.util.json.events.HoverEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public final class MessagePart implements Cloneable {
 	}
 
 	public Map<String, Object> serialize() {
-		HashMap<String, Object> map = new HashMap<>();
+		ConcurrentMap<String, Object> map = Concurrent.newMap();
 		map.put("text", this.text);
 		map.put("styles", this.styles);
 		map.put("color", this.color.getCode());

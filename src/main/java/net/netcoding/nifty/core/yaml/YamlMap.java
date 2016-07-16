@@ -1,7 +1,9 @@
 package net.netcoding.nifty.core.yaml;
 
-import net.netcoding.nifty.core.yaml.annotations.Path;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 import net.netcoding.nifty.core.yaml.annotations.ConfigMode;
+import net.netcoding.nifty.core.yaml.annotations.Path;
 import net.netcoding.nifty.core.yaml.annotations.PreserveStatic;
 import net.netcoding.nifty.core.yaml.converters.Converter;
 
@@ -76,7 +78,7 @@ public abstract class YamlMap {
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> saveToMap(Class<?> clazz) throws Exception {
-		Map<String, Object> returnMap = new HashMap<>();
+		ConcurrentMap<String, Object> returnMap = Concurrent.newMap();
 
 		if (!clazz.getSuperclass().equals(YamlMap.class) && !clazz.getSuperclass().equals(Object.class)) {
 			Map<String, Object> map = this.saveToMap(clazz.getSuperclass());
