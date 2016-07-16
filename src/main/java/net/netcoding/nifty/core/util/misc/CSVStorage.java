@@ -1,21 +1,18 @@
 package net.netcoding.nifty.core.util.misc;
 
 import com.google.common.base.Preconditions;
+import net.netcoding.nifty.core.NiftyCore;
 import net.netcoding.nifty.core.util.StringUtil;
 import net.netcoding.nifty.core.util.concurrent.Concurrent;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.logging.Level;
 
 public abstract class CSVStorage {
 
@@ -24,26 +21,35 @@ public abstract class CSVStorage {
 	public CSVStorage(File folder, String fileName) {
 		Preconditions.checkArgument(StringUtil.notEmpty(fileName), "Filename cannot be NULL!");
 		this.file = new File(folder, fileName + (fileName.endsWith(".csv") ? "" : ".csv"));
-		this.reload();
+
+		try (BufferedReader reader = this.getReader()) {
+			this.reload();
+		} catch (IOException ioex) {
+			NiftyCore.getNiftyLogger().log(Level.SEVERE, StringUtil.format("Unable to load ''{0}''!", this.getLocalFile().getName()), ioex);
+		}
 	}
 
 	protected final ClassLoader getClassLoader() {
 		return this.getClass().getClassLoader();
 	}
 
-	public final List<String> getLines() throws IOException {
+	protected final BufferedReader getReader() throws IOException {
 		try (InputStreamReader inputStream = (this.getLocalFile().exists() ? new FileReader(this.getLocalFile()) : new InputStreamReader(this.getResource()))) {
 			try (BufferedReader reader = new BufferedReader(inputStream)) {
-				ConcurrentList<String> lines = Concurrent.newList();
-
-				do {
-					String line = reader.readLine();
-					if (StringUtil.isEmpty(line)) break;
-					lines.add(line);
-				} while (true);
-
-				return Collections.unmodifiableList(lines);
+				return reader;
 			}
+		}
+	}
+
+	public final List<String> getLines() throws IOException {
+		try (BufferedReader reader = this.getReader()) {
+			ConcurrentList<String> lines = Concurrent.newList();
+			String line;
+
+			while ((line = reader.readLine()) != null)
+				lines.add(line);
+
+			return Collections.unmodifiableList(lines);
 		}
 	}
 
@@ -68,7 +74,21 @@ public abstract class CSVStorage {
 		return this.file;
 	}
 
-	public abstract void reload();
+	protected abstract void preReload();
+
+	protected abstract void processLine(String[] parts);
+
+	public final void reload() throws IOException {
+		try (BufferedReader reader = this.getReader()) {
+			String line;
+
+			while ((line = reader.readLine()) != null) {
+				line = line.trim().toLowerCase(Locale.ENGLISH);
+				if (StringUtil.isEmpty(line) || line.charAt(0) == '#') continue;
+				this.processLine(line.split("[^a-zA-Z0-9-_]"));
+			}
+		}
+	}
 
 	public final void save() {
 		this.save(false);
