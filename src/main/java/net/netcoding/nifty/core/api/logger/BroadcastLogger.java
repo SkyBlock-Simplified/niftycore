@@ -1,11 +1,11 @@
 package net.netcoding.nifty.core.api.logger;
 
-import net.netcoding.nifty.core.api.plugin.Plugin;
+import net.netcoding.nifty.core.api.plugin.PluginDescription;
 
 public abstract class BroadcastLogger extends ConsoleLogger {
 
-	public BroadcastLogger(Plugin plugin) {
-		super(plugin);
+	public BroadcastLogger(PluginDescription desc) {
+		super(desc);
 	}
 
 	public final void broadcast(Throwable exception, Object... args) {

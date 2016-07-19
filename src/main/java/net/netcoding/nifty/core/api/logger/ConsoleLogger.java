@@ -1,7 +1,7 @@
 package net.netcoding.nifty.core.api.logger;
 
 import net.netcoding.nifty.core.api.color.ChatColor;
-import net.netcoding.nifty.core.api.plugin.Plugin;
+import net.netcoding.nifty.core.api.plugin.PluginDescription;
 import net.netcoding.nifty.core.reflection.Reflection;
 import net.netcoding.nifty.core.util.RegexUtil;
 import net.netcoding.nifty.core.util.StringUtil;
@@ -14,8 +14,8 @@ public abstract class ConsoleLogger {
 
 	private final JavaLogger logger;
 
-	public ConsoleLogger(Plugin plugin) {
-		this.logger = new JavaLogger(plugin);
+	public ConsoleLogger(PluginDescription desc) {
+		this.logger = new JavaLogger(desc);
 	}
 
 	public final void console(Throwable exception, Object... args) {
@@ -58,9 +58,9 @@ public abstract class ConsoleLogger {
 
 		private final String pluginName;
 
-		public JavaLogger(Plugin plugin) {
-			super(plugin.getName(), null);
-			this.pluginName = StringUtil.format("[{0}] ", plugin.getName());
+		public JavaLogger(PluginDescription desc) {
+			super(desc.getName(), null);
+			this.pluginName = StringUtil.format("[{0}] ", desc.getName());
 			this.setLevel(Level.ALL);
 
 			try {
