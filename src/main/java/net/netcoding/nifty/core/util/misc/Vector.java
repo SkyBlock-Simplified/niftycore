@@ -46,7 +46,7 @@ public class Vector implements Cloneable, Serializable {
 	}
 
 	@Override
-	public Vector clone() {
+	public final Vector clone() {
 		try {
 			return (Vector)super.clone();
 		} catch (CloneNotSupportedException cnsex) {
@@ -195,7 +195,7 @@ public class Vector implements Cloneable, Serializable {
 		return NumberUtil.square(this.getX()) + NumberUtil.square(this.getY()) + NumberUtil.square(this.getZ());
 	}
 
-	public Vector midpoint(Vector other) {
+	public final Vector midpoint(Vector other) {
 		this.setX((this.getX() + other.getX()) / 2.0D);
 		this.setY((this.getY() + other.getY()) / 2.0D);
 		this.setZ((this.getZ() + other.getZ()) / 2.0D);
