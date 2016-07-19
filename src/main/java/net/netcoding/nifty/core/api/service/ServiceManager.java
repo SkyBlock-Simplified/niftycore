@@ -74,17 +74,7 @@ public class ServiceManager<P> {
 	 * @see #isRegistered(Class)
 	 */
 	public final <T> T getProvider(Class<T> service) throws UnknownServiceException {
-		if (this.isRegistered(service))
-			return this.getServiceProvider(service).getProvider();
-
-		for (ServiceProvider provider : SERVICES) {
-			if (provider.getService().isAssignableFrom(service)) {
-				NiftyCore.getNiftyLogger().warning(StringUtil.format("Service ''{0}'' is superclass of ''{1}''!", service.getName(), provider.getService().getName()));
-				return service.cast(provider.getProvider());
-			}
-		}
-
-		throw new UnknownServiceException(service);
+		return this.getServiceProvider(service).getProvider();
 	}
 
 	/**
