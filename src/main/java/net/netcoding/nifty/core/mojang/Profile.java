@@ -5,14 +5,14 @@ import java.util.UUID;
 public interface Profile {
 
 	/**
-	 * Gets the name associated to this profile.
+	 * Gets the name associated with this profile.
 	 *
 	 * @return Current profile name.
 	 */
 	String getName();
 
 	/**
-	 * Gets the unique identifier associated to this profile.
+	 * Gets the unique identifier associated with this profile.
 	 *
 	 * @return Current profile UUID.
 	 */

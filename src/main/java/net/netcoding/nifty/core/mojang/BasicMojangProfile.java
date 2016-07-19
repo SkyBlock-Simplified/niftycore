@@ -3,7 +3,7 @@ package net.netcoding.nifty.core.mojang;
 import net.netcoding.nifty.core.api.MinecraftServer;
 import net.netcoding.nifty.core.util.json.JsonMessage;
 
-public class BasicMojangProfile extends MojangProfile {
+public class BasicMojangProfile extends MojangProfile<BasicMojangProfile> {
 
 	@Override
 	public MinecraftServer<? extends MojangProfile> getServer() {
