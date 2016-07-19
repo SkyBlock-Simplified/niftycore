@@ -33,7 +33,6 @@ public class NiftyCore {
 			logger = (Logger)plugin.invokeMethod("getLogger", pluginObj);
 			isBungee = true;
 		} catch (Exception bungee) {
-			bungee.printStackTrace();
 			try {
 				Reflection bukkit = new Reflection("Bukkit", "org.bukkit");
 				Reflection manager = new Reflection("PluginManager", "plugin", "org.bukkit");
