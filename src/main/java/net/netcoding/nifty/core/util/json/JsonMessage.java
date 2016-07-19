@@ -43,6 +43,11 @@ public class JsonMessage<T extends JsonMessage<T>> implements JsonRepresentedObj
 		this(TextualComponent.rawText(firstPartText));
 	}
 
+	/**
+	 * Creates a JSON message with component.
+	 *
+	 * @param firstPartText The existing text component in the message.
+	 */
 	public JsonMessage(TextualComponent firstPartText) {
 		this.messageParts.add(new MessagePart(firstPartText));
 	}
