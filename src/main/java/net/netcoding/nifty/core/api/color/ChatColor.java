@@ -1,5 +1,6 @@
 package net.netcoding.nifty.core.api.color;
 
+import com.google.common.base.Preconditions;
 import net.netcoding.nifty.core.util.RegexUtil;
 import net.netcoding.nifty.core.util.StringUtil;
 
@@ -7,22 +8,22 @@ import java.util.regex.Pattern;
 
 public enum ChatColor {
 
-	BLACK('0'),
-	DARK_BLUE('1'),
-	DARK_GREEN('2'),
-	DARK_AQUA('3'),
-	DARK_RED('4'),
-	DARK_PURPLE('5'),
-	GOLD('6'),
-	GRAY('7'),
-	DARK_GRAY('8'),
-	BLUE('9'),
-	GREEN('a'),
-	AQUA('b'),
-	RED('c'),
-	LIGHT_PURPLE('d'),
-	YELLOW('e'),
-	WHITE('f'),
+	BLACK('0', 0x000000),
+	DARK_BLUE('1', 0x0000AA),
+	DARK_GREEN('2', 0x00AA00),
+	DARK_AQUA('3', 0x00AAAA),
+	DARK_RED('4', 0xAA0000),
+	DARK_PURPLE('5', 0xAA00AA),
+	GOLD('6', 0xFFAA00),
+	GRAY('7', 0xAAAAAA),
+	DARK_GRAY('8', 0x555555),
+	BLUE('9', 0x5555FF),
+	GREEN('a', 0x55FF55),
+	AQUA('b', 0x55FFFF),
+	RED('c', 0xFF5555),
+	LIGHT_PURPLE('d', 0xFF55FF),
+	YELLOW('e', 0xFFFF55),
+	WHITE('f', 0xFFFFFF),
 	MAGIC('k', true, "obfuscated"),
 	BOLD('l', true),
 	STRIKETHROUGH('m', true),
@@ -35,20 +36,38 @@ public enum ChatColor {
 	private final boolean isFormat;
 	private final String jsonName;
 	private final String toString;
+	private final Color color;
 
 	ChatColor(char code) {
-		this(code, false);
+		this(code, -1);
+	}
+
+	ChatColor(char code, int rgb) {
+		this(code, false, rgb);
 	}
 
 	ChatColor(char code, boolean isFormat) {
-		this(code, isFormat, null);
+		this(code, isFormat, -1);
+	}
+
+	ChatColor(char code, boolean isFormat, int rgb) {
+		this(code, isFormat, null, rgb);
 	}
 
 	ChatColor(char code, boolean isFormat, String jsonName) {
+		this(code, isFormat, jsonName, -1);
+	}
+
+	ChatColor(char code, boolean isFormat, String jsonName, int rgb) {
 		this.code = code;
 		this.isFormat = isFormat;
 		this.jsonName = jsonName;
 		this.toString = new String(new char[] { COLOR_CHAR, code });
+		this.color = (rgb > -1 ? Color.fromRGB(rgb) : null);
+	}
+
+	public int asRGB() {
+		return this.getColor().asRGB();
 	}
 
     /**
@@ -68,6 +87,11 @@ public enum ChatColor {
 
 	public char getCode() {
 		return this.code;
+	}
+
+	public Color getColor() {
+		Preconditions.checkArgument(this.isColor(), "Format has no color!");
+		return this.color;
 	}
 
 	public String getJsonName() {
