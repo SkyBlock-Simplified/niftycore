@@ -19,7 +19,7 @@ import java.security.ProtectionDomain;
 import java.util.Arrays;
 
 /**
- * Allows for access to hidden fields, methods and classes inside classes.
+ * Allows for access to hidden fields, methods and classes.
  */
 @SuppressWarnings({ "AccessOfSystemProperties", "unchecked" })
 public class Reflection {
