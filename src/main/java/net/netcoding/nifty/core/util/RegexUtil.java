@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Used for regular expression replacement on strings.
+ */
 public class RegexUtil {
 
 	private static final transient ConcurrentLinkedMap<String, String> ORDERED_MESSAGES = Concurrent.newLinkedMap(100);
@@ -37,14 +40,36 @@ public class RegexUtil {
 		CODE_COMPARE.addIgnoreCharacter('r');
 	}
 
+	/**
+	 * Replaces the given message using the given pattern.
+	 *
+	 * @param message The message to filter.
+	 * @param pattern The regular expression pattern.
+	 * @return The cached filtered message.
+	 */
 	public static String replace(String message, Pattern pattern) {
 		return replace(message, pattern, "$1");
 	}
 
+	/**
+	 * Replaces the given message using the given pattern.
+	 *
+	 * @param message The message to filter.
+	 * @param pattern The regular expression pattern.
+	 * @param replace The replacement string.
+	 * @return The cached filtered message.
+	 */
 	public static String replace(String message, Pattern pattern, String replace) {
 		return pattern.matcher(message).replaceAll(replace);
 	}
 
+	/**
+	 * Replaces the colors in the given message using the given pattern.
+	 *
+	 * @param message The message to filter.
+	 * @param pattern The regular expression pattern.
+	 * @return The cached filtered message.
+	 */
 	public static String replaceColor(String message, Pattern pattern) {
 		if (!ORDERED_MESSAGES.containsKey(message)) {
 			Pattern patternx = Pattern.compile(StringUtil.format("(((?:[&{0}]{1}){2})+)([^&{0}]*)", SECTOR_SYMBOL, "{1,2}", ALL_PATTERN));
@@ -71,6 +96,13 @@ public class RegexUtil {
 		return replace(replace(ORDERED_MESSAGES.get(message), pattern, RegexUtil.SECTOR_SYMBOL + "$1"), REPLACE_PATTERN, "&");
 	}
 
+	/**
+	 * Strips the given message using the given pattern.
+	 *
+	 * @param message The message to filter.
+	 * @param pattern The regular expression pattern.
+	 * @return The cached filtered message.
+	 */
 	public static String strip(String message, Pattern pattern) {
 		return replace(message, pattern, "");
 	}

@@ -31,18 +31,48 @@ public class ListUtil {
 		return collection == null || collection.isEmpty();
 	}
 
+	/**
+	 * Ensures the given array is not null and does not contain a null element.
+	 *
+	 * @param array The array to check.
+	 * @param <T> The type of elements.
+	 * @throws IllegalArgumentException If the given array is null or contains a null element.
+	 */
 	public static <T> void noNullElements(T[] array) throws IllegalArgumentException {
 		noNullElements(array, "The validated array is NULL!", "The validated array contains NULL element at index {0}!");
 	}
 
+	/**
+	 * Ensures the given collection is not null and does not contain a null element.
+	 *
+	 * @param collection The collection to check.
+	 * @param <T> The type of elements.
+	 * @throws IllegalArgumentException If the given collection is null or contains a null element.
+	 */
 	public static <T> void noNullElements(Collection<? extends T> collection) throws IllegalArgumentException {
 		noNullElements(collection, "The validated collection is NULL!", "The validated collection contains NULL element at index {0}!");
 	}
 
+	/**
+	 * Ensures the given array is not null and does not contain a null element.
+	 *
+	 * @param array The array to check.
+	 * @param <T> The type of elements.
+	 * @param message The custom message to display if an IllegalArgumentException is thrown.
+	 * @throws IllegalArgumentException If the given array is null or contains a null element.
+	 */
 	public static <T> void noNullElements(T[] array, String message) throws IllegalArgumentException {
 		noNullElements(array, message, message);
 	}
 
+	/**
+	 * Ensures the given collection is not null and does not contain a null element.
+	 *
+	 * @param collection The collection to check.
+	 * @param <T> The type of elements.
+	 * @param message The custom message to display if an IllegalArgumentException is thrown.
+	 * @throws IllegalArgumentException If the given collection is null or contains a null element.
+	 */
 	public static <T> void noNullElements(Collection<? extends T> collection, String message) throws IllegalArgumentException {
 		noNullElements(collection, message, message);
 	}
@@ -114,27 +144,11 @@ public class ListUtil {
 	}
 
 	/**
-	 * Gets a list converter to array.
+	 * Converts the given iterable into an array of the given type.
 	 *
-	 * @param collection to convert to array
-	 * @param type of {@code list} elements
-	 * @return converted array of passed collection
-	 */
-	/*@SuppressWarnings("unchecked")
-	public static <T> T[] toArray(Collection<? extends T> collection, Class<? extends T> type) {
-		try {
-			return collection.toArray((T[])Array.newInstance(type, collection.size()));
-		} catch (NullPointerException npe) {
-			return (T[])Array.newInstance(type, 0);
-		}
-	}*/
-
-	/**
-	 * Gets a list converter to array.
-	 *
-	 * @param iterable to convert to array
-	 * @param type of {@code list} elements
-	 * @return converted array of passed collection
+	 * @param iterable The iterable to convert to array.
+	 * @param type The type of elements the iterable contains.
+	 * @return The converted array of the passed collection.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
