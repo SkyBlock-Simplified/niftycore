@@ -31,7 +31,7 @@ public class BuilderManager<P> {
 		Preconditions.checkArgument(service != null, "Service cannot be NULL!");
 
 		for (BuilderProvider provider : BUILDERS) {
-			if (provider.getBuilder().getName().equals(service.getName()))
+			if (provider.getService().getName().equals(service.getName()))
 				return true;
 		}
 
@@ -51,14 +51,14 @@ public class BuilderManager<P> {
 	public final <T, B extends BuilderCore<T>> BuilderProvider<P, T, B> getBuilderProvider(Class<T> service) throws UnknownBuilderException {
 		if (this.isRegistered(service)) {
 			for (BuilderProvider provider : BUILDERS) {
-				if (provider.getBuilder().getName().equals(service.getName()))
+				if (provider.getService().getName().equals(service.getName()))
 					return provider;
 			}
 		}
 
 		for (BuilderProvider provider : BUILDERS) {
 			if (provider.getService().isAssignableFrom(service)) {
-				NiftyCore.getNiftyLogger().warning(StringUtil.format("Service ''{0}'' is superclass of ''{1}''!", service.getName(), provider.getBuilder().getName()));
+				NiftyCore.getNiftyLogger().warning(StringUtil.format("Service ''{0}'' is superclass of ''{1}''!", service.getName(), provider.getService().getName()));
 				return provider;
 			}
 		}
@@ -77,17 +77,7 @@ public class BuilderManager<P> {
 	 * @see #isRegistered(Class)
 	 */
 	public final <T, B extends BuilderCore<T>> B createBuilder(Class<T> service) throws UnknownBuilderException {
-		if (this.isRegistered(service))
-			return (B)this.getBuilderProvider(service).createBuilder();
-
-		for (BuilderProvider provider : BUILDERS) {
-			if (provider.getService().isAssignableFrom(service)) {
-				NiftyCore.getNiftyLogger().warning(StringUtil.format("Service ''{0}'' is superclass of ''{1}''!", service.getName(), provider.getBuilder().getName()));
-				return (B)provider.createBuilder();
-			}
-		}
-
-		throw new UnknownBuilderException(service);
+		return (B)this.getBuilderProvider(service).createBuilder();
 	}
 
 	/**
