@@ -11,7 +11,7 @@ public class VersionUtil implements Comparable<VersionUtil> {
 	}
 
 	@Override
-	public int compareTo(VersionUtil that) {
+	public final int compareTo(VersionUtil that) {
 		if (that == null) return 1;
 		String[] thisParts = this.getVersion().split("\\.");
 		String[] thatParts = that.getVersion().split("\\.");
@@ -28,15 +28,8 @@ public class VersionUtil implements Comparable<VersionUtil> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this)
-			return true;
-		else if (obj == null || !VersionUtil.class.isAssignableFrom(obj.getClass()))
-			return false;
-		else {
-			VersionUtil other = (VersionUtil)obj;
-			return this.compareTo(other) == 0;
-		}
+	public final boolean equals(Object obj) {
+		return obj == this || obj instanceof VersionUtil && this.compareTo((VersionUtil) obj) == 0;
 	}
 
 	public final String getVersion() {
@@ -44,12 +37,12 @@ public class VersionUtil implements Comparable<VersionUtil> {
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return super.hashCode();
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		return this.getVersion();
 	}
 
