@@ -91,20 +91,20 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	 * @param player Player to search with.
 	 * @param callback Callback to handle the result or error with.
 	 */
-	public final void searchByPlayer(P player, Callback<T> callback) {
+	public final void searchByPlayer(P player, Callback<T, ProfileNotFoundException> callback) {
 		Preconditions.checkArgument(callback != null, "Callback cannot be NULL!");
 
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			T profile = null;
-			Throwable throwable = null;
+			ProfileNotFoundException error = null;
 
 			try {
 				profile = this.searchByPlayer(player);
 			} catch (ProfileNotFoundException pnfex) {
-				throwable = pnfex;
+				error = pnfex;
 			}
 
-			callback.handle(profile, throwable);
+			callback.handle(profile, error);
 		});
 	}
 
@@ -123,20 +123,20 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	 * @param players Players to search with.
 	 * @param callback Callback to handle the result or error with.
 	 */
-	public final void searchByPlayer(P[] players, Callback<T[]> callback) {
+	public final void searchByPlayer(P[] players, Callback<T[], ProfileNotFoundException> callback) {
 		Preconditions.checkArgument(callback != null, "Callback cannot be NULL!");
 
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			T[] profiles = null;
-			Throwable throwable = null;
+			ProfileNotFoundException error = null;
 
 			try {
 				profiles = this.searchByPlayer(players);
 			} catch (ProfileNotFoundException pnfex) {
-				throwable = pnfex;
+				error = pnfex;
 			}
 
-			callback.handle(profiles, throwable);
+			callback.handle(profiles, error);
 		});
 	}
 
@@ -155,20 +155,20 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	 * @param players Players to search with.
 	 * @param callback Callback to handle the result or error with.
 	 */
-	public final void searchByPlayer(Collection<? extends P> players, Callback<T[]> callback) {
+	public final void searchByPlayer(Collection<? extends P> players, Callback<T[], ProfileNotFoundException> callback) {
 		Preconditions.checkArgument(callback != null, "Callback cannot be NULL!");
 
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			T[] profiles = null;
-			Throwable throwable = null;
+			ProfileNotFoundException error = null;
 
 			try {
 				profiles = this.searchByPlayer(players);
 			} catch (ProfileNotFoundException pnfex) {
-				throwable = pnfex;
+				error = pnfex;
 			}
 
-			callback.handle(profiles, throwable);
+			callback.handle(profiles, error);
 		});
 	}
 
@@ -193,20 +193,20 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	 * @param username Username to search with.
 	 * @param callback Callback to handle the result or error with.
 	 */
-	public final void searchByUsername(String username, Callback<T> callback) {
+	public final void searchByUsername(String username, Callback<T, ProfileNotFoundException> callback) {
 		Preconditions.checkArgument(callback != null, "Callback cannot be NULL!");
 
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			T profile = null;
-			Throwable throwable = null;
+			ProfileNotFoundException error = null;
 
 			try {
 				profile = this.searchByUsername(username);
 			} catch (ProfileNotFoundException pnfex) {
-				throwable = pnfex;
+				error = pnfex;
 			}
 
-			callback.handle(profile, throwable);
+			callback.handle(profile, error);
 		});
 	}
 
@@ -227,20 +227,20 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	 * @param usernames Usernames to search with.
 	 * @param callback Callback to handle the result or error with.
 	 */
-	public final void searchByUsername(String[] usernames, Callback<T[]> callback) {
+	public final void searchByUsername(String[] usernames, Callback<T[], ProfileNotFoundException> callback) {
 		Preconditions.checkArgument(callback != null, "Callback cannot be NULL!");
 
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			T[] profiles = null;
-			Throwable throwable = null;
+			ProfileNotFoundException error = null;
 
 			try {
 				profiles = this.searchByUsername(usernames);
 			} catch (ProfileNotFoundException pnfex) {
-				throwable = pnfex;
+				error = pnfex;
 			}
 
-			callback.handle(profiles, throwable);
+			callback.handle(profiles, error);
 		});
 	}
 
@@ -407,20 +407,20 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	 * @param usernames Usernames to search with.
 	 * @param callback Callback to handle the result or error with.
 	 */
-	public final void searchByUsername(Collection<String> usernames, Callback<T[]> callback) {
+	public final void searchByUsername(Collection<String> usernames, Callback<T[], ProfileNotFoundException> callback) {
 		Preconditions.checkArgument(callback != null, "Callback cannot be NULL!");
 
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			T[] profiles = null;
-			Throwable throwable = null;
+			ProfileNotFoundException error = null;
 
 			try {
 				profiles = this.searchByUsername(usernames);
 			} catch (ProfileNotFoundException pnfex) {
-				throwable = pnfex;
+				error = pnfex;
 			}
 
-			callback.handle(profiles, throwable);
+			callback.handle(profiles, error);
 		});
 	}
 
@@ -504,20 +504,20 @@ public abstract class MojangRepository<T extends MojangProfile, P> {
 	 * @param uniqueId Unique ID to search with.
 	 * @param callback The callback to handle the result or error with.
 	 */
-	public final void searchByUniqueId(UUID uniqueId, Callback<T> callback) {
+	public final void searchByUniqueId(UUID uniqueId, Callback<T, ProfileNotFoundException> callback) {
 		Preconditions.checkArgument(callback != null, "Callback cannot be NULL!");
 
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			T profile = null;
-			Throwable throwable = null;
+			ProfileNotFoundException error = null;
 
 			try {
 				profile = this.searchByUniqueId(uniqueId);
 			} catch (ProfileNotFoundException pnfex) {
-				throwable = pnfex;
+				error = pnfex;
 			}
 
-			callback.handle(profile, throwable);
+			callback.handle(profile, error);
 		});
 	}
 

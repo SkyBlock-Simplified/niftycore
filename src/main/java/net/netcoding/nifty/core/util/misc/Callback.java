@@ -1,7 +1,7 @@
 package net.netcoding.nifty.core.util.misc;
 
-public interface Callback<T> {
+public interface Callback<R, T extends Throwable> {
 
-	void handle(T result, Throwable error);
+	void handle(R result, T error);
 
 }
