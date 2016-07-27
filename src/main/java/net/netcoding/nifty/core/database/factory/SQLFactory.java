@@ -68,7 +68,7 @@ public abstract class SQLFactory {
 		this.url = url;
 		this.properties = properties;
 		this.fileStorage = false;
-		this.load();
+		this.load(null);
 	}
 
 	/**
@@ -336,10 +336,6 @@ public abstract class SQLFactory {
 		return this.driverAvailable;
 	}
 
-	private void load() throws SQLException {
-		this.load(null);
-	}
-
 	private void load(String schema) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			this.product = connection.getMetaData().getDatabaseProductName();
@@ -414,7 +410,7 @@ public abstract class SQLFactory {
 	public void queryAsync(final String sql, final VoidResultCallback callback, final Object... args) {
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			try {
-				query(sql, callback, args);
+				this.query(sql, callback, args);
 			} catch (SQLException ignore) { }
 		});
 	}
@@ -466,7 +462,7 @@ public abstract class SQLFactory {
 	 */
 	public void updateAsync(final String sql, final Object... args) {
 		MinecraftScheduler.getInstance().runAsync(() -> {
-			try (Connection connection = getConnection()) {
+			try (Connection connection = this.getConnection()) {
 				try (PreparedStatement statement = connection.prepareStatement(sql)) {
 					assignArgs(statement, args);
 					statement.executeUpdate();
