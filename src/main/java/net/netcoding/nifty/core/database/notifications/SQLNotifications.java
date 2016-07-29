@@ -100,7 +100,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	}
 
 	private void createPurgeEvent() {
-		this.updateAsync(StringUtil.format("CREATE EVENT IF NOT EXISTS purgeNiftyNotifications ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL 1 DAY DO DELETE LOW_PRIORITY FROM {0}.{1} WHERE time < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY));", this.getSchema(), ACTIVITY_TABLE));
+		this.updateAsync(StringUtil.format("CREATE EVENT IF NOT EXISTS purgeNiftyNotifications ON SCHEDULE EVERY 24 DAY_HOUR DO DELETE LOW_PRIORITY FROM {0}.{1} WHERE time < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY));", this.getSchema(), ACTIVITY_TABLE));
 	}
 
 	public boolean isRunning() {
