@@ -9,9 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Dependency {
 
-	String id();
-
-	String version() default "";
+	String name();
 
 	boolean optional() default false;
 
