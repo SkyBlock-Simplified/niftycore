@@ -158,11 +158,11 @@ public abstract class MojangProfile<T extends MojangProfile<T>> implements Onlin
 	 * @param callback A call back used for when the request is finished.
 	 */
 	@SuppressWarnings("unchecked")
-	public final void loadProperties(Callback<T> callback) {
+	public final void loadProperties(Callback<T, ProfileNotFoundException> callback) {
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			final ProfileNotFoundException.LookupType type = ProfileNotFoundException.LookupType.UNIQUE_ID;
 			HttpStatus status = HttpStatus.OK;
-			Throwable throwable = null;
+			ProfileNotFoundException pnfex = null;
 
 			try {
 				if (MojangRepository.API_AVAILABLE) {
@@ -192,11 +192,11 @@ public abstract class MojangProfile<T extends MojangProfile<T>> implements Onlin
 					}
 				}
 			} catch (Exception ex) {
-				throwable = new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, this.getUniqueId());
+				pnfex = new ProfileNotFoundException(ProfileNotFoundException.Reason.EXCEPTION, type, ex, this.getUniqueId());
 			}
 
 			if (callback != null)
-				callback.handle((T)this, throwable);
+				callback.handle((T)this, pnfex);
 		});
 	}
 
