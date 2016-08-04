@@ -47,6 +47,9 @@ public class Reflection {
 			this.subPackage = "";
 			this.packagePath = clazz.getName().replaceAll(StringUtil.format("\\.{0}$", this.className), "");
 		}
+
+		if (!CLASS_CACHE.containsKey(this.getClazzPath()))
+			CLASS_CACHE.put(this.getClazzPath(), clazz);
 	}
 
 	/**
@@ -602,7 +605,7 @@ public class Reflection {
 		Class<?>[] newTypes = new Class<?>[ListUtil.notEmpty(types) ? types.length : 0];
 
 		for (int i = 0; i < newTypes.length; i++)
-			newTypes[i] = Primitives.unwrap(types[i]);
+			newTypes[i] = (newTypes[i] != null ? Primitives.unwrap(types[i]) : null);
 
 		return newTypes;
 	}
@@ -614,12 +617,12 @@ public class Reflection {
 	 * @return Converted class types.
 	 */
 	public static Class<?>[] toPrimitiveTypeArray(Object[] objects) {
-		Class<?>[] types = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
+		Class<?>[] newTypes = new Class<?>[ListUtil.notEmpty(objects) ? objects.length : 0];
 
-		for (int i = 0; i < types.length; i++)
-			types[i] = Primitives.unwrap(objects[i] != null ? objects[i].getClass() : null);
+		for (int i = 0; i < newTypes.length; i++)
+			newTypes[i] = (objects[i] != null ? Primitives.unwrap(objects[i].getClass()) : null);
 
-		return types;
+		return newTypes;
 	}
 
 }
