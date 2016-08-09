@@ -1,5 +1,6 @@
 package net.netcoding.nifty.core.database.notifications;
 
+import net.netcoding.nifty.core.NiftyCore;
 import net.netcoding.nifty.core.database.factory.SQLFactory;
 import net.netcoding.nifty.core.database.factory.callbacks.VoidResultCallback;
 import net.netcoding.nifty.core.util.StringUtil;
@@ -8,9 +9,8 @@ import net.netcoding.nifty.core.util.concurrent.ConcurrentList;
 import net.netcoding.nifty.core.util.concurrent.ConcurrentMap;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * An sql listener used to check for updates to its associated table and notify plugins.
@@ -26,7 +26,9 @@ public class DatabaseNotification {
 	private final String table;
 
 	DatabaseNotification(SQLFactory sql, String table, DatabaseListener listener, boolean overwrite) throws SQLException {
-		if (listener == null) throw new IllegalArgumentException("DatabaseListener cannot be null!");
+		if (listener == null)
+			throw new IllegalArgumentException("DatabaseListener cannot be null!");
+
 		this.sql = sql;
 		this.table = table;
 		this.pulse();
@@ -49,8 +51,12 @@ public class DatabaseNotification {
 					quote, this.getSchema(), this.getName(event), event.toUppercase(), this.getTable(), SQLNotifications.ACTIVITY_TABLE);
 			String _old = null;
 			String _new = null;
-			if (TriggerEvent.INSERT != event) _old = StringUtil.format("CONCAT(OLD.{0}{1}{0})", quote, StringUtil.implode(StringUtil.format("{0}, '','', OLD.{0}", quote), this.primaryColumnNames));
-			if (TriggerEvent.DELETE != event) _new = StringUtil.format("CONCAT(NEW.{0}{1}{0})", quote, StringUtil.implode(StringUtil.format("{0}, '','', NEW.{0}", quote), this.primaryColumnNames));
+
+			if (TriggerEvent.INSERT != event)
+				_old = StringUtil.format("CONCAT(OLD.{0}{1}{0})", quote, StringUtil.implode(StringUtil.format("{0}, '','', OLD.{0}", quote), this.primaryColumnNames));
+
+			if (TriggerEvent.DELETE != event)
+				_new = StringUtil.format("CONCAT(NEW.{0}{1}{0})", quote, StringUtil.implode(StringUtil.format("{0}, '','', NEW.{0}", quote), this.primaryColumnNames));
 
 			try {
 				this.sql.update(String.format(trigger + "%s, %s);", _old, _new), this.getSchema(), this.getTable(), event.toUppercase(), primaryKeys);
@@ -81,14 +87,18 @@ public class DatabaseNotification {
 	 * @throws SQLException If you attempt to retrieve deleted data when inserting a record.
 	 */
 	public Map<String, Object> getDeletedData() throws SQLException {
-		if (this.getEvent() == TriggerEvent.INSERT) throw new SQLException("Cannot retrieve an inserted record!");
+		if (this.getEvent() == TriggerEvent.INSERT)
+			throw new SQLException("Cannot retrieve an inserted record!");
+
 		final ConcurrentMap<String, Object> deleted = Concurrent.newMap();
 
 		this.sql.query(StringUtil.format("SELECT old_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), result -> {
 			if (result.next()) {
 				String[] _old = result.getString("old_data").split(",");
 				int keyCount = primaryColumnNames.size();
-				for (int i = 0; i < keyCount; i++) deleted.put(primaryColumnNames.get(i), _old[i]);
+
+				for (int i = 0; i < keyCount; i++)
+					deleted.put(primaryColumnNames.get(i), _old[i]);
 			}
 		}, this.getSchema(), this.getTable(), this.getEvent().toUppercase(), this.previousId);
 
@@ -133,16 +143,19 @@ public class DatabaseNotification {
 	 * @throws SQLException If you attempt to retrieve updated data when deleting a record.
 	 */
 	public void getUpdatedRow(final VoidResultCallback callback) throws SQLException {
-		if (this.getEvent() == TriggerEvent.DELETE) throw new SQLException("Cannot retrieve a deleted record!");
+		if (this.getEvent() == TriggerEvent.DELETE)
+			throw new SQLException("Cannot retrieve a deleted record!");
 
 		this.sql.query(StringUtil.format("SELECT new_data FROM {0} WHERE schema_name = ? AND table_name = ? AND sql_action = ? AND id = ?;", SQLNotifications.ACTIVITY_TABLE), result -> {
 			if (result.next()) {
-				List<String> whereClause = new ArrayList<>();
+				ConcurrentList<String> whereClause = Concurrent.newList();
 				int keyCount = primaryColumnNames.size();
 				String[] _new = result.getString("new_data").split(",");
 
 				if (keyCount > 0) {
-					for (int i = 0; i < keyCount; i++) whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX({0}{1}{0}, '','', {2}), '','', -1) = ?", sql.getIdentifierQuoteString(), primaryColumnNames.get(i), (i + 1)));
+					for (int i = 0; i < keyCount; i++)
+						whereClause.add(StringUtil.format("SUBSTRING_INDEX(SUBSTRING_INDEX({0}{1}{0}, '','', {2}), '','', -1) = ?", sql.getIdentifierQuoteString(), primaryColumnNames.get(i), (i + 1)));
+
 					sql.query(StringUtil.format("SELECT * FROM {0} WHERE {1};", getTable(), StringUtil.implode(" AND ", whereClause)), callback, (Object[])_new);
 				}
 			}
@@ -185,7 +198,7 @@ public class DatabaseNotification {
 				return false;
 			}, this.getTable(), this.previousId, "INSERT", "UPDATE", "DELETE");
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			NiftyCore.getNiftyLogger().log(Level.SEVERE, StringUtil.format("Unable to query activity table ''{0}''!", SQLNotifications.ACTIVITY_TABLE), ex);
 			this.stop();
 		}
 
@@ -196,7 +209,7 @@ public class DatabaseNotification {
 		try {
 			this.listener.onDatabaseNotification(this);
 		} catch (SQLException ex) {
-			ex.printStackTrace();
+			NiftyCore.getNiftyLogger().log(Level.SEVERE, "Database notification was mishandled!", ex);
 		}
 	}
 
@@ -223,14 +236,13 @@ public class DatabaseNotification {
 
 	private boolean triggersExist() {
 		try {
-			// SELECT * FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA LIKE '%nifty' AND TRIGGER_NAME LIKE '%onnifty';
 			return this.sql.query("SELECT TRIGGER_NAME FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA = ? AND TRIGGER_NAME IN (?, ?, ?);", result -> {
 				int count = 0;
 				while (result.next()) count++;
 				return count == 3;
 			}, this.getSchema(), this.getName(TriggerEvent.INSERT), this.getName(TriggerEvent.UPDATE), this.getName(TriggerEvent.DELETE));
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			NiftyCore.getNiftyLogger().log(Level.SEVERE, "Unable to check if trigger exists!", ex);
 		}
 
 		return false;
