@@ -18,11 +18,11 @@ public abstract class AtomicList<E, T extends AbstractList<E>> extends AbstractL
 	}
 
 	@Override
-	public final void add(int index, E item) {
+	public final void add(int index, E element) {
 		while (true) {
 			T current = this.ref.get();
 			T modified = this.newList(current);
-			modified.add(index, item);
+			modified.add(index, element);
 
 			if (this.ref.compareAndSet(current, modified))
 				return;
@@ -30,11 +30,11 @@ public abstract class AtomicList<E, T extends AbstractList<E>> extends AbstractL
 	}
 
 	@Override
-	public final boolean add(E item) {
+	public final boolean add(E element) {
 		while (true) {
 			T current = this.ref.get();
 			T modified = this.newList(current);
-			boolean result = modified.add(item);
+			boolean result = modified.add(element);
 
 			if (this.ref.compareAndSet(current, modified))
 				return result;
@@ -144,15 +144,15 @@ public abstract class AtomicList<E, T extends AbstractList<E>> extends AbstractL
 
 	@SuppressWarnings("SuspiciousMethodCalls")
 	@Override
-	public final boolean remove(Object item) {
+	public final boolean remove(Object element) {
 		while (true) {
 			T current = this.ref.get();
 
-			if (!current.contains(item))
+			if (!current.contains(element))
 				return false;
 
 			T modified = this.newList(current);
-			boolean result = modified.remove(item);
+			boolean result = modified.remove(element);
 
 			if (this.ref.compareAndSet(current, modified))
 				return result;
@@ -184,11 +184,11 @@ public abstract class AtomicList<E, T extends AbstractList<E>> extends AbstractL
 	}
 
 	@Override
-	public final E set(int index, E item) {
+	public final E set(int index, E element) {
 		while (true) {
 			T current = this.ref.get();
 			T modified = this.newList(current);
-			E old = modified.set(index, item);
+			E old = modified.set(index, element);
 
 			if (this.ref.compareAndSet(current, modified))
 				return old;

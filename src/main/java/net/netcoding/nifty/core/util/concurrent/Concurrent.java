@@ -28,6 +28,19 @@ public final class Concurrent {
 		return (key, value) -> { throw new IllegalStateException(StringUtil.format("Duplicate key {0}", key)); };
 	}
 
+	public static <E> ConcurrentDeque<E> newDeque() {
+		return new ConcurrentDeque<>();
+	}
+
+	@SafeVarargs
+	public static <E> ConcurrentDeque<E> newDeque(E... array) {
+		return new ConcurrentDeque<>(array);
+	}
+
+	public static <E> ConcurrentDeque<E> newDeque(Collection<? extends E> collection) {
+		return new ConcurrentDeque<>(collection);
+	}
+
 	public static <E> ConcurrentList<E> newList() {
 		return new ConcurrentList<>();
 	}
@@ -47,6 +60,19 @@ public final class Concurrent {
 
 	public static <K, V> ConcurrentMap<K, V> newMap(Map<? extends K, ? extends V> map) {
 		return new ConcurrentMap<>(map);
+	}
+
+	public static <E> ConcurrentQueue<E> newQueue() {
+		return new ConcurrentQueue<>();
+	}
+
+	@SafeVarargs
+	public static <E> ConcurrentQueue<E> newQueue(E... array) {
+		return new ConcurrentQueue<>(array);
+	}
+
+	public static <E> ConcurrentQueue<E> newQueue(Collection<? extends E> collection) {
+		return new ConcurrentQueue<>(collection);
 	}
 
 	public static <E> ConcurrentSet<E> newSet() {

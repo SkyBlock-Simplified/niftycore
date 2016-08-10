@@ -17,15 +17,15 @@ public abstract class AtomicSet<E, T extends AbstractSet<E>> extends AbstractSet
 	}
 
 	@Override
-	public final boolean add(E item) {
+	public final boolean add(E element) {
 		while (true) {
 			T current = this.ref.get();
 
-			if (current.contains(item))
+			if (current.contains(element))
 				return false;
 
 			T modified = this.newSet(current);
-			boolean result = modified.add(item);
+			boolean result = modified.add(element);
 
 			if (this.ref.compareAndSet(current, modified))
 				return result;
@@ -50,8 +50,8 @@ public abstract class AtomicSet<E, T extends AbstractSet<E>> extends AbstractSet
 	}
 
 	@Override
-	public final boolean contains(Object item) {
-		return ref.get().contains(item);
+	public final boolean contains(Object element) {
+		return ref.get().contains(element);
 	}
 
 	@Override
@@ -109,11 +109,11 @@ public abstract class AtomicSet<E, T extends AbstractSet<E>> extends AbstractSet
 	}
 
 	@Override
-	public final boolean retainAll(Collection<?> c) {
+	public final boolean retainAll(Collection<?> collection) {
 		while (true) {
 			T current = this.ref.get();
 			T modified = this.newSet(current);
-			boolean result = modified.retainAll(c);
+			boolean result = modified.retainAll(collection);
 
 			if (this.ref.compareAndSet(current, modified))
 				return result;
