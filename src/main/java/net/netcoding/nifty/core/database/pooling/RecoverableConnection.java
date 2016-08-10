@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
  *
  * @see Connection
  */
-public class RecoverableConnection implements Connection {
+public final class RecoverableConnection implements Connection {
 
 	private final transient Connection connection;
 	private final transient SQLPooling pool;

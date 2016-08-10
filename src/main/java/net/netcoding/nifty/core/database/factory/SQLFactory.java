@@ -25,7 +25,6 @@ import java.util.UUID;
 /**
  * Factory sql classes to be inherited from when creating a wrapper.
  */
-@SuppressWarnings("JDBCExecuteWithNonConstantString")
 public abstract class SQLFactory {
 
 	private final String driver;
@@ -113,7 +112,7 @@ public abstract class SQLFactory {
 		this.load(schemaName);
 	}
 
-	private static void assignArgs(PreparedStatement statement, Object... args) throws SQLException {
+	protected static void assignArgs(PreparedStatement statement, Object... args) throws SQLException {
 		for (int i = 0; i < args.length; i++) {
 			int index = i + 1;
 			Object arg = args[i];
@@ -154,11 +153,11 @@ public abstract class SQLFactory {
 	/**
 	 * Gets if the given column name exists in the given table for the current DBMS.
 	 *
-	 * @param tableName  Table name to use.
+	 * @param tableName Table name to use.
 	 * @param columnName Column name to check existence of.
-	 * @return True if column exists, otherwise false.
+	 * @return True if column exists.
 	 */
-	public boolean checkColumnExists(String tableName, String columnName) throws SQLException {
+	public final boolean checkColumnExists(String tableName, String columnName) throws SQLException {
 		boolean exists;
 
 		try (Connection connection = this.getConnection()) {
@@ -174,9 +173,9 @@ public abstract class SQLFactory {
 	 * Gets if the given table name exists for the current DBMS.
 	 *
 	 * @param tableName Table name to check existence of.
-	 * @return True if table exists, otherwise false.
+	 * @return True if table exists.
 	 */
-	public boolean checkTableExists(String tableName) throws SQLException {
+	public final boolean checkTableExists(String tableName) throws SQLException {
 		boolean exists;
 
 		try (Connection connection = this.getConnection()) {
@@ -192,10 +191,11 @@ public abstract class SQLFactory {
 	 * Create a table if it does not exist.
 	 *
 	 * @param tableName Name of the table.
-	 * @param sql       Fields and constrains of the table
-	 * @return True if the table was created, otherwise false.
+	 * @param sql Fields and constrains of the table
+	 * @return True if the table was created.
 	 */
-	public boolean createTable(String tableName, String sql) throws SQLException {
+	@SuppressWarnings("JDBCExecuteWithNonConstantString")
+	public final boolean createTable(String tableName, String sql) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (Statement statement = connection.createStatement()) {
 				return statement.executeUpdate(StringUtil.format("CREATE TABLE IF NOT EXISTS {0}{1}{2}{1} ({3}){4};", (this.fileStorage ? "" : StringUtil.format("{0}{1}{0}.", this.getIdentifierQuoteString(), this.getSchema())), this.getIdentifierQuoteString(), tableName, sql, ("MySQL".equalsIgnoreCase(this.getProduct()) ? " ENGINE=InnoDB" : ""))) > 0;
@@ -207,9 +207,9 @@ public abstract class SQLFactory {
 	 * Create a table if it does not exist asynchronously.
 	 *
 	 * @param tableName Name of the table.
-	 * @param sql       Table fields and constraints.
+	 * @param sql Table fields and constraints.
 	 */
-	public void createTableAsync(final String tableName, final String sql) {
+	public final void createTableAsync(final String tableName, final String sql) {
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			try {
 				createTable(tableName, sql);
@@ -222,7 +222,7 @@ public abstract class SQLFactory {
 	 *
 	 * @param tableName Name of the table.
 	 */
-	public void dropTable(String tableName) throws SQLException {
+	public final void dropTable(String tableName) throws SQLException {
 		this.update("DROP TABLE IF EXISTS ?;", tableName);
 	}
 
@@ -267,7 +267,7 @@ public abstract class SQLFactory {
 	/**
 	 * Gets the string used to quote identifiers.
 	 *
-	 * @return Identifier quote, a space " " if unsupported.
+	 * @return Identifier quote, or space " " if unsupported.
 	 */
 	public final String getIdentifierQuoteString() {
 		return this.quote;
@@ -287,7 +287,7 @@ public abstract class SQLFactory {
 	 *
 	 * @return Connection property details.
 	 */
-	protected Properties getProperties() {
+	protected final Properties getProperties() {
 		return this.properties;
 	}
 
@@ -319,9 +319,9 @@ public abstract class SQLFactory {
 	}
 
 	/**
-	 * Gets the url for this DBMS.
+	 * Gets the url for the current DBMS.
 	 *
-	 * @return Url for this DBMS.
+	 * @return Url for the current DBMS.
 	 */
 	public final String getUrl() {
 		return StringUtil.format("{0}{1}", this.url, (this.fileStorage ? "" : "?autoReconnectForPools=true&useUnicode=true&characterEncoding=UTF-8"));
@@ -330,7 +330,7 @@ public abstract class SQLFactory {
 	/**
 	 * Gets if the given jdbc driver is available.
 	 *
-	 * @return True if driver available, otherwise false.
+	 * @return True if driver available.
 	 */
 	public boolean isDriverAvailable() {
 		return this.driverAvailable;
@@ -356,12 +356,12 @@ public abstract class SQLFactory {
 	/**
 	 * Run SELECT query against the DBMS.
 	 *
-	 * @param sql      Query to run.
+	 * @param sql Query to run.
 	 * @param callback Callback to process results with.
-	 * @param args     Arguments to pass to the query.
+	 * @param args Arguments to pass to the query.
 	 * @return Whatever you decide to return in the callback.
 	 */
-	public <T> T query(String sql, ResultCallback<T> callback, Object... args) throws SQLException {
+	public final <T> T query(String sql, ResultCallback<T> callback, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			return this.query(connection, sql, callback, args);
 		}
@@ -370,11 +370,11 @@ public abstract class SQLFactory {
 	/**
 	 * Run SELECT query against the DBMS.
 	 *
-	 * @param sql      Query to run.
+	 * @param sql Query to run.
 	 * @param callback Callback t process results with.
-	 * @param args     Arguments to pass to the query.
+	 * @param args Arguments to pass to the query.
 	 */
-	public void query(String sql, VoidResultCallback callback, Object... args) throws SQLException {
+	public final void query(String sql, VoidResultCallback callback, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (PreparedStatement statement = connection.prepareStatement(sql)) {
 				assignArgs(statement, args);
@@ -403,11 +403,11 @@ public abstract class SQLFactory {
 	/**
 	 * Run SELECT query against the DBMS asynchronously.
 	 *
-	 * @param sql      Query to run.
+	 * @param sql Query to run.
 	 * @param callback Callback to process results with.
-	 * @param args     Arguments to pass to the query.
+	 * @param args Arguments to pass to the query.
 	 */
-	public void queryAsync(final String sql, final VoidResultCallback callback, final Object... args) {
+	public final void queryAsync(final String sql, final VoidResultCallback callback, final Object... args) {
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			try {
 				this.query(sql, callback, args);
@@ -421,7 +421,7 @@ public abstract class SQLFactory {
 	 * @param schema database name
 	 * @return True if correctly set.
 	 */
-	public boolean setSchema(String schema) throws SQLException {
+	public final boolean setSchema(String schema) throws SQLException {
 		if (this.fileStorage)
 			throw new SQLException("Local databases cannot change schema!");
 
@@ -441,11 +441,11 @@ public abstract class SQLFactory {
 	/**
 	 * Run INSERT, UPDATE or DELETE query against this DBMS.
 	 *
-	 * @param sql  Query to run.
+	 * @param sql Query to run.
 	 * @param args Arguments to pass to the query.
-	 * @return True if query was successful, otherwise false.
+	 * @return True if query was successful.
 	 */
-	public boolean update(String sql, Object... args) throws SQLException {
+	public final boolean update(String sql, Object... args) throws SQLException {
 		try (Connection connection = this.getConnection()) {
 			try (PreparedStatement statement = connection.prepareStatement(sql)) {
 				assignArgs(statement, args);
@@ -457,10 +457,10 @@ public abstract class SQLFactory {
 	/**
 	 * Run INSERT, UPDATE or DELETE query against this DBMS asynchronously.
 	 *
-	 * @param sql  Query to run.
+	 * @param sql Query to run.
 	 * @param args Arguments to pass to the query.
 	 */
-	public void updateAsync(final String sql, final Object... args) {
+	public final void updateAsync(final String sql, final Object... args) {
 		MinecraftScheduler.getInstance().runAsync(() -> {
 			try (Connection connection = this.getConnection()) {
 				try (PreparedStatement statement = connection.prepareStatement(sql)) {

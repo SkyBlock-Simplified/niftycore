@@ -14,7 +14,7 @@ import java.util.Properties;
 /**
  * Adds support for notifications through an sql server instance.
  */
-public abstract class SQLNotifications extends SQLPooling implements Runnable {
+public abstract class SQLNotifications extends SQLPooling {
 
 	static final String ACTIVITY_TABLE = "nifty_notifications";
 	private static final int DEFAULT_DELAY = 10;
@@ -52,7 +52,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param table    Table name to listen to.
 	 * @param notifier Listener to send notifications to.
 	 */
-	public void addListener(String table, DatabaseListener notifier) throws SQLException {
+	public final void addListener(String table, DatabaseListener notifier) throws SQLException {
 		this.addListener(table, notifier, DEFAULT_DELAY, false);
 	}
 
@@ -63,7 +63,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param notifier  Listener to send notifications to.
 	 * @param overwrite True to overwrite the triggers in the database, otherwise false.
 	 */
-	public void addListener(String table, DatabaseListener notifier, boolean overwrite) throws SQLException {
+	public final void addListener(String table, DatabaseListener notifier, boolean overwrite) throws SQLException {
 		this.addListener(table, notifier, DEFAULT_DELAY, overwrite);
 	}
 
@@ -74,7 +74,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param notifier Listener to send notifications to.
 	 * @param delay    How long in ticks to wait before checking.
 	 */
-	public void addListener(String table, DatabaseListener notifier, long delay) throws SQLException {
+	public final void addListener(String table, DatabaseListener notifier, long delay) throws SQLException {
 		this.addListener(table, notifier, delay, false);
 	}
 
@@ -86,13 +86,13 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param delay     How long in ticks to wait before checking.
 	 * @param overwrite True to overwrite the triggers in the database, otherwise false.
 	 */
-	public void addListener(String table, DatabaseListener notifier, long delay, boolean overwrite) throws SQLException {
+	public final void addListener(String table, DatabaseListener notifier, long delay, boolean overwrite) throws SQLException {
 		this.createLogTable();
 		this.createPurgeEvent();
 		this.listeners.add(new DatabaseNotification(this, table, notifier, overwrite));
 
 		if (this.taskId == -1)
-			this.taskId = MinecraftScheduler.getInstance().runAsync(this, 0, delay * (NiftyCore.isBungee() ? 50 : 1)).getId();
+			this.taskId = MinecraftScheduler.getInstance().runAsync(new ActivityScanner(), 0, delay * (NiftyCore.isBungee() ? 50 : 1)).getId();
 	}
 
 	private void createLogTable() throws SQLException {
@@ -103,14 +103,14 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 		this.updateAsync(StringUtil.format("CREATE EVENT IF NOT EXISTS purgeNiftyNotifications ON SCHEDULE EVERY 24 DAY_HOUR DO DELETE LOW_PRIORITY FROM {0}.{1} WHERE time < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 7 DAY));", this.getSchema(), ACTIVITY_TABLE));
 	}
 
-	public boolean isRunning() {
+	public final boolean isRunning() {
 		return this.taskId != -1;
 	}
 
 	/**
 	 * Remove all listeners.
 	 */
-	public void removeListeners() {
+	public final void removeListeners() {
 		this.removeListener(null);
 	}
 
@@ -119,7 +119,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 *
 	 * @param dropTriggers True to drop triggers, otherwise false.
 	 */
-	public void removeListeners(boolean dropTriggers) {
+	public final void removeListeners(boolean dropTriggers) {
 		this.removeListener(null, dropTriggers);
 	}
 
@@ -128,7 +128,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 *
 	 * @param table Table name to remove listeners from.
 	 */
-	public void removeListener(String table) {
+	public final void removeListener(String table) {
 		this.removeListener(table, false);
 	}
 
@@ -138,7 +138,7 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 	 * @param table        Table name to remove listeners from.
 	 * @param dropTriggers True to drop triggers, otherwise false.
 	 */
-	public void removeListener(String table, boolean dropTriggers) {
+	public final void removeListener(String table, boolean dropTriggers) {
 		this.listeners.stream().filter(listener -> StringUtil.isEmpty(table) || listener.getTable().equals(table)).forEach(listener -> listener.stop(dropTriggers));
 
 		if (this.listeners.isEmpty()) {
@@ -149,17 +149,21 @@ public abstract class SQLNotifications extends SQLPooling implements Runnable {
 		}
 	}
 
-	@Override
-	public void run() {
-		for (DatabaseNotification notification : this.listeners) {
-			if (notification.isStopped()) {
-				this.listeners.remove(notification);
-				continue;
-			}
+	private class ActivityScanner implements Runnable {
 
-			if (notification.pulse())
-				notification.sendNotification();
+		@Override
+		public void run() {
+			for (DatabaseNotification notification : SQLNotifications.this.listeners) {
+				if (notification.isStopped()) {
+					SQLNotifications.this.listeners.remove(notification);
+					continue;
+				}
+
+				if (notification.pulse())
+					notification.sendNotification();
+			}
 		}
+
 	}
 
 }

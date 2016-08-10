@@ -1,24 +1,25 @@
 package net.netcoding.nifty.core.database.pooling;
 
 import net.netcoding.nifty.core.NiftyCore;
-import net.netcoding.nifty.core.database.factory.SQLFactory;
 import net.netcoding.nifty.core.api.scheduler.MinecraftScheduler;
+import net.netcoding.nifty.core.database.factory.SQLFactory;
+import net.netcoding.nifty.core.util.concurrent.Concurrent;
+import net.netcoding.nifty.core.util.concurrent.ConcurrentDeque;
 
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-import java.util.Vector;
 
 /**
  * Handles database connections with connection pooling functionality.
  */
-public abstract class SQLPooling extends SQLFactory implements Runnable {
+public abstract class SQLPooling extends SQLFactory {
 
 	private static final int DEFAULT_MIN_CONNECTIONS = 2;
 	private static final int DEFAULT_MAX_CONNECTIONS = 10;
-	private final transient Vector<Connection> availableConnections = new Vector<>();
-	private final transient Vector<Connection> usedConnections = new Vector<>();
+	private final transient ConcurrentDeque<Connection> availableConnections = Concurrent.newDeque();
+	private final transient ConcurrentDeque<Connection> usedConnections = Concurrent.newDeque();
 	private final Object lock = new Object();
 	private String validationQuery = "SELECT 1;";
 	private int minimumConnections = DEFAULT_MIN_CONNECTIONS;
@@ -64,7 +65,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	}
 
 	private void initializeTimer() {
-		MinecraftScheduler.getInstance().runAsync(this, 0, 200 * (NiftyCore.isBungee() ? 50 : 1));
+		MinecraftScheduler.getInstance().runAsync(new ConnectionCleaner(), 0, 200 * (NiftyCore.isBungee() ? 50 : 1));
 	}
 
 	/**
@@ -74,7 +75,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 * @throws SQLException When connection is not available immediately.
 	 */
 	@Override
-	protected Connection getConnection() throws SQLException {
+	protected final Connection getConnection() throws SQLException {
 		return this.getConnection(WaitTime.IMMEDIATELY);
 	}
 
@@ -83,7 +84,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 		this.firstConnect = false;
 
 		for (int i = 0; i < this.getMinimumConnections(); i++)
-			this.availableConnections.addElement(this.getConnection());
+			this.availableConnections.offer(this.getConnection());
 	}
 
 	/**
@@ -102,7 +103,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 			synchronized (this.lock) {
 				if (this.availableConnections.isEmpty()) {
 					if (this.usedConnections.size() < this.getMaximumConnections())
-						this.usedConnections.addElement(connection = new RecoverableConnection(super.getConnection(), this));
+						this.usedConnections.offer(connection = new RecoverableConnection(super.getConnection(), this));
 					else {
 						if (waitTime == WaitTime.IMMEDIATELY)
 							throw new SQLException("Failed to borrow connection from the available pool!");
@@ -114,9 +115,8 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 						connection = this.getConnection();
 					}
 				} else {
-					connection = this.availableConnections.firstElement();
-					this.availableConnections.removeElement(connection);
-					this.usedConnections.addElement(connection);
+					connection = this.availableConnections.remove();
+					this.usedConnections.offer(connection);
 				}
 			}
 
@@ -143,7 +143,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 *
 	 * @return Minimum number of connections to be stored in the pool.
 	 */
-	public int getMinimumConnections() {
+	public final int getMinimumConnections() {
 		return this.minimumConnections;
 	}
 
@@ -152,7 +152,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 *
 	 * @return Maximum number of connections to be stored in the pool.
 	 */
-	public int getMaximumConnections() {
+	public final int getMaximumConnections() {
 		return this.maximumConnections;
 	}
 
@@ -162,7 +162,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 *
 	 * @return Query to run the test with.
 	 */
-	protected String getValidationQuery() {
+	protected final String getValidationQuery() {
 		return this.validationQuery;
 	}
 
@@ -172,13 +172,13 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 *
 	 * @return True if tested, otherwise false.
 	 */
-	protected boolean isTestingOnBorrow() {
+	protected final boolean isTestingOnBorrow() {
 		return this.testOnBorrow;
 	}
 
 	void recycle(Connection connection) {
-		this.usedConnections.removeElement(connection);
-		this.availableConnections.addElement(connection);
+		this.usedConnections.remove(connection);
+		this.availableConnections.offer(connection);
 	}
 
 	/**
@@ -186,7 +186,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 *
 	 * @param count Minimum number of connections to have available.
 	 */
-	public void setMinimumConnections(int count) {
+	public final void setMinimumConnections(int count) {
 		count = count < 0 ? DEFAULT_MIN_CONNECTIONS : count;
 		count = count > this.getMaximumConnections() ? this.getMaximumConnections() : count;
 		this.minimumConnections = count;
@@ -197,7 +197,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 *
 	 * @param count Maximum number of connections to have available.
 	 */
-	public void setMaximumConnections(int count) {
+	public final void setMaximumConnections(int count) {
 		count = count <= this.getMinimumConnections() ? this.getMinimumConnections() + 1 : count;
 		this.maximumConnections = count;
 	}
@@ -208,7 +208,7 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 *
 	 * @param value True to test, otherwise false.
 	 */
-	protected void setTestOnBorrow(boolean value) {
+	protected final void setTestOnBorrow(boolean value) {
 		this.testOnBorrow = value;
 	}
 
@@ -218,21 +218,24 @@ public abstract class SQLPooling extends SQLFactory implements Runnable {
 	 *
 	 * @param query Query to run the test with.
 	 */
-	protected void setValidationQuery(String query) {
+	protected final void setValidationQuery(String query) {
 		this.validationQuery = query;
 	}
 
-	@Override
-	public void run() {
-		while (this.availableConnections.size() > this.getMinimumConnections()) {
-			Connection connection = this.availableConnections.lastElement();
-			this.availableConnections.removeElement(connection);
+	private class ConnectionCleaner implements Runnable {
 
-			try {
-				if (!connection.isClosed())
-					((RecoverableConnection)connection).closeOnly();
-			} catch (SQLException ignore) { }
+		@Override
+		public void run() {
+			while (SQLPooling.this.availableConnections.size() > SQLPooling.this.getMinimumConnections()) {
+				Connection connection = SQLPooling.this.availableConnections.removeLast();
+
+				try {
+					if (!connection.isClosed())
+						((RecoverableConnection)connection).closeOnly();
+				} catch (SQLException ignore) { }
+			}
 		}
+
 	}
 
 }

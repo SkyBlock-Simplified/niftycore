@@ -86,7 +86,7 @@ public class DatabaseNotification {
 	 * @return Map of primary keys and associated deleted data.
 	 * @throws SQLException If you attempt to retrieve deleted data when inserting a record.
 	 */
-	public Map<String, Object> getDeletedData() throws SQLException {
+	public final Map<String, Object> getDeletedData() throws SQLException {
 		if (this.getEvent() == TriggerEvent.INSERT)
 			throw new SQLException("Cannot retrieve an inserted record!");
 
@@ -110,7 +110,7 @@ public class DatabaseNotification {
 	 *
 	 * @return Event type of the current notification.
 	 */
-	public TriggerEvent getEvent() {
+	public final TriggerEvent getEvent() {
 		return this.event;
 	}
 
@@ -123,7 +123,7 @@ public class DatabaseNotification {
 	 *
 	 * @return Database name of the current notification.
 	 */
-	public String getSchema() {
+	public final String getSchema() {
 		return this.sql.getSchema();
 	}
 
@@ -132,7 +132,7 @@ public class DatabaseNotification {
 	 *
 	 * @return Table name of the current notification.
 	 */
-	public String getTable() {
+	public final String getTable() {
 		return this.table;
 	}
 
@@ -142,7 +142,7 @@ public class DatabaseNotification {
 	 * @param callback Callback class to handle retrieved data.
 	 * @throws SQLException If you attempt to retrieve updated data when deleting a record.
 	 */
-	public void getUpdatedRow(final VoidResultCallback callback) throws SQLException {
+	public final void getUpdatedRow(final VoidResultCallback callback) throws SQLException {
 		if (this.getEvent() == TriggerEvent.DELETE)
 			throw new SQLException("Cannot retrieve a deleted record!");
 
@@ -167,7 +167,7 @@ public class DatabaseNotification {
 	 *
 	 * @return True if has stopped, otherwise false.
 	 */
-	public synchronized boolean isStopped() {
+	public final boolean isStopped() {
 		return this.stopped;
 	}
 
@@ -216,7 +216,7 @@ public class DatabaseNotification {
 	/**
 	 * Stops this class from listening for further notifications.
 	 */
-	public synchronized void stop() {
+	public final void stop() {
 		this.stop(false);
 	}
 
@@ -225,7 +225,7 @@ public class DatabaseNotification {
 	 *
 	 * @param dropTriggers True to delete the triggers, otherwise false.
 	 */
-	public synchronized void stop(boolean dropTriggers) {
+	public final void stop(boolean dropTriggers) {
 		this.stopped = true;
 
 		if (dropTriggers) {
