@@ -236,10 +236,19 @@ public class DatabaseNotification {
 
 	private boolean triggersExist() {
 		try {
-			return this.sql.query("SELECT TRIGGER_NAME FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA = ? AND TRIGGER_NAME IN (?, ?, ?);", result -> {
-				int count = 0;
-				while (result.next()) count++;
-				return count == 3;
+			return this.sql.query("SELECT TRIGGER_NAME, ACTION_STATEMENT FROM INFORMATION_SCHEMA.TRIGGERS WHERE TRIGGER_SCHEMA = ? AND TRIGGER_NAME IN (?, ?, ?);", result -> {
+				int valid = 0;
+
+				while (result.next()) {
+					String action = result.getString("ACTION_STATEMENT");
+
+					if (action.startsWith(StringUtil.format("INSERT INTO {0}.{1}", this.getSchema(), SQLNotifications.ACTIVITY_TABLE))) {
+						if (action.contains(StringUtil.format("VALUES (''{0}'', ''{1}''", this.getSchema(), this.getTable())))
+							valid++;
+					}
+				}
+
+				return valid == 3;
 			}, this.getSchema(), this.getName(TriggerEvent.INSERT), this.getName(TriggerEvent.UPDATE), this.getName(TriggerEvent.DELETE));
 		} catch (Exception ex) {
 			NiftyCore.getNiftyLogger().log(Level.SEVERE, "Unable to check if trigger exists!", ex);
