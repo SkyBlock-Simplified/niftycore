@@ -56,9 +56,22 @@ public class StringUtil {
 	 * @return a formatted string
 	 */
 	public static String format(String format, Object... objects) {
+		return format(format, ChatColor.GRAY, ChatColor.RED, objects);
+	}
+
+	/**
+	 * Returns a formatted string using a cached {@link MessageFormat}.
+	 *
+	 * @param format to format objects with
+	 * @param logColor The default color for log messages
+	 * @param logImportant The important color for log messages
+	 * @param objects to be used for replacement
+	 * @return a formatted string
+	 */
+	public static String format(String format, ChatColor logColor, ChatColor logImportant, Object... objects) {
 		if (!MESSAGE_CACHE.containsKey(format)) {
 			MessageFormat messageFormat = null;
-			String newFormat = RegexUtil.replace(format, RegexUtil.LOG_PATTERN, (ChatColor.RED + "$1" + ChatColor.GRAY));
+			String newFormat = RegexUtil.replace(format, RegexUtil.LOG_PATTERN, (logImportant + "$1" + logColor));
 
 			try {
 				messageFormat = new MessageFormat(newFormat);
